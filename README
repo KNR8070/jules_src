@@ -1,0 +1,28 @@
+Merge patch workflow - README
+
+1) Run:
+   python3 generate_patch_stubs.py /mnt/data/science_diff.txt
+   -> This will generate stubs in ./patches/ (one stub per diff header).
+
+2) Open each stub (./patches/*.patch.stub.txt) and create a focused patch:
+   - Edit the accompanying .patch file in ./patches/ and place a valid git unified diff.
+   - Keep patches small and focused (one logical change each).
+
+3) (Optional) For common renames, inspect scripts in ./sed_patches/ and run them in a feature branch:
+   ./sed_patches/timestep_len_to_timestep.sh
+
+4) Apply patches:
+   From the repo root run:
+   ./apply_patches.sh         # creates local branches and commits
+   or
+   ./apply_patches.sh --push  # also pushes branches to origin
+
+5) For each created branch:
+   - Build locally (use strict Fortran flags)
+   - Run single column / short test runs
+   - Fix remaining interface mismatches manually and update the patch
+
+6) When tests are OK:
+   - Push branch (if not pushed)
+   - Create PR per branch, explain context and tests performed
+
