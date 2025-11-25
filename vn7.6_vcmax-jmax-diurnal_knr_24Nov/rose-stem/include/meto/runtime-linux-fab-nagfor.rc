@@ -1,0 +1,9 @@
+[runtime]
+
+    [[METO_LINUX_FAB_NAGFOR_BUILD]]
+        inherit = METO_LINUX_FAB_BUILD
+
+    [[fab_jules_meto_linux_nagfor_debug_nompi_noomp]]
+        inherit = METO_LINUX_FAB_NAGFOR_BUILD, EXTRACT
+        [[[environment]]]
+            CONFIG = 'nagfor_debug'

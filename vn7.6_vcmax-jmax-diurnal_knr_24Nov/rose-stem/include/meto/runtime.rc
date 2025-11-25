@@ -1,0 +1,18 @@
+{% if TRUSTZONE == 'research' %}
+# Include Linux definitions
+%include 'include/meto/runtime-linux-fcm-make.rc'
+%include 'include/meto/runtime-linux-fab.rc'
+%include 'include/meto/runtime-linux-fab-gfortran.rc'
+%include 'include/meto/runtime-linux-fab-intel.rc'
+%include 'include/meto/runtime-linux-fab-nagfor.rc'
+%include 'include/meto/runtime-linux-fcm-make-intel.rc'
+%include 'include/meto/runtime-linux-fcm-make-gfortran.rc'
+%include 'include/meto/runtime-linux-fcm-make-nagfor.rc'
+%include 'include/meto/runtime-ex1a.rc'
+%include 'include/meto/runtime-ex1a-cce.rc'
+%include 'include/meto/runtime-ex1a-gfortran.rc'
+{% endif %}
+
+# Include XC40 definitions
+%include 'include/meto/runtime-xc40-cce.rc'
+

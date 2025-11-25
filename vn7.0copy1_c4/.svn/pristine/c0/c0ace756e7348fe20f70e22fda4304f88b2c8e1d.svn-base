@@ -1,0 +1,14 @@
+{% if TRUSTZONE == 'research' %}
+# Include Linux definitions
+%include 'include/meto/runtime-linux.rc'
+%include 'include/meto/runtime-linux-intel.rc'
+%include 'include/meto/runtime-linux-gfortran.rc'
+%include 'include/meto/runtime-linux-nagfor.rc'
+%include 'include/meto/runtime-ex1a.rc'
+%include 'include/meto/runtime-ex1a-cce.rc'
+%include 'include/meto/runtime-ex1a-gfortran.rc'
+{% endif %}
+
+# Include XC40 definitions
+%include 'include/meto/runtime-xc40-cce.rc'
+

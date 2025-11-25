@@ -1,0 +1,30 @@
+[runtime]
+    [[FAB]]
+        env-script = eval $(rose task-env)
+        pre-script = "conda activate sci-fab"
+        script = rose task-run --app-key=fab_jules
+        [[[environment]]]
+            FAB_WORKSPACE = $CYLC_TASK_WORK_DIR/fab_workspace
+            BUILD_SCRIPT = "fab_jules"
+        [[[events]]]
+            mail events = failed, submission failed, submission retry, submission timeout, execution timeout
+            execution timeout = PT3H
+            submission timeout = P1D
+        [[[job]]]
+            batch system = slurm
+            execution time limit = PT10M
+        [[[directives]]]
+            --mem=8000
+            --ntasks=4
+            --export=N
+
+    [[METO_LINUX_FAB_BUILD]]
+        inherit = FAB
+
+    [[METO_LINUX_FAB_BUILD_RIVERS_ONLY]]
+        inherit = FAB
+        pre-script = """module swap ifort ifort/16.0_64
+                        module unload libraries/gcc
+                        conda activate sci-fab"""
+        [[[environment]]]
+            PATH=/home/h01/frum/lib/ifort-16.0.1-gcc-4.8.5/mpi/mpich-3.2.1/bin:$PATH

@@ -1,0 +1,37 @@
+[runtime]
+
+    [[METO_LINUX_FAB_INTEL_BUILD]]
+        inherit = METO_LINUX_FAB_BUILD
+        pre-script = """module swap ifort ifort/16.0_64
+                        module unload libraries/gcc
+                        conda activate sci-fab"""
+        [[[environment]]]
+            PATH=/home/h01/frum/lib/ifort-16.0.1-gcc-4.8.5/mpi/mpich-3.2.1/bin:$PATH
+
+    [[METO_LINUX_FAB_INTEL_BUILD_RIVERS_ONLY]]
+        inherit = METO_LINUX_FAB_BUILD_RIVERS_ONLY
+
+    [[METO_LINUX_FAB_INTEL_ENV]]
+        inherit = None, METO_LINUX_FAB_BUILD
+        pre-script = """module swap ifort ifort/16.0_64
+                        module unload libraries/gcc
+                        conda activate sci-fab"""
+        [[[environment]]]
+            PATH=/home/h01/frum/lib/ifort-16.0.1-gcc-4.8.5/mpi/mpich-3.2.1/bin:$PATH
+
+    [[fab_jules_meto_linux_intel_debug_nompi_noomp]]
+        inherit = METO_LINUX_FAB_INTEL_BUILD, EXTRACT
+        [[[environment]]]
+            CONFIG = 'ifort_debug'
+
+
+    [[fab_jules_meto_linux_intel_normal_mpi_noomp]]
+        inherit = METO_LINUX_FAB_INTEL_BUILD, EXTRACT
+        [[[environment]]]
+            CONFIG = 'ifort_normal'
+
+
+    [[fab_jules_rivers_meto_linux_intel_normal_mpi_noomp]]
+        inherit = METO_LINUX_FAB_INTEL_BUILD_RIVERS_ONLY, EXTRACT
+        [[[environment]]]
+            CONFIG = 'intel_rivers'
