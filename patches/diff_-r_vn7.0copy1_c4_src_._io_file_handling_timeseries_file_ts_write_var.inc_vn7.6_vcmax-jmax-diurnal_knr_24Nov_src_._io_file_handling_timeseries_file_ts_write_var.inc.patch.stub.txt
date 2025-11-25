@@ -1,0 +1,30 @@
+Patch stub generated: 2025-11-25T12:09:12.217464 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/file_handling/timeseries/file_ts_write_var.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/file_handling/timeseries/file_ts_write_var.inc
+
+SUMMARY:
+  - added lines (>): 2
+  - removed lines (<): 2
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/file_handling/timeseries/file_ts_write_var.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/file_handling/timeseries/file_ts_write_var.inc
+11c11
+< USE precision_mod, ONLY: INT64
+---
+> USE precision_mod, ONLY: int_64
+58c58
+< INTEGER(KIND=INT64) :: interval_start, interval_end
+---
+> INTEGER(KIND=int_64) :: interval_start, interval_end
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_file_handling_timeseries_file_ts_write_var.inc_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_file_handling_timeseries_file_ts_write_var.inc.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

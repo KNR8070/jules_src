@@ -1,0 +1,84 @@
+Patch stub generated: 2025-11-25T12:09:12.127289 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_soil_ecosse_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_soil_ecosse_mod.F90
+
+SUMMARY:
+  - added lines (>): 18
+  - removed lines (<): 18
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Signature rename: unify timestep_len/timestep or provide wrapper.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_soil_ecosse_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_soil_ecosse_mod.F90
+21,22c21,22
+<     decomp_rate, decomp_wrate_min_rothc, decomp_wrate_min_jules,               &
+<     decomp_temp_coeff_rothc, decomp_ph_min, decomp_ph_max,                     &
+---
+>     decomp_rate, decomp_wrate_min_smith, decomp_wrate_min_clark,               &
+>     decomp_temp_coeff_smith, decomp_ph_min, decomp_ph_max,                     &
+82,83c82,83
+<   temp_mod_rothc = 2,                                                          &
+<     ! Value of temp_modifier that indicates the RothC form of the
+---
+>   temp_mod_smith = 2,                                                          &
+>     ! Value of temp_modifier that indicates Smith et al. (2010) form of the
+85,86c85,86
+<   water_mod_jules = 1,                                                         &
+<     ! Value of water_modifier that indicates the JULES form of the
+---
+>   water_mod_clark = 1,                                                         &
+>     ! Value of water_modifier that indicates Clark et al. (2011) form of the
+88,89c88,89
+<   water_mod_rothc = 2
+<     ! Value of water_modifier that indicates the RothC form of the
+---
+>   water_mod_smith = 2
+>     ! Value of water_modifier that indicates Smith et al. (2010) form of the
+148c148
+<   temp_modifier = temp_mod_rothc,                                              &
+---
+>   temp_modifier = temp_mod_smith,                                              &
+150c150
+<   water_modifier = water_mod_rothc
+---
+>   water_modifier = water_mod_smith
+180,181c180,181
+<     decomp_rate, decomp_wrate_min_rothc, decomp_wrate_min_jules,               &
+<     decomp_temp_coeff_rothc, decomp_ph_min, decomp_ph_max,                     &
+---
+>     decomp_rate, decomp_wrate_min_smith, decomp_wrate_min_clark,               &
+>     decomp_temp_coeff_smith, decomp_ph_min, decomp_ph_max,                     &
+214c214
+<   timestep_len_real=>timestep
+---
+>   timestep
+365c365
+< IF ( dt_soilc <= 0.0 ) dt_soilc = timestep_len_real
+---
+> IF ( dt_soilc <= 0.0 ) dt_soilc = timestep
+369c369
+< IF ( MOD( dt_soilc, timestep_len_real ) > EPSILON(dt_soilc) ) THEN
+---
+> IF ( MOD( dt_soilc, timestep ) > EPSILON(dt_soilc) ) THEN
+393c393
+< CASE ( temp_mod_q10, temp_mod_rothc )
+---
+> CASE ( temp_mod_q10, temp_mod_smith )
+402c402
+< CASE ( water_mod_jules, water_mod_rothc )
+---
+> CASE ( water_mod_clark, water_mod_smith )
+413c413
+< IF ( ABS( dt_soilc - timestep_len_real ) < EPSILON(dt_soilc) ) THEN
+---
+> IF ( ABS( dt_soilc - timestep ) < EPSILON(dt_soilc) ) THEN
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_jules_soil_ecosse_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_jules_soil_ecosse_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

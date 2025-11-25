@@ -1,0 +1,91 @@
+Patch stub generated: 2025-11-25T12:09:12.114465 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/rivers-standalone/control_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/rivers-standalone/control_mod.F90
+
+SUMMARY:
+  - added lines (>): 23
+  - removed lines (<): 23
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/rivers-standalone/control_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/rivers-standalone/control_mod.F90
+1d0
+< #if !defined(UM_JULES)
+25,26d23
+< !   Scalar arguments (INTENT IN)
+<     timestep,                                                                  &
+28c25
+<     psparms, ainfo, progs, fluxes, river )
+---
+>     psparms, ainfo, progs, fluxes, river, wtrac_jls )
+36,39c33,37
+< USE p_s_parms,   ONLY: psparms_type
+< USE ancil_info,  ONLY: ainfo_type
+< USE prognostics, ONLY: progs_type
+< USE fluxes_mod,  ONLY: fluxes_type
+---
+> USE p_s_parms,            ONLY: psparms_type
+> USE ancil_info,           ONLY: ainfo_type
+> USE prognostics,          ONLY: progs_type
+> USE fluxes_mod,           ONLY: fluxes_type
+> USE jules_wtrac_type_mod, ONLY: jls_wtrac_type
+58a57,58
+> USE jules_water_tracers_mod,     ONLY: n_wtrac_jls
+> 
+64,68d63
+< ! Scalar arguments with intent(in)
+< !-------------------------------------------------------------------------------
+< INTEGER, INTENT(IN) :: timestep    ! IN Atmospheric timestep number.
+< 
+< !-------------------------------------------------------------------------------
+71,75c66,71
+< TYPE(psparms_type), INTENT(IN OUT) :: psparms
+< TYPE(ainfo_type),   INTENT(IN OUT) :: ainfo
+< TYPE(progs_type),   INTENT(IN OUT) :: progs
+< TYPE(fluxes_type),  INTENT(IN OUT) :: fluxes
+< TYPE(rivers_type),  INTENT(IN OUT) :: river
+---
+> TYPE(psparms_type),   INTENT(IN OUT) :: psparms
+> TYPE(ainfo_type),     INTENT(IN OUT) :: ainfo
+> TYPE(progs_type),     INTENT(IN OUT) :: progs
+> TYPE(fluxes_type),    INTENT(IN OUT) :: fluxes
+> TYPE(rivers_type),    INTENT(IN OUT) :: river
+> TYPE(jls_wtrac_type), INTENT(IN OUT) :: wtrac_jls
+146c142
+<      land_pts,                                                                 &
+---
+>      land_pts, n_wtrac_jls,                                                    &
+148a145
+>      wtrac_jls%sub_surf_roff_gb,  wtrac_jls%surf_roff_gb,                      &
+153a151,152
+>      wtrac_jls%tot_surf_runoff_gb, wtrac_jls%tot_sub_runoff_gb,                &
+>      wtrac_jls%acc_lake_evap_gb,                                               &
+161c160
+<      global_river_rows, nsurft,                                                &
+---
+>      global_river_rows,                                                        &
+163c162
+<      fluxes%fqw_surft, delta_lambda, delta_phi, xx_cos_theta_latitude,         &
+---
+>      fluxes%lake_evap, delta_lambda, delta_phi, xx_cos_theta_latitude,         &
+166a166
+>      wtrac_jls%lake_evap,                                                      &
+169a170
+>      wtrac_jls%twatstor, wtrac_jls%smcl_soilt, wtrac_jls%sthu_soilt,           &
+172c173
+<      riverout_rgrid,                                                           &
+---
+>      riverout_rgrid, wtrac_jls%inlandout_atm_gb,                               &
+185d185
+< #endif
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_rivers-standalone_control_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_rivers-standalone_control_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

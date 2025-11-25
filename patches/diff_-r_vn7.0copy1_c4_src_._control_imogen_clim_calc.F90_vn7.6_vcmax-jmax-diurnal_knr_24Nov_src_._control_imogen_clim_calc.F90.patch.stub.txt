@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.097591 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/imogen/clim_calc.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/clim_calc.F90
+
+SUMMARY:
+  - added lines (>): 43
+  - removed lines (<): 138
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/imogen/clim_calc.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/clim_calc.F90
+12,15c12
+< SUBROUTINE clim_calc(                                                          &
+<   land_pts,wgen,mm,md,tmin_wg,tmax_wg,                                         &
+<   swdown_wg,rh1p5m_wg,precip_wg,nsdmax,                                        &
+<   seed_rain,lat,lon, imgn_drive, ainfo)
+---
+> SUBROUTINE clim_calc(land_pts, mm, md, nsdmax, seed_rain, imgn_drive, ainfo)
+43c40
+<            ! Number of days in (GCM) month
+---
+>            ! Number of days in month (in this case 30 expected)
+51,53d47
+< LOGICAL, INTENT(IN) ::                                                         &
+<   wgen     ! Is the weather generator switched on.
+< 
+55d48
+< 
+58,76d50
+< REAL, INTENT(IN) ::                                                            &
+<   lat(land_pts),                                                               &
+<            ! Latitudinal position of l
+<   lon(land_pts)
+<            ! Longitudinal position of
+< 
+< ! Output from the weather generator when called
+< REAL, INTENT(IN OUT) ::                                                        &
+<   precip_wg(land_pts,mm,md),                                                   &
+<            ! Daily precipitation (mm/day)
+<   tmin_wg(land_pts,mm,md),                                                     &
+<            ! Daily minimum temperature (K)
+<   tmax_wg(land_pts,mm,md),                                                     &
+<            ! Daily maximum temperature (K)
+<   swdown_wg(land_pts,mm,md),                                                   &
+<            ! Daily shortwave radiation (W/m2)
+<   rh1p5m_wg(land_pts,mm,md)
+<            ! Daily relative humidity (%)
+< 
+79c53
+<   t1p5m_subdaily(land_pts,nsdmax),                                             &
+---
+>   tl1_subdaily(land_pts,nsdmax),                                               &
+87c61
+<   q1p5m_subdaily(land_pts,nsdmax),                                             &
+---
+>   ql1_subdaily(land_pts,nsdmax),                                               &
+100c74
+<   t1p5m_daily(land_pts,mm,md),                                                 &
+---
+>   tl1_daily(land_pts,mm,md),                                                   &
+104,107d77
+<   uwind_daily(land_pts,mm,md),                                                 &
+<            ! Calculated "u"-wind  (m/s)
+<   vwind_daily(land_pts,mm,md),                                                 &
+<            ! Calculated "v"-wind  (m/s)
+110c80
+<   diurnal_t1p5m_daily(land_pts,mm,md),                                         &
+---
+>   diurnal_tl1_daily(land_pts,mm,md),                                           &
+118,119c88,89
+<   rh1p5m_daily(land_pts,mm,md)
+<            ! Calculated relative humidity (%)
+---
+>   ql1_daily(land_pts,mm,md)
+>            ! Calculated specific humidity (kg/kg)
+128,141d97
+< ! Variables required to split rainfall up so that it rains roughly
+< ! the correct no. of days/month when weather generator is switched off.
+< !    INTEGER ::                                                    &
+< !      NO_RAINDAY,                                                 &
+<                ! WORK No. of rainy days in the month.
+< !      INT_RAINDAY
+<                ! WORK Rain day interval.
+< !      IC_RAINDAY
+<                ! WORK No. of rain days counter.
+< !    REAL ::                                                       &
+< !      TOT_RAIN ! WORK Total rain counter.
+< !---------------------------------------------------------------------
+< 
+< 
+143c99
+< ! Anomalies will be zero, if anom=.false. and anlg=.false.
+---
+> ! Anomalies will be zero, if anom=.false.
+152,206c108,118
+<       IF (wgen) THEN
+<         ! Temperature (K)
+<         t1p5m_daily(l,im,id) = ( 0.5 * (tmin_wg(l,im,id) + tmax_wg(l,im,id)) ) &
+<                           + imgn_drive%t1p5m_ij_anom(i,j,im)
+<         diurnal_t1p5m_daily(l,im,id) = ( tmax_wg(l,im,id) - tmin_wg(l,im,id) ) &
+<                            + imgn_drive%diurnal_t1p5m_ij_anom(i,j,im)
+< 
+<         ! Shortwave radiation (W/m2)
+<         swdown_daily(l,im,id) = swdown_wg(l,im,id) +                           &
+<                                imgn_drive%swdown_ij_anom(i,j,im)
+< 
+<         ! Relative humidity (kg/kg)
+<         rh1p5m_daily(l,im,id) = rh1p5m_wg(l,im,id) +                           &
+<                                imgn_drive%rh1p5m_ij_anom(i,j,im)
+< 
+<         ! Precip
+<         precip_daily(l,im,id) = precip_wg(l,im,id) +                           &
+<                                imgn_drive%precip_ij_anom(i,j,im)
+<       ELSE
+<         t1p5m_daily(l,im,id) = imgn_drive%t1p5m_ij_clim(i,j,im) +              &
+<                                imgn_drive%t1p5m_ij_anom(i,j,im)
+<         swdown_daily(l,im,id) = imgn_drive%swdown_ij_clim(i,j,im) +            &
+<                                imgn_drive%swdown_ij_anom(i,j,im)
+<         rh1p5m_daily(l,im,id) = imgn_drive%rh1p5m_ij_clim(i,j,im) +            &
+<                                imgn_drive%rh1p5m_ij_anom(i,j,im)
+<         diurnal_t1p5m_daily(l,im,id) =                                         &
+<                                imgn_drive%diurnal_t1p5m_ij_clim(i,j,im) +      &
+<                                imgn_drive%diurnal_t1p5m_ij_anom(i,j,im)
+<         precip_daily(l,im,id) = imgn_drive%precip_ij_clim(i,j,im) +            &
+<                                imgn_drive%precip_ij_anom(i,j,im)
+< 
+<         !CH-EDITTED OUT LINES BELOW BUT WILL BE RE_IMPLEMENTED WITH DOCUMENTATIO
+<         ! To correct the no. of rain days per month if WGEN is off:
+<         !                 IF (K == 1)THEN
+<         !                    NO_RAINDAY=NINT(F_WET_CLIM(L,J)*MD)
+<         !                    IF (NO_RAINDAY <  1)NO_RAINDAY=1
+<         !                    IF (NO_RAINDAY >  MD)NO_RAINDAY=MD
+<         !                    INT_RAINDAY=INT(FLOAT(MD)/FLOAT(NO_RAINDAY))
+<         !                    IF (INT_RAINDAY >  MD)INT_RAINDAY=MD
+<         !                    IC_RAINDAY=0
+<         !                    TOT_RAIN=0.0
+<         !                 END IF
+<         !
+<         !                 IF (MOD(K,INT_RAINDAY) == 0
+<         !    &                 .AND.IC_RAINDAY <  NO_RAINDAY)THEN
+<         !                    PRECIP_DAILY(L,J,K) = (RAINFALL_CLIM(L,J)+
+<         !    &                 SNOWFALL_CLIM(L,J)+PRECIP_ANOM(L,J))
+<         !    &                    *FLOAT(MD)/FLOAT(NO_RAINDAY)
+<         !                    IC_RAINDAY=IC_RAINDAY+1
+<         !                 ELSE
+<         !                    PRECIP_DAILY(L,J,K) = 0.0
+<         !                 END IF
+<         !                 TOT_RAIN=TOT_RAIN+PRECIP_DAILY(L,J,K)
+<         !CH-END OF EDITTING OUT
+<       END IF
+---
+>       tl1_daily(l,im,id) = imgn_drive%tl1_ij_clim(i,j,im) +                    &
+>                               imgn_drive%tl1_ij_anom(i,j,im)
+>       swdown_daily(l,im,id) = imgn_drive%swdown_ij_clim(i,j,im) +              &
+>                               imgn_drive%swdown_ij_anom(i,j,im)
+>       ql1_daily(l,im,id) = imgn_drive%ql1_ij_clim(i,j,im) +                    &
+>                            imgn_drive%ql1_ij_anom(i,j,im)
+>       diurnal_tl1_daily(l,im,id) =                                             &
+>                               imgn_drive%diurnal_tl1_ij_clim(i,j,im) +         &
+>                               imgn_drive%diurnal_tl1_ij_anom(i,j,im)
+>       precip_daily(l,im,id) = imgn_drive%precip_ij_clim(i,j,im) +              &
+>                               imgn_drive%precip_ij_anom(i,j,im)
+209c121,122
+<       ! Convert input files to kg/m2/s when read in from netcdf in next ticket
+---
+>       ! Convert input precipitation from kg/m2/s to kg/m2/day
+>       precip_daily(l,im,id) = precip_daily(l,im,id) * 86400
+212,220d124
+<       ! Pressure (Pa)
+<       ! currently converts from hPa to Pa - will read in Pa in the future
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_imogen_clim_calc.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_imogen_clim_calc.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

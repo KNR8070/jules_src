@@ -1,0 +1,34 @@
+Patch stub generated: 2025-11-25T12:09:12.230155 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./params/imogen/imogen_constants.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./params/imogen/imogen_constants.F90
+
+SUMMARY:
+  - added lines (>): 1
+  - removed lines (<): 7
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./params/imogen/imogen_constants.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./params/imogen/imogen_constants.F90
+32,33d31
+< INTEGER, PARAMETER :: n_imogen_land = 1631
+<             ! Number of land points in the IMOGEN grid
+39c37
+< REAL, PARAMETER :: conv = 0.471
+---
+> REAL, PARAMETER :: conv_gtc_to_ppm = 0.471
+43,46d40
+< CHARACTER(LEN=4), PARAMETER :: drive_month(12) = ['/jan','/feb','/mar','/apr', &
+<                                                   '/may','/jun','/jul','/aug', &
+<                                                   '/sep','/oct','/nov','/dec']
+<             ! Month labels for reading in files
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._params_imogen_imogen_constants.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._params_imogen_imogen_constants.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

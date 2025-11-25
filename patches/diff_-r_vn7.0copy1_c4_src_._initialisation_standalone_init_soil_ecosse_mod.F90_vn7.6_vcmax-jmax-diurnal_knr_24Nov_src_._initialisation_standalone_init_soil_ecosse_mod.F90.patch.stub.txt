@@ -1,0 +1,48 @@
+Patch stub generated: 2025-11-25T12:09:12.196856 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_soil_ecosse_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_soil_ecosse_mod.F90
+
+SUMMARY:
+  - added lines (>): 7
+  - removed lines (<): 7
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_soil_ecosse_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_soil_ecosse_mod.F90
+49c49
+<   temp_mod_q10, temp_mod_rothc, water_mod_jules, water_mod_rothc,              &
+---
+>   temp_mod_q10, temp_mod_smith, water_mod_clark, water_mod_smith,              &
+165c165
+< CASE ( temp_mod_rothc )
+---
+> CASE ( temp_mod_smith )
+167c167
+<                  "RothC form of T modifier equation used." )
+---
+>                  "Smith et al. (2010)  form of T modifier equation used." )
+170c170
+<                  "Q10 form of T modifier equation used." )
+---
+>                  "Clark et al. (2005) --Q10-- form of T modifier equation used." )
+174c174
+< CASE ( water_mod_rothc )
+---
+> CASE ( water_mod_smith )
+176,177c176,177
+<                  "RothC form of moisture modifier equation used." )
+< CASE ( water_mod_jules )
+---
+>                  "4-pool form of moisture modifier equation used." )
+> CASE ( water_mod_clark )
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_init_soil_ecosse_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_init_soil_ecosse_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

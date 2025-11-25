@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.235426 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/params/deposition_species_io_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/deposition_species_io_mod.F90
+
+SUMMARY:
+  - added lines (>): 239
+  - removed lines (<): 63
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Namelist/IO changes: reconcile derived types and broadcast logic.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/params/deposition_species_io_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/deposition_species_io_mod.F90
+1d0
+< #if !defined(UM_JULES)
+14a14,25
+> !-----------------------------------------------------------------------------
+> ! Description:
+> !   Module containing input species and parameters for the deposition model,
+> !     and code for checking their values.
+> !
+> ! Code Owner: Please refer to ModuleLeaders.txt
+> ! This file belongs in BIOGENIC FLUXES.
+> !
+> ! Code Description:
+> !   Language: Fortran 90.
+> !-----------------------------------------------------------------------------
+> 
+16d26
+< USE max_dimensions, ONLY: ndep_species_max, ntype_max
+18c28,38
+< USE um_types, ONLY: real_jlslsm
+---
+> USE deposition_output_arrays_mod, ONLY: deposition_output_array_real
+> 
+> USE jules_deposition_mod,   ONLY: ndry_dep_species
+> 
+> USE jules_print_mgr,  ONLY: jules_print, jules_message, newline
+> 
+> USE errormessagelength_mod, ONLY: errormessagelength
+> 
+> USE max_dimensions,         ONLY: ndep_species_max, ntype_max
+> 
+> USE um_types,               ONLY: real_jlslsm
+39,43d58
+<   ch4_scaling_io,                                                              &
+<     ! Scaling applied to CH4 soil uptake (dimensionless).
+<     ! Originally this was used to match the value from the IPCC TAR.
+<   cuticle_o3_io,                                                               &
+<     ! Constant for calculation of cuticular resistance for ozone (s m-1).
+45a61,62
+>   dep_species_rmm_io,                                                          &
+>     ! Relative molecular mass (g mol-1).
+49c66
+<   r_tundra_io,                                                                 &
+---
+>   r_tundra_io
+51,52d67
+<   r_wet_soil_o3_io
+<     ! Wet soil surface resistance for ozone (s m-1).
+59,61d73
+<   ch4dd_tundra_io(4),                                                          &
+<     ! Coefficients of cubic polynomial relating CH4 loss for tundra to
+<     ! temperature.
+65,73d76
+<   h2dd_c_io(ntype_max),                                                        &
+<     ! Constant in quadratic function relating hydrogen deposition to soil
+<     ! moisture, for each surface type (s m-1).
+<   h2dd_m_io(ntype_max),                                                        &
+<     ! Coefficient of first order term in quadratic function relating hydrogen
+<     ! deposition to soil moisture, for each surface type (s m-1).
+<   h2dd_q_io(ntype_max),                                                        &
+<     ! Coefficient of second order term in quadratic function relating
+<     ! hydrogen deposition to soil moisture, for each surface type (s m-1).
+75c78,105
+<     ! Surface resistance used in tundra region for each surface type (s m-1).
+---
+>     ! Standard surface resistance used for each surface type (s m-1).
+> 
+> #if defined(UM_JULES)
+> ! TYPE structure to hold all deposition i/o parameters/variables
+> ! For use in coupled/UM-JULES applications
+> TYPE :: deposition_io_data_type
+>     ! Species-specific parameters/variables
+>   REAL(KIND=real_jlslsm) :: ch4_scaling_io
+>   REAL(KIND=real_jlslsm) :: ch4_mml_io
+>   REAL(KIND=real_jlslsm) :: ch4dd_tundra_io(4)
+>   REAL(KIND=real_jlslsm) :: ch4_up_flux_io(ntype_max)
+>   REAL(KIND=real_jlslsm) :: cuticle_o3_io
+>   REAL(KIND=real_jlslsm) :: h2dd_c_io(ntype_max)
+>   REAL(KIND=real_jlslsm) :: h2dd_m_io(ntype_max)
+>   REAL(KIND=real_jlslsm) :: h2dd_q_io(ntype_max)
+>   REAL(KIND=real_jlslsm) :: r_wet_soil_o3_io
+>     ! Parameters/variables with species dimension
+>   REAL(KIND=real_jlslsm) :: dd_ice_coeff_io(ndep_species_max, 3)
+>   REAL(KIND=real_jlslsm) :: diffusion_coeff_io(ndep_species_max)
+>   REAL(KIND=real_jlslsm) :: dep_species_rmm_io(ndep_species_max)
+>   REAL(KIND=real_jlslsm) :: diffusion_corr_io(ndep_species_max)
+>   REAL(KIND=real_jlslsm) :: r_tundra_io(ndep_species_max)
+>   REAL(KIND=real_jlslsm) :: rsurf_std_io(ntype_max, ndep_species_max)
+>   CHARACTER(LEN=10)      :: dep_species_name_io(ndep_species_max)
+> END TYPE deposition_io_data_type
+> 
+> TYPE (deposition_io_data_type) :: deposition_io_data_all
+> #endif
+78c108
+< ! Namelist.
+---
+> ! Namelist
+81d110
+<   ch4_scaling_io, ch4dd_tundra_io, cuticle_o3_io,                              &
+83,84c112
+<   diffusion_corr_io, h2dd_c_io, h2dd_m_io, h2dd_q_io,                          &
+<   r_tundra_io, r_wet_soil_o3_io, rsurf_std_io
+---
+>   diffusion_corr_io, r_tundra_io, rsurf_std_io, dep_species_rmm_io
+86c114
+< CHARACTER(LEN=*), PARAMETER, PRIVATE :: ModuleName='DEPOSITION_SPECIES_IO'
+---
+> CHARACTER(LEN=*), PARAMETER, PRIVATE :: ModuleName='DEPOSITION_SPECIES_IO_MOD'
+90,91c118
+< !#############################################################################
+< 
+---
+> !-----------------------------------------------------------------------------
+93c120
+< USE jules_print_mgr, ONLY: jules_print
+---
+> !-----------------------------------------------------------------------------
+96a124
+> !Arguments
+101,102d128
+< CHARACTER(LEN=50000) :: lineBuffer
+< 
+106,107c132,134
+< WRITE(lineBuffer,"(2A)")' dep_species_name_io = ',dep_species_name_io
+< CALL jules_print(RoutineName,lineBuffer)
+---
+> ! Common to all species
+> WRITE(jules_message,'(2A)') ' dep_species_name_io = ',dep_species_name_io
+> CALL jules_print(RoutineName,jules_message)
+109,110c136,137
+< WRITE(lineBuffer,"(A,G11.4E2)")' ch4_scaling = ',ch4_scaling_io
+< CALL jules_print(RoutineName,lineBuffer)
+---
+> WRITE(jules_message,'(A,G11.4E2)') ' diffusion_coeff_io = ',diffusion_coeff_io
+> CALL jules_print(RoutineName,jules_message)
+112,113c139,140
+< WRITE(lineBuffer,*)' ch4dd_tundra_io = ',ch4dd_tundra_io(:)
+< CALL jules_print(RoutineName,lineBuffer)
+---
+> WRITE(jules_message,'(A,G11.4E2)') ' dep_species_rmm_io = ',dep_species_rmm_io
+> CALL jules_print(RoutineName,jules_message)
+115,116c142,143
+< WRITE(lineBuffer,"(A,G11.4E2)")' cuticle_o3_io = ',cuticle_o3_io
+< CALL jules_print(RoutineName,lineBuffer)
+---
+> WRITE(jules_message,'(A,G11.4E2)') ' diffusion_corr_io = ',diffusion_corr_io
+> CALL jules_print(RoutineName,jules_message)
+118,119c145,147
+< WRITE(lineBuffer,"(A,G11.4E2)")' r_wet_soil_o3_io = ',r_wet_soil_o3_io
+< CALL jules_print(RoutineName,lineBuffer)
+---
+> WRITE(jules_message,'(A)') ' rsurf_std_io = '
+> CALL jules_print(RoutineName,jules_message)
+> CALL deposition_output_array_real(ntype_max, rsurf_std_io(:))
+121,122c149,150
+< WRITE(lineBuffer,"(A,G11.4E2)")' diffusion_coeff_io = ',diffusion_coeff_io
+< CALL jules_print(RoutineName,lineBuffer)
+---
+> WRITE(jules_message,'(A,G11.4E2)') ' r_tundra_io    = ',r_tundra_io
+> CALL jules_print(RoutineName,jules_message)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_params_deposition_species_io_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_params_deposition_species_io_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

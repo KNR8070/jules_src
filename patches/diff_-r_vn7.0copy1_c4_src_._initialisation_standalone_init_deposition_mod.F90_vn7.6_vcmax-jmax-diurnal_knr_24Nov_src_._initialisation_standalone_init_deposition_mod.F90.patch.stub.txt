@@ -1,0 +1,106 @@
+Patch stub generated: 2025-11-25T12:09:12.186529 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_deposition_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_deposition_mod.F90
+
+SUMMARY:
+  - added lines (>): 33
+  - removed lines (<): 28
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_deposition_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_deposition_mod.F90
+36c36
+< USE io_constants, ONLY: namelist_unit
+---
+> USE io_constants,           ONLY: namelist_unit
+38c38
+< USE string_utils_mod, ONLY: to_string
+---
+> USE string_utils_mod,       ONLY: to_string
+40c40
+< USE jules_deposition_mod, ONLY:                                                &
+---
+> USE jules_deposition_mod,   ONLY:                                              &
+42c42
+<   dry_dep_ukca_jules,                                                          &
+---
+>   dry_dep_model_jules, dry_dep_model_ukca,                                     &
+47c47
+<   check_jules_deposition,                                                      &
+---
+>   check_jules_deposition, print_nlist_jules_deposition,                        &
+51c51,53
+< USE logging_mod, ONLY: log_info, log_fatal
+---
+> USE logging_mod,            ONLY: log_info, log_fatal
+> 
+> USE missing_data_mod,       ONLY: rmdi
+117a120,124
+> ! Print our namelist
+> !-----------------------------------------------------------------------------
+> CALL print_nlist_jules_deposition()
+> 
+> !-----------------------------------------------------------------------------
+131c138,142
+<   CASE ( dry_dep_ukca_jules )
+---
+>   CASE ( dry_dep_model_ukca )
+>     CALL log_info( RoutineName, "Dry deposition is modelled by JULES, " //     &
+>                                 "using the UKCA routines." )
+> 
+>   CASE ( dry_dep_model_jules )
+134,135c145
+<     CALL log_info( RoutineName, "This code is still being developed and " //   &
+<                                 "is not recommended for general use!" )
+---
+>     CALL log_info( RoutineName, "Restriction on pft ordering removed." )
+149,161c159,163
+<   SELECT CASE ( dry_dep_model )
+< 
+<   CASE ( dry_dep_ukca_jules )
+< 
+<     IF ( l_deposition_flux ) THEN
+<       IF ( l_ukca_ddep_lev1 ) THEN
+<         CALL log_info( RoutineName,                                            &
+<                        "Deposition only occurs from the lowest " //            &
+<                        "layer.")
+<       ELSE
+<         CALL log_info( RoutineName,                                            &
+<                        "Deposition occurs throughout the boundary layer." )
+<       END IF
+---
+>   IF ( l_deposition_flux ) THEN
+>     IF ( l_ukca_ddep_lev1 ) THEN
+>       CALL log_info( RoutineName,                                              &
+>                      "Deposition only occurs from the lowest atmospheric " //  &
+>                      "boundary-layer level." )
+164,168c166,172
+<                      "Dry deposition velocities are modelled (not fluxes)." )
+<     END IF  !  l_deposition_flux
+< 
+<     CALL log_info( RoutineName, "tundra_s_limit = " //                         &
+<                    to_string(tundra_s_limit) )
+---
+>                      "Deposition occurs on all atmospheric boundary-layer " // &
+>                      "levels." )
+>     END IF
+>   ELSE
+>     CALL log_info( RoutineName,                                                &
+>                    "Dry deposition velocities are modelled (not fluxes)." )
+>   END IF  !  l_deposition_flux
+170c174,175
+<   END SELECT  !  dry_dep_model
+---
+>   CALL log_info( RoutineName, "tundra_s_limit = " //                           &
+>                  to_string(tundra_s_limit) )
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_init_deposition_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_init_deposition_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

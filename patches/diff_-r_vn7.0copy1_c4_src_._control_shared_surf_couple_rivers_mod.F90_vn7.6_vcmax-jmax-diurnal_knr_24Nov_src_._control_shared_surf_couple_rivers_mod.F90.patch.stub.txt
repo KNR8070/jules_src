@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.138737 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/surf_couple_rivers_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/surf_couple_rivers_mod.F90
+
+SUMMARY:
+  - added lines (>): 288
+  - removed lines (<): 93
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/surf_couple_rivers_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/surf_couple_rivers_mod.F90
+10a11,13
+> 
+> USE um_types, ONLY: real_jlslsm
+> 
+16c19
+<    land_pts,                                                                   &
+---
+>    land_pts, n_wtrac_jls,                                                      &
+18c21
+<    sub_surf_roff, surf_roff,                                                   &
+---
+>    sub_surf_roff, surf_roff, sub_surf_roff_wtrac, surf_roff_wtrac,             &
+22a26,27
+>    tot_surf_runoff_gb_wtrac, tot_sub_runoff_gb_wtrac,                          &
+>    acc_lake_evap_gb_wtrac,                                                     &
+30c35
+<    global_river_rows, nsurft,                                                  &
+---
+>    global_river_rows,                                                          &
+32c37
+<    fqw_surft, delta_lambda, delta_phi, xx_cos_theta_latitude,                  &
+---
+>    lake_evap, delta_lambda, delta_phi, xx_cos_theta_latitude,                  &
+35c40
+<    smvcst_soilt, smvcwt_soilt, frac_surft,                                     &
+---
+>    smvcst_soilt, smvcwt_soilt, frac_surft, lake_evap_wtrac,                    &
+37a43
+>    twatstor_wtrac, smcl_soilt_wtrac, sthu_soilt_wtrac,                         &
+40c46
+<    riverout_rgrid,                                                             &
+---
+>    riverout_rgrid, inlandout_atm_gb_wtrac,                                     &
+47c53
+< USE rivers_route_mod,         ONLY: rivers_drive, scatter_land_from_riv_field
+---
+> USE rivers_route_mod,         ONLY: scatter_land_from_riv_field, rivers_route_rp
+50c56
+<                                     rivers_type,                               &
+---
+>                                     rivers_type, l_riv_overbank,               &
+52,53c58,59
+<                                     l_inland, rivers_um_trip, rivers_speed,    &
+<                                     rivers_meander
+---
+>                                     l_inland, rivers_um_trip
+> USE jules_model_environment_mod, ONLY:  l_oasis_rivers
+70c76,78
+< USE overbank_inundation_mod,  ONLY: l_riv_overbank
+---
+> USE rivers_regrid_mod,        ONLY: landpts_to_rivpts, rivpts_to_landpts
+> 
+> USE jules_water_tracers_mod,  ONLY: l_wtrac_jls
+96,97d103
+< USE um_types, ONLY: real_jlslsm
+< 
+102c108,109
+< !   Control routine for rivers
+---
+> !   Control routine for rivers. If OASIS rivers is used, regridding between
+> !   the land and river grids is done automatically by the coupler.
+130c137
+<   nsurft
+---
+>   n_wtrac_jls
+140c147,152
+<   fqw_surft(land_pts,nsurft),                                                  &
+---
+>   lake_evap(land_pts),                                                         &
+>   surf_roff_wtrac(land_pts,n_wtrac_jls),                                       &
+>   ! Water tracer surface runoff (kg m-2 s-1)
+>   sub_surf_roff_wtrac(land_pts,n_wtrac_jls),                                   &
+>   ! Water tracer sub-surface runoff (kg m-2 s-1)
+>   lake_evap_wtrac(land_pts,n_wtrac_jls),                                       &
+167a180,182
+>   tot_surf_runoff_gb_wtrac(land_pts,n_wtrac_jls),                              &
+>   tot_sub_runoff_gb_wtrac(land_pts,n_wtrac_jls),                               &
+>   acc_lake_evap_gb_wtrac(row_length,rows,n_wtrac_jls),                         &
+170a186,188
+>   twatstor_wtrac(river_row_length, river_rows,n_wtrac_jls),                    &
+>   smcl_soilt_wtrac(land_pts,nsoilt,sm_levels,n_wtrac_jls),                     &
+>   sthu_soilt_wtrac(land_pts,nsoilt,sm_levels,n_wtrac_jls),                     &
+189a208,210
+> REAL(KIND=real_jlslsm), INTENT(OUT) ::                                         &
+>    inlandout_atm_gb_wtrac(land_pts,n_wtrac_jls)
+> 
+196,199d216
+< REAL(KIND=real_jlslsm) :: riverout_rgrid_1d(np_rivers)
+<                           ! River outflow into the ocean on river points
+<                           ! (kg s-1). This is calculated, but not used
+<                           ! further.
+205,209d221
+< REAL(KIND=real_jlslsm), ALLOCATABLE :: global_tot_sub_runoff(:)
+< REAL(KIND=real_jlslsm), ALLOCATABLE :: global_tot_surf_runoff(:)
+< REAL(KIND=real_jlslsm), ALLOCATABLE :: global_rrun(:)
+< REAL(KIND=real_jlslsm), ALLOCATABLE :: global_rflow(:)
+< 
+215a228,235
+> REAL(KIND=real_jlslsm), ALLOCATABLE :: global_tot_sub_runoff(:)
+> REAL(KIND=real_jlslsm), ALLOCATABLE :: global_tot_surf_runoff(:)
+> REAL(KIND=real_jlslsm), ALLOCATABLE :: global_rrun(:)
+> REAL(KIND=real_jlslsm), ALLOCATABLE :: global_rflow(:)
+> 
+> REAL(KIND=real_jlslsm), ALLOCATABLE :: inlandout_atmos_wtrac(:,:,:)
+>                            ! inlandout_atmos_gb_wtrac on (i,j) grid
+> 
+222,227c242
+<   gather_pe_rivers,                                                            &
+<   l,i,j
+< 
+< #if !defined(UM_JULES)
+< INTEGER :: ip
+< #endif
+---
+>   l,i,j,ip,i_wt
+235d249
+<    first_routing,                                                              &
+253a268,274
+> ! Allocate water tracer fields
+> IF (l_wtrac_jls) THEN
+>   ALLOCATE(inlandout_atmos_wtrac(row_length,rows,n_wtrac_jls))
+> ELSE
+>   ALLOCATE(inlandout_atmos_wtrac(1,1,1))
+> END IF
+> 
+254a276
+> 
+259a282,285
+>     END DO
+>   END DO
+>   DO j = 1, river_rows
+>     DO i = 1, river_row_length
+262a289,298
+> 
+>   IF (l_wtrac_jls) THEN
+>     DO i_wt = 1, n_wtrac_jls
+>       DO j = 1, rows
+>         DO i = 1, row_length
+>           inlandout_atmos_wtrac(i,j,i_wt) = 0.0
+>         END DO
+>       END DO
+>     END DO
+>   END IF
+271,272d306
+< !Set the river routing to run on the 'last' PE as PE0 is very busy
+< gather_pe_rivers = n_proc - 1
+280a315,333
+> 
+>   IF (l_wtrac_jls) THEN
+>     DO i_wt = 1, n_wtrac_jls
+>       DO l = 1, land_pts
+>         tot_surf_runoff_gb_wtrac(l,i_wt) = 0.0
+>         tot_sub_runoff_gb_wtrac(l,i_wt)  = 0.0
+>       END DO
+>       DO j = 1, rows
+>         DO i = 1, row_length
+>           acc_lake_evap_gb_wtrac(i,j,i_wt)   = 0.0
+>         END DO
+>       END DO
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_surf_couple_rivers_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_surf_couple_rivers_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

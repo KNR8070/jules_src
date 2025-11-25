@@ -1,0 +1,102 @@
+Patch stub generated: 2025-11-25T12:09:12.244505 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/radiation/Jin11_osa_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/radiation/Jin11_osa_mod.F90
+
+SUMMARY:
+  - added lines (>): 12
+  - removed lines (<): 39
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/radiation/Jin11_osa_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/radiation/Jin11_osa_mod.F90
+311,312d310
+< END DO
+< !$OMP END DO
+314,316c312
+< ! rrr, the fresnel reflectance for at each point, for the broadband refm:
+< !$OMP DO SCHEDULE(STATIC)
+< DO ipt = 1, nd_points
+---
+>   ! rrr, the fresnel reflectance for at each point, for the broadband refm:
+321,322d316
+< END DO
+< !$OMP END DO NOWAIT
+324,327c318,319
+< ! the foam/whitecap fraction. (Eq 16 of Jin 2011, from Koepke 1984,
+< ! doi:10.1364/AO.23.001816)
+< !$OMP DO SCHEDULE(STATIC)
+< DO ipt = 1, nd_points
+---
+>   ! the foam/whitecap fraction. (Eq 16 of Jin 2011, from Koepke 1984,
+>   ! doi:10.1364/AO.23.001816)
+339d330
+<   END DO
+341,342c332
+<   ! fresnel reflection, at current solar zenith angle and wavelength:
+<   DO ipt = 1, nd_points
+---
+>     ! fresnel reflection, at current solar zenith angle and wavelength:
+347,348d336
+<   END DO
+< 
+350,351c338
+<   ! This gives the direct surface albedo (eq 1 in Jin 2011):
+<   DO ipt = 1, nd_points
+---
+>     ! This gives the direct surface albedo (eq 1 in Jin 2011):
+353d339
+<   END DO
+355,356c341
+<   ! and this is the surface diffuse (Eq 5a in Jin 2011):
+<   DO ipt = 1, nd_points
+---
+>     ! and this is the surface diffuse (Eq 5a in Jin 2011):
+358c343,344
+<                     s_df_fit(3) * refm(iwl) + s_df_fit(4) * sigma(ipt) * refm(iwl)
+---
+>                     s_df_fit(3) * refm(iwl) + s_df_fit(4) * sigma(ipt) *       &
+>                     refm(iwl)
+393d378
+<     END DO
+395,396c380
+<     ! now combine to give the diffuse sub-surface/water leaving albedo:
+<     DO ipt = 1, nd_points
+---
+>       ! now combine to give the diffuse sub-surface/water leaving albedo:
+416,418c400
+<   END DO
+<   ! then diffuse:
+<   DO ipt = 1, nd_points
+---
+>     ! then diffuse:
+424,425c406
+< !$OMP END DO
+< 
+---
+> !$OMP END DO NOWAIT
+465,469c446
+<         END DO
+<       END DO
+<       ! add the values up:
+<       DO iwl = 1, n_band_subsample
+<         DO ipt = 1, nd_points
+---
+>           ! add the values up:
+477,478d453
+<       END DO
+<       DO ipt = 1, nd_points
+1136d1110
+< END DO
+1138d1111
+< DO ipt = 1, nd_points
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_radiation_Jin11_osa_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_radiation_Jin11_osa_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

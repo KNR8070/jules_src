@@ -1,0 +1,155 @@
+Patch stub generated: 2025-11-25T12:09:12.120705 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_hydrology_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_hydrology_mod.F90
+
+SUMMARY:
+  - added lines (>): 95
+  - removed lines (<): 13
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_hydrology_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_hydrology_mod.F90
+20a21
+> USE missing_data_mod, ONLY: rmdi, imdi
+36c37
+<       ! Switch for slope dependent s_pdm in PDM hydrology
+---
+>       ! Switch for slope-dependent s_pdm in PDM hydrology
+54c55
+<   dz_pdm = 1.0,                                                                &
+---
+>   dz_pdm = rmdi,                                                               &
+56c57
+<   b_pdm  = 1.0,                                                                &
+---
+>   b_pdm  = rmdi,                                                               &
+58,62c59,64
+<   s_pdm = 0.0,                                                                 &
+< ! So/Smax factor for PDM
+<    slope_pdm_max = 6.0
+< ! Maximum topographic slope (deg) in the slope dependent s_pdm
+< ! linear function
+---
+>   s_pdm = rmdi,                                                                &
+>       ! So/Smax factor for PDM
+>   slope_pdm_max = rmdi
+>       ! Maximum topographic slope (deg) in the slope dependent s_pdm
+>       ! linear function
+> 
+67c69
+<   nfita = 20
+---
+>   nfita = imdi
+68a71
+> 
+70c73
+<   ti_max = 10.0,                                                               &
+---
+>   ti_max = rmdi,                                                               &
+72c75
+<   ti_wetl = 1.5,                                                               &
+---
+>   ti_wetl = rmdi,                                                              &
+75c78
+<   zw_max = 6.0
+---
+>   zw_max = rmdi
+76a80
+> 
+89a94,95
+> !#############################################################################
+> 
+107a114,115
+> CHARACTER(LEN=*), PARAMETER :: RoutineName = 'CHECK_JULES_HYDROLOGY'
+> 
+113c121
+<   CALL ereport("check_jules_hydrology", errorstatus,                           &
+---
+>   CALL ereport(RoutineName, errorstatus,                                       &
+116a125,197
+> !-----------------------------------------------------------------------------
+> ! Check that values required with PDM have been provided.
+> !-----------------------------------------------------------------------------
+> IF ( l_pdm ) THEN
+> 
+>   IF ( ABS( b_pdm - rmdi ) < EPSILON(1.0) ) THEN
+>     errorstatus = 101  !  a hard error
+>     CALL ereport(RoutineName, errorstatus,                                     &
+>                  "No value for b_pdm")
+>   END IF
+> 
+>   IF ( ABS( dz_pdm - rmdi ) < EPSILON(1.0) ) THEN
+>     errorstatus = 101  !  a hard error
+>     CALL ereport(RoutineName, errorstatus,                                     &
+>                  "No value for dz_pdm")
+>   END IF
+> 
+>   IF ( l_spdmvar ) THEN
+>     IF ( ABS( slope_pdm_max - rmdi ) < EPSILON(1.0) ) THEN
+>       errorstatus = 101  !  a hard error
+>       CALL ereport(RoutineName, errorstatus,                                   &
+>                    "No value for slope_pdm_max")
+>     END IF
+>   ELSE
+>     IF ( ABS( s_pdm - rmdi ) < EPSILON(1.0) ) THEN
+>       errorstatus = 101  !  a hard error
+>       CALL ereport(RoutineName, errorstatus,                                   &
+>                    "No value for s_pdm")
+>     END IF
+>   END IF  !  l_spdmvar
+> 
+> ELSE
+> 
+>   ! PDM is not selected. Check that a related switch is consistent.
+>   IF ( l_spdmvar ) THEN
+>     errorstatus = 101  !  a hard error
+>     CALL ereport(RoutineName, errorstatus,                                     &
+>                  "l_spdmvar must be FALSE if l_pdm is FALSE.")
+>   END IF
+> 
+> END IF  !  l_pdm
+> 
+> !-----------------------------------------------------------------------------
+> ! Check that values required with TOPMODEL have been provided.
+> !-----------------------------------------------------------------------------
+> IF ( l_top ) THEN
+> 
+>   IF ( nfita == imdi ) THEN
+>     errorstatus = 101  !  a hard error
+>     CALL ereport(RoutineName, errorstatus,                                     &
+>                  "No value for nfita")
+>   END IF
+> 
+>   IF ( ABS( ti_max - rmdi ) < EPSILON(1.0) ) THEN
+>     errorstatus = 101  !  a hard error
+>     CALL ereport(RoutineName, errorstatus,                                     &
+>                  "No value for ti_max")
+>   END IF
+> 
+>   IF ( ABS( ti_wetl - rmdi ) < EPSILON(1.0) ) THEN
+>     errorstatus = 101  !  a hard error
+>     CALL ereport(RoutineName, errorstatus,                                     &
+>                  "No value for ti_wetl")
+>   END IF
+> 
+>   IF ( ABS( zw_max - rmdi ) < EPSILON(1.0) ) THEN
+>     errorstatus = 101  !  a hard error
+>     CALL ereport(RoutineName, errorstatus,                                     &
+>                  "No value for zw_max")
+>   END IF
+> 
+> END IF  !  l_top
+> 
+118a200
+> !#############################################################################
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_jules_hydrology_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_jules_hydrology_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

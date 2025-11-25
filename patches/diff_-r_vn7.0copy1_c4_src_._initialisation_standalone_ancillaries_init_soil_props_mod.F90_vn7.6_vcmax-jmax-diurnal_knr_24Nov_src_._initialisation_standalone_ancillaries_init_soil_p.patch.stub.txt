@@ -1,0 +1,40 @@
+Patch stub generated: 2025-11-25T12:09:12.180883 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/ancillaries/init_soil_props_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/ancillaries/init_soil_props_mod.F90
+
+SUMMARY:
+  - added lines (>): 6
+  - removed lines (<): 6
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/ancillaries/init_soil_props_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/ancillaries/init_soil_props_mod.F90
+33c33
+<    soil_model_ecosse, soil_model_rothc,                                        &
+---
+>    soil_model_ecosse, soil_model_4pool,                                        &
+160,161c160,161
+<   ! If RothC is selected, clay is required.
+<   IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+>   ! If 4-pool soil C is selected, clay is required.
+>   IF ( soil_bgc_model == soil_model_4pool ) THEN
+169,171c169,171
+<                     "No value given for soil clay content. "            //     &
+<                     "Soil clay content is required with RothC model. "  //     &
+<                     "It will be set to 0.0 as for previous versions. "  //     &
+---
+>                     "No value given for soil clay content. "              //   &
+>                     "Soil clay content is required with 4-pool C model. " //   &
+>                     "It will be set to 0.0 as for previous versions. "    //   &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_ancillaries_init_soil_props_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_ancillaries_init_soil_p.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

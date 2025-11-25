@@ -1,0 +1,43 @@
+Patch stub generated: 2025-11-25T12:09:12.229621 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./params/imogen/imogen_anlg_vals.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./params/imogen/imogen_anlg_vals.F90
+
+SUMMARY:
+  - added lines (>): 9
+  - removed lines (<): 8
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./params/imogen/imogen_anlg_vals.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./params/imogen/imogen_anlg_vals.F90
+51,56c51,57
+<   dir_patt = '',                                                               &
+<               ! Directory containing the patterns
+<   dir_clim = '',                                                               &
+<               ! Directory containing initialising climatology.
+<   dir_anom = ''
+<               ! Directory containing prescribed anomalies
+---
+>   file_patt = '',                                                              &
+>               ! File containing the patterns
+>   file_clim = '',                                                              &
+>               ! File containing initialising climatology.
+>   file_base_anom = ''
+>               ! File containing prescribed anomalies ("name")
+>               ! Actual filename is in the form "name_year.nc"
+61,62c62,63
+<                                  t_ocean_init,dir_patt,                        &
+<                                  dir_clim, dir_anom,                           &
+---
+>                                  t_ocean_init,file_patt,                       &
+>                                  file_clim, file_base_anom,                    &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._params_imogen_imogen_anlg_vals.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._params_imogen_imogen_anlg_vals.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

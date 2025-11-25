@@ -1,0 +1,32 @@
+Patch stub generated: 2025-11-25T12:09:12.147925 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/standalone/jules_fields_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/jules_fields_mod.F90
+
+SUMMARY:
+  - added lines (>): 7
+  - removed lines (<): 0
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/standalone/jules_fields_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/jules_fields_mod.F90
+31a32,34
+> USE water_resources_vars_mod, ONLY: water_resources_data_type,                 &
+>                                     water_resources_type
+> USE jules_wtrac_type_mod, ONLY: jls_wtrac_data_type, jls_wtrac_type
+54a58,59
+> TYPE(water_resources_data_type), TARGET :: water_resources_data
+> TYPE(jls_wtrac_data_type), TARGET :: wtrac_jls_data
+77a83,84
+> TYPE(water_resources_type) :: water_resources
+> TYPE(jls_wtrac_type) :: wtrac_jls
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_standalone_jules_fields_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_standalone_jules_fields_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

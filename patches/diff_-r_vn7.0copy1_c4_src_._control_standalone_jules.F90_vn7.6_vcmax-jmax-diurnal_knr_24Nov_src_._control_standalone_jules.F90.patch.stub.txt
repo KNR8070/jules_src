@@ -1,0 +1,73 @@
+Patch stub generated: 2025-11-25T12:09:12.147411 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/standalone/jules.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/jules.F90
+
+SUMMARY:
+  - added lines (>): 21
+  - removed lines (<): 9
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/standalone/jules.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/jules.F90
+15a16,17
+> USE jules_vars_mod, ONLY: mpi_local_comm
+> USE mpi, ONLY: mpi_comm_world
+30c32
+<                        output_close_all => close_all
+---
+>                       output_close_all => close_all
+32c34,35
+< USE model_time_mod, ONLY: timestep, start_of_year, end_of_year, end_of_run
+---
+> USE model_time_mod, ONLY: timestep_number, start_of_year, end_of_year,         &
+>                           end_of_run
+62c65,67
+<                             rivers_data, rivers
+---
+>                             rivers_data, rivers,                               &
+>                             water_resources_data, water_resources,             &
+>                             wtrac_jls_data, wtrac_jls
+68a74
+> USE imgn_vars_mod, ONLY: imgn_vars_data, imgn_vars
+97a104
+> mpi_local_comm = mpi_comm_world
+138c145,146
+<                    !veg3_parm_(data), &
+---
+>                    imgn_vars_data, imgn_vars,                                  &
+>                   !veg3_parm_(data), &
+142c150,153
+<                    !CABLE state vars, progs, params and miscellaneous requirements
+---
+>                    water_resources_data, water_resources,                      &
+>                    wtrac_jls_data, wtrac_jls,                                  &
+>                    ! CABLE state vars, progs, params and miscellaneous
+>                    ! requirements
+158c169
+<     CALL imogen_update_clim(progs, imgn_drive, ainfo)
+---
+>     CALL imogen_update_clim(progs, imgn_drive, imgn_vars, ainfo)
+182c193
+<       timestep,                                                                &
+---
+>       timestep_number,                                                         &
+196c207,208
+<       rivers,                                                                  &
+---
+>       rivers, water_resources,                                                 &
+>       wtrac_jls,                                                               &
+204c216
+<   IF ( l_imogen .AND. end_of_year ) CALL imogen_update_carb(progs, imgn_drive)
+---
+>   IF ( l_imogen .AND. end_of_year ) CALL imogen_update_carb(progs, imgn_vars)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_standalone_jules.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_standalone_jules.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

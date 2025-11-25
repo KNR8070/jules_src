@@ -1,0 +1,119 @@
+Patch stub generated: 2025-11-25T12:09:12.246331 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/river_routing/overbank_update_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/overbank_update_mod.F90
+
+SUMMARY:
+  - added lines (>): 32
+  - removed lines (<): 35
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/river_routing/overbank_update_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/overbank_update_mod.F90
+33,36d32
+< USE planet_constants_mod, ONLY: planet_radius
+< 
+< USE conversions_mod, ONLY: pi_over_180
+< 
+38,39c34
+<    np_rivers,                                                                  &
+<    nstep_rivers, rivers_dx, rivers_dlat
+---
+>    np_rivers, nstep_rivers, rivers_length
+43c38
+<    l_riv_hypsometry, use_rosgen,                                               &
+---
+>    overbank_hypsometric, overbank_simple, overbank_simple_rosgen,              &
+45c40
+<    riv_a, riv_b, riv_c, riv_f, ent_ratio,                                      &
+---
+>    overbank_model, riv_a, riv_b, riv_c, riv_f, ent_ratio,                      &
+64c59,60
+< REAL(KIND=real_jlslsm) :: dt, dx
+---
+> REAL(KIND=real_jlslsm) :: dt
+>        ! River timestep length (s).
+79c75
+< ! rivers model timestep (s)
+---
+> ! Calculate rivers model timestep length.
+82,88d77
+< ! horizontal gridsize (m)
+< IF (rivers_dx <= 0) THEN
+<   dx = planet_radius * ( ABS( rivers_dlat ) * pi_over_180 )
+< ELSE
+<   dx = rivers_dx
+< END IF
+< 
+93a83,84
+> 
+>   ! Initialisation.
+95c86
+<   riv_width(ip) = 0.0
+---
+>   frac_fplain_rp(ip) = 0.0
+96a88
+>   ! Remove any negative flow value.
+99c91,93
+<   IF ( l_riv_hypsometry .OR. use_rosgen ) THEN
+---
+>   ! Calculate river flow depth, if required.
+>   IF ( overbank_model == overbank_simple_rosgen .OR.                           &
+>        overbank_model == overbank_hypsometric ) THEN
+108,109c102,103
+<   frac_fplain_rp(ip) = 0.0
+<   IF ( l_riv_hypsometry ) THEN
+---
+>   SELECT CASE ( overbank_model )
+>   CASE ( overbank_hypsometric )
+120c114
+<   ELSE
+---
+>   CASE ( overbank_simple, overbank_simple_rosgen )
+122,123c116,118
+<     ! Calculate as estimated river width divided by (north-south cell extent),
+<     ! (i.e. assuming that river channel runs straight W-E)
+---
+>     ! Calculate inundated fraction as estimated river width divided by
+>     ! north-south cell extent (i.e. assuming that river channel runs
+>     !straight W-E).
+128,136c123,132
+<     IF ( use_rosgen .AND. rfm_rivflow_rp(ip) > qbf(ip) ) THEN
+<       ! If river above bankfull and using Rosgen entrenchment ratio option.
+<       ! This assumes linear interpolation between (width=wbf, depth=dbf) and
+<       ! (width=ent_ratio*wbf, depth=2*dbf) (from definition of Rosgen
+<       ! entrenchment ratio)
+< 
+<       riv_width(ip) = wbf(ip) + ( ( wbf(ip) * (ent_ratio-1.0)                  &
+<                                   * (riv_depth(ip) - dbf(ip)) ) / dbf(ip) )
+<     END IF
+---
+>     IF ( overbank_model == overbank_simple_rosgen ) THEN
+>       IF ( rfm_rivflow_rp(ip) > qbf(ip) ) THEN
+>         ! River is above bankfull and using Rosgen entrenchment ratio option.
+>         ! This assumes linear interpolation between (width=wbf, depth=dbf) and
+>         ! (width=ent_ratio*wbf, depth=2*dbf) (from definition of Rosgen
+>         ! entrenchment ratio)
+>         riv_width(ip) = wbf(ip) + ( ( wbf(ip) * (ent_ratio-1.0)                &
+>                                       * (riv_depth(ip) - dbf(ip)) ) / dbf(ip) )
+>       END IF
+>     END IF  !  overbank_simple_rosgen
+139c135,136
+<       frac_fplain_rp(ip) = MAX( MIN(riv_width(ip) / dx , 1.0 ) , 0.0 )
+---
+>       frac_fplain_rp(ip) = MAX( MIN(riv_width(ip) / rivers_length , 1.0 ) ,    &
+>                                 0.0 )
+142c139
+<   END IF  !  l_riv_hypsometry
+---
+>   END SELECT  !  overbank_model
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_river_routing_overbank_update_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_river_routing_overbank_update_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

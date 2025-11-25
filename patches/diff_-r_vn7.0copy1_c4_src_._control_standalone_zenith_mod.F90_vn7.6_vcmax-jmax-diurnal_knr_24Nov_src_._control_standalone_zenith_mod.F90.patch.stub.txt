@@ -1,0 +1,34 @@
+Patch stub generated: 2025-11-25T12:09:12.157057 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/standalone/zenith_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/zenith_mod.F90
+
+SUMMARY:
+  - added lines (>): 7
+  - removed lines (<): 2
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/standalone/zenith_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/zenith_mod.F90
+84a85
+> USE datetime_mod,  ONLY: l_local_solar_time
+128,129c129,134
+<     hh = pi * ((2.0 * (REAL(TIME) / rsec_per_day))                             &
+<          + (longitude(i,j) / 180.0) - 1.0)
+---
+>     IF (l_local_solar_time) THEN
+>       hh = pi * ((2.0 * (REAL(TIME) / rsec_per_day)) - 1.0)
+>     ELSE
+>       hh = pi * ((2.0 * (REAL(TIME) / rsec_per_day))                           &
+>            + (longitude(i,j) / 180.0) - 1.0)
+>     END IF
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_standalone_zenith_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_standalone_zenith_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

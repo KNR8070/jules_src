@@ -1,0 +1,27 @@
+Patch stub generated: 2025-11-25T12:09:12.160842 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/um/update_veg.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/um/update_veg.F90
+
+SUMMARY:
+  - added lines (>): 2
+  - removed lines (<): 1
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/um/update_veg.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/um/update_veg.F90
+114c114,115
+<   CALL tilepts(land_pts,frac_surft,surft_pts,surft_index,ainfo%l_lice_point)
+---
+>   CALL tilepts(land_pts,frac_surft,surft_pts,surft_index,ainfo%l_lice_point,   &
+>                ainfo%l_lice_surft)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_um_update_veg.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_um_update_veg.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,112 @@
+Patch stub generated: 2025-11-25T12:09:12.204488 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/um/read_jules_namelists_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/um/read_jules_namelists_mod.F90
+
+SUMMARY:
+  - added lines (>): 88
+  - removed lines (<): 0
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Namelist/IO changes: reconcile derived types and broadcast logic.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/um/read_jules_namelists_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/um/read_jules_namelists_mod.F90
+29a30,31
+> USE ereport_mod,      ONLY: ereport
+> 
+105a108,193
+> 
+> ! *********************************************************************
+> 
+> SUBROUTINE read_jules_deposition (unitnumber)
+> 
+> ! Description:
+> !  Read the JULES_DEPOSITION control namelist
+> 
+> USE jules_deposition_mod,  ONLY:                                               &
+>   print_nlist_jules_deposition, check_jules_deposition,                        &
+>   read_nml_jules_deposition
+> 
+> IMPLICIT NONE
+> 
+> ! Subroutine arguments
+> INTEGER, INTENT(IN) :: unitnumber
+> 
+> REAL(KIND=jprb) :: zhook_handle
+> CHARACTER(LEN=*), PARAMETER :: RoutineName='READ_JULES_DEPOSITION'
+> 
+> IF (lhook) CALL dr_hook(ModuleName//':'//RoutineName,zhook_in,zhook_handle)
+> 
+> CALL read_nml_jules_deposition(unitnumber)
+> IF (PrintStatus >= PrStatus_Oper .AND. mype == 0) THEN
+>   CALL print_nlist_jules_deposition()
+> END IF
+> CALL check_jules_deposition()
+> 
+> IF (lhook) CALL dr_hook(ModuleName//':'//RoutineName,zhook_out,zhook_handle)
+> RETURN
+> END SUBROUTINE read_jules_deposition
+> 
+> ! *********************************************************************
+> 
+> SUBROUTINE read_jules_deposition_species (unitnumber)
+> 
+> ! Description:
+> !  Read the JULES_DEPOSITION_OTHER and JULES_DEPOSITION_SPECIES namelists
+> 
+> USE jules_deposition_mod,       ONLY:                                          &
+>   dry_dep_model, dry_dep_model_ukca, dry_dep_model_jules
+> 
+> USE deposition_species_io_mod,  ONLY:                                          &
+>   print_nlist_jules_deposition_species,                                        &
+>   read_nml_jules_deposition_species
+> 
+> USE deposition_species_specific_io_mod,  ONLY:                                 &
+>   print_nlist_jules_deposition_species_specific,                               &
+>   read_nml_jules_deposition_species_specific
+> 
+> IMPLICIT NONE
+> 
+> ! Subroutine arguments
+> INTEGER, INTENT(IN) :: unitnumber
+> INTEGER             :: errorstatus
+> 
+> REAL(KIND=jprb) :: zhook_handle
+> CHARACTER(LEN=*), PARAMETER :: RoutineName='READ_JULES_DEPOSITION_SPECIES'
+> 
+> IF (lhook) CALL dr_hook(ModuleName//':'//RoutineName,zhook_in,zhook_handle)
+> 
+> errorstatus = dry_dep_model
+> SELECT CASE ( dry_dep_model )
+> 
+> CASE ( dry_dep_model_ukca, dry_dep_model_jules )
+>   ! Species deposition parameter values from namelists
+>   CALL read_nml_jules_deposition_species(unitnumber)
+>   IF (PrintStatus >= PrStatus_Oper .AND. mype == 0) THEN
+>     CALL print_nlist_jules_deposition_species()
+>   END IF
+> 
+>   CALL read_nml_jules_deposition_species_specific(unitnumber)
+>   IF (PrintStatus >= PrStatus_Oper .AND. mype == 0) THEN
+>     CALL print_nlist_jules_deposition_species_specific()
+>   END IF
+>   ! Check is on deposition science variables
+> 
+> CASE DEFAULT
+>   CALL ereport (RoutineName, errorstatus,                                      &
+>                "Invalid value for dry_dep_model. Should be 1 or 2." )
+> 
+> END SELECT
+> 
+> IF (lhook) CALL dr_hook(ModuleName//':'//RoutineName,zhook_out,zhook_handle)
+> RETURN
+> END SUBROUTINE read_jules_deposition_species
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_um_read_jules_namelists_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_um_read_jules_namelists_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

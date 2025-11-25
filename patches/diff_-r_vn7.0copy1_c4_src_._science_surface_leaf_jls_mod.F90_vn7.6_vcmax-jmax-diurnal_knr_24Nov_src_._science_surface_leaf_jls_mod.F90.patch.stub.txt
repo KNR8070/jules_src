@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.281162 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/leaf_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/leaf_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 61
+  - removed lines (<): 335
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Signature rename: unify timestep_len/timestep or provide wrapper.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/leaf_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/leaf_jls_mod.F90
+15,18c15,16
+< ,                clos_index ,open_index, veg_index, icr, fpar, pstar           &
+< ,                t1,t_growth_gb,vpd,vpd_growth_gb,l_growth_gb, co2_growth_gb   &
+< ,                pstar_growth_gb,xipam_opt,vcmax_opt,jmax_opt                  &
+< ,                ca,cim,ci, fsmc, o3mol, ra, tl, wcarb, wexpt, wlite, rd          &
+---
+> ,                clos_index ,open_index, veg_index                             &
+> ,                ca, ci, fsmc, o3mol, ra, tl, wcarb, wexpt, wlite, rd          &
+21,22c19
+< USE pftparm, ONLY: beta_c3c4, dfp_dcuo, eagamma, eakc, eako, fd, fl_o3_ct      &
+< ,                 gamma25, glmin, kc25, ko25,c3
+---
+> USE pftparm, ONLY: dfp_dcuo, fl_o3_ct, glmin
+25c22
+< USE conversions_mod, ONLY:zerodegc
+---
+> 
+28,29c25
+<     photo_collatz, photo_farquhar, photo_pmodel,photo_acclim_model,            &
+<     photo_adapt, photo_acclim, photo_adapt_acclim, photo_pmodel_acclim,        &
+---
+>     photo_collatz, photo_farquhar,                                             &
+32c28
+< USE model_time_mod, ONLY: timestep_len, current_time
+---
+> 
+72,73c68,69
+<  ,ci(land_field)                                                               &
+<                             ! Leaf-internal CO2 partial pressure (Pa).
+---
+> ,ci(land_field)                                                                &
+>                             ! Internal CO2 pressure (Pa).
+83a80,82
+> ,wcarb(land_field)                                                             &
+>                             ! Carboxylation-limited gross photosynthetic
+>                             ! rate (mol CO2/m2/s).
+87,96c86,88
+< ,icr(land_field)                                                               &
+<                             ! Incident PAR (mol photons m-2 s-1).
+< ,fpar(land_field)                                                              &
+< 			    ! PAR absorption factor.
+< ,pstar(land_field)                                                             &
+<                             ! Surface pressure (Pa).
+< ,t1(land_field) 
+<                             ! Atmospheric temperature (K)
+< 
+<                                                                  
+---
+> ,wlite(land_field)
+>                             ! Light-limited gross photosynthetic rate
+>                             ! (mol CO2/m2/s).
+102,140c94,95
+<  rd(land_field)                                                                &
+<                              ! Dark respiration (mol CO2/m2/s).
+< ,wcarb(land_field)                                                             &
+<                             ! Carboxylation-limited gross photosynthetic
+<                             ! rate (mol CO2/m2/s).    
+< ,wlite(land_field)                                                             &
+<                             ! Light-limited gross photosynthetic rate
+<                             ! (mol CO2/m2/s).                               
+< ,co2_growth_gb(land_field)                                                     &
+<                             ! Running mean (growth) CO2 for
+<                             ! acclimation of photosynthesis  
+< ,l_growth_gb(land_field)                                                       &
+<                             ! exponantial mean (growth) light for
+<                             ! acclimation of photosynthesis                                                      
+< ,pstar_growth_gb(land_field)                                                  &
+<                             ! Running mean (growth) surface pressure for
+<                             ! acclimation of photosynthesis
+< ,t_growth_gb(land_field)                                                       &
+<                             ! Running mean (growth) temperature for
+<                             ! acclimation of photosynthesis (K).
+<                             ! Atmospheric temperature (K).
+< ,jmax_opt(land_field)                                                          &
+< 			    ! Maximum rate of electron transport at optimal
+<                             ! condition (mol m-2 s-1)
+< ,vpd_growth_gb(land_field)                                                     &
+<                             ! optimal vapour pressure          
+<                             ! deficit for acclimation of photosynthesis
+< ,vcmax_opt(land_field)                                                         &
+< 			    ! Maximum rate of carboxylation at optimal
+<                             ! condition(mol CO2/m2s)  
+< ,xipam_opt(land_field)                                                         &
+<                             ! Sensitivity of ci/ca ratio to VPD at 
+<                             ! optimal condition (Pa^1/2)
+< ,cim(land_field)                                                               &
+< ! Leaf-internal CO2 partial pressure (Pa). pmodel
+< ,vpd(land_field)
+<                             ! optimal vapour pressure          
+<                             ! deficit for acclimation of photosynthesis                            
+< 
+---
+>  rd(land_field)              ! Dark respiration (mol CO2/m2/s).
+>                              ! This is modified only if l_o3_damage=.TRUE..
+161,174c116
+< ,j,m,l                                                                          &                       
+<                               ! Loop counters.
+< ,current_time_pmodel        ! save currentime for comparison                              
+< 
+< !-----------------------------------------------------------------------------
+< ! Local parameters.
+< !-----------------------------------------------------------------------------
+< REAL(KIND=real_jlslsm), PARAMETER ::                                           &
+<   ha = 65330.0,                                                                &
+<     ! Activation energy
+<   rgas = 8.314,                                                                &
+<     ! Universal gas constant 
+<   haj = 43900.0
+<     ! Deactivation energy
+---
+> ,j,l                        ! Loop counters.
+179c121
+<   beta1p2m4, beta2p2m4
+---
+>   beta1p2m4, beta2p2m4,                                                        &
+180a123,124
+>   glmin_ft
+>                             ! glmin(ft)
+191c135,137
+< ,wp(land_field)                                                                &
+---
+> ,wl(land_field)                                                                &
+>                             ! Gross leaf phtosynthesis (mol CO2/m2/s).
+> ,wp(land_field)
+194,237d139
+< ,gammastar25(land_field)                                                  &
+< 			    ! CO2 compensation point at 25 degree C (Pa)
+< ,gammastarm(land_field)                                                   &
+< 			    ! Pressure-dependent photorespiratory          
+< 		            ! compensation point  (Pa)  
+< ,iabs_light(land_field)                                                         &
+< 		            ! Amount of absorbed light (Photon mol m-2 s-1).              
+< ,gammastarm_opt(land_field)                                               &
+<           ! Pressure-dependent photorespiratory at optimal
+< ,jmax25_opt(land_field)                                                   &
+< 			    ! Maximum rate of electron transport at optimal
+<                             ! condition normalirsed at 25 degree (mol m-2 s-1) 
+< ,jmax_pmodel(land_field)                                                  &
+< 			    ! Maximum rate of electron transport (mol m-2 s-1)
+< ,jmax_adjusted(land_field)                                                &
+< 			    ! Adjusted maximum rate of electron transport 
+<                             ! (mol m-2 s-1)
+< ,jp1(land_field)                                                           &
+< 			  ! The electron transport rate mol electrons (m-2 s-1)                           
+< ,kcpa(land_field)                                                         &
+<                           ! Michaelis-Menten constant for CO2 (Pa) for a point. 
+< ,kopa(land_field)                                                         &
+<                           ! Michaelis-Menten constant for O2 (Pa) for a point.
+< ,kmpa(land_field)                                                          &
+< 	   	    	  ! A combination of Michaelis-Menten and other terms.
+< ,ta(land_field)                                                            &
+< 		            ! Atmospheric temperature (degree C). 
+< ,O2_partial_pres(land_field)                                               &
+<                             ! Atmospheric O2 partial pressure (K). 
+< ,phi0(land_field)                                                          &
+< 			    ! Intrinsic quantum yield parameter. 
+< ,pratio(land_field)                                                        &
+<                             ! Atmospheric pressure/atmospheric pressure at 0m
+< ,tgdegc(land_field)                                                        &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_leaf_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_leaf_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

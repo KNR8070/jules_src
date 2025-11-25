@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.277081 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/jules_ssi_sf_explicit_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/jules_ssi_sf_explicit_jls.F90
+
+SUMMARY:
+  - added lines (>): 430
+  - removed lines (<): 147
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/jules_ssi_sf_explicit_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/jules_ssi_sf_explicit_jls.F90
+31c31
+<  nice, nice_use,                                                               &
+---
+>  nice, nice_use, n_wtrac_jls,                                                  &
+46c46
+< ! IN calcualted in land code
+---
+> ! IN calculated in land code
+65a66
+>  sice_pts_ncat, ssi_pts, sea_pts,                                              &
+67,88c68,80
+<  sw_sicat, sw_sea)
+< 
+< USE sf_flux_mod, ONLY: sf_flux
+< USE sfl_int_mod, ONLY: sfl_int
+< USE fcdch_mod, ONLY: fcdch
+< USE stdev1_mod, ONLY: stdev1
+< USE sf_rib_mod, ONLY: sf_rib
+< USE qsat_mod, ONLY: qsat, qsat_mix
+< USE calc_air_dens_mod, ONLY: calc_air_dens
+< 
+< !Use in relevant variables
+< USE theta_field_sizes, ONLY: t_i_length,t_j_length
+< 
+< USE planet_constants_mod, ONLY: g, vkman, r, c_virtual,epsil=>repsilon
+< USE csigma, ONLY: sbcon
+< 
+< USE sf_diags_mod, ONLY: strnewsfdiag
+< USE timestep_mod, ONLY: timestep
+< 
+< USE atm_fields_bounds_mod, ONLY:                                               &
+<    pdims_s, pdims, tdims
+< 
+---
+>  sw_sicat, sw_sea,                                                             &
+>  !Water tracers (IN)
+>  qw_1_wtrac, r_sea_wtrac, r_sice_wtrac,                                        &
+>  !Water tracers (INOUT)
+>  fqw_1_wtrac,                                                                  &
+>  !Water tracers (OUT)
+>  fqw_sea_wtrac, fqw_sicat_wtrac)
+> 
+> USE atm_fields_bounds_mod,   ONLY: pdims_s, pdims, tdims
+> USE c_kappai,                ONLY: kappa_seasurf,dzsea
+> USE calc_air_dens_mod,       ONLY: calc_air_dens
+> USE csigma,                  ONLY: sbcon
+> USE fcdch_mod,               ONLY: fcdch
+90,91c82,91
+< USE water_constants_mod, ONLY: lc, rhosea, tm
+< USE c_kappai, ONLY: kappa_seasurf,dzsea
+---
+> USE planet_constants_mod,    ONLY: g, vkman, r, c_virtual,epsil=>repsilon
+> USE qsat_mod,                ONLY: qsat, qsat_mix
+> USE sf_diags_mod,            ONLY: strnewsfdiag
+> USE sf_flux_mod,             ONLY: sf_flux
+> USE sf_rib_mod,              ONLY: sf_rib
+> USE sfl_int_mod,             ONLY: sfl_int
+> USE stdev1_mod,              ONLY: stdev1
+> USE theta_field_sizes,       ONLY: t_i_length,t_j_length
+> USE timestep_mod,            ONLY: timestep
+> USE water_constants_mod,     ONLY: lc, rhosea, tm
+112c112,113
+< USE ancil_info, ONLY: ssi_pts, sea_pts, sice_pts_ncat
+---
+> USE jules_water_tracers_mod, ONLY: l_wtrac_jls
+> USE sf_flux_ssi_wtrac_mod,   ONLY: sf_flux_ssi_wtrac
+117d117
+< 
+124a125
+>  ssi_pts, sea_pts,                                                             &
+127,128c128,131
+< ,nice_use   ! No. of sea ice categories used fully in surface calculations
+< 
+---
+> ,nice_use                                                                      &
+>             ! No. of sea ice categories used fully in surface calculations
+> ,n_wtrac_jls
+>             ! No. of water tracers used in JULES
+358c361,362
+<  sice_index_ncat(t_i_length * t_j_length,nice)
+---
+>  sice_index_ncat(t_i_length * t_j_length,nice),                                &
+>  sice_pts_ncat(nice)
+370a375,408
+> ! Water tracers (IN)
+> REAL(KIND=real_jlslsm), INTENT(IN) :: qw_1_wtrac(tdims%i_start:tdims%i_end,    &
+>                                          tdims%j_start:tdims%j_end,n_wtrac_jls)
+>                          ! IN Total water tracer content in lowest atmos level
+> REAL(KIND=real_jlslsm), INTENT(IN) :: r_sea_wtrac(tdims%i_start:tdims%i_end,   &
+>                                          tdims%j_start:tdims%j_end,n_wtrac_jls)
+>                          ! IN Open ocean surface water tracer ratio
+> REAL(KIND=real_jlslsm), INTENT(IN) :: r_sice_wtrac(tdims%i_start:tdims%i_end,  &
+>                                                    tdims%j_start:tdims%j_end,  &
+>                                                    nice_use,n_wtrac_jls)
+>                          ! IN Sea ice surface water tracer ratio per ice cat
+> 
+> ! Water tracers (INOUT)
+> REAL(KIND=real_jlslsm), INTENT(IN OUT) :: fqw_1_wtrac(                         &
+>                                             tdims%i_start:tdims%i_end,         &
+>                                             tdims%j_start:tdims%j_end,         &
+>                                             n_wtrac_jls)
+>                          ! INOUT Surface water tracer moisture flux (kg/m2/s)
+> 
+> ! Water tracers (OUT)
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: fqw_sea_wtrac(                          &
+>                                             tdims%i_start:tdims%i_end,         &
+>                                             tdims%j_start:tdims%j_end,         &
+>                                             n_wtrac_jls)
+>                          ! OUT Surface water tracer evaporation from sea
+>                          !     (kg/m2/s)
+> 
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: fqw_sicat_wtrac(                        &
+>                                             tdims%i_start:tdims%i_end,         &
+>                                             tdims%j_start:tdims%j_end,         &
+>                                             nice_use,n_wtrac_jls)
+>                          ! OUT Surface water tracer sublimation from sea ice
+>                          !     categories (kg/m2/s)
+> 
+620c658
+< ,first_counter
+---
+> ,first_counter                                                                 &
+621a660,661
+> ,i_wt
+>              ! Loop counter (water tracers)
+666c706,724
+< !$OMP PARALLEL DEFAULT(NONE) PRIVATE(I)                                        &
+---
+> IF (sf_diag%l_tau_surft .OR. sf_diag%l_tau_1) THEN
+>   ALLOCATE(rhokm_1_sice(tdims%i_start:tdims%i_end,tdims%j_start:tdims%j_end))
+>   ALLOCATE(rhokm_1_sice_ncats(tdims%i_start:tdims%i_end,tdims%j_start:tdims%j_end,nice_use))
+>   ALLOCATE(rhokm_1_sea(tdims%i_start:tdims%i_end,tdims%j_start:tdims%j_end))
+> ELSE
+>   ALLOCATE(rhokm_1_sice(1,1))
+>   ALLOCATE(rhokm_1_sice_ncats(1,1,nice_use))
+>   ALLOCATE(rhokm_1_sea(1,1))
+> END IF
+> 
+> IF (i_modiscopt == on) THEN
+>   ALLOCATE(z1_tq_top_sea(t_i_length,t_j_length))
+>   ALLOCATE(z1_tq_top_ctile(t_i_length,t_j_length))
+> ELSE
+>   ALLOCATE(z1_tq_top_sea(1,1))
+>   ALLOCATE(z1_tq_top_ctile(1,1))
+> END IF
+> 
+> !$OMP PARALLEL DEFAULT(NONE) PRIVATE(I, j, k, l, n, i_wt)                      &
+668c726,737
+< !$OMP array_zero_int,zdt_dummy,cd_std_ice,v_s_std_ice,u_s_std_ice)
+---
+> !$OMP array_zero_int,zdt_dummy,cd_std_ice,v_s_std_ice,u_s_std_ice,             &
+> !$OMP        tdims,radnet_sea,radnet_sice,z0h_sea,z0hsea,z0m_miz,z0miz,        &
+> !$OMP        z0h_miz,z0h_z0m_miz,rib_sea,rib_ice,db_sea,db_ice,rhokm_ssi,      &
+> !$OMP        rhokm_ssi_nohalo,cd_ssi,ch_ssi,ftl_ice,fqw_ice,h_sea,e_sea,       &
+> !$OMP        cd_ice,ch_ice,v_s_ice,recip_l_mo_ice,l_icerough_prognostic,       &
+> !$OMP        z0m_ice,z0m_sice_fmd,z0h_ice,z0h_z0m_sice,z0m_sice_skin,z0sice,   &
+> !$OMP        lw_down,sice_pts_ncat,sice_index_ncat,ssi_index,                  &
+> !$OMP        sw_sicat,emis_sice,tstar_sice_cat,nice_use, sf_diag,              &
+> !$OMP        sea_pts, sea_index, sw_sea, emis_sea, tstar_sea,                  &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_jules_ssi_sf_explicit_jls.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_jules_ssi_sf_explicit_jls.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

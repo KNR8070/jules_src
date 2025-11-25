@@ -1,0 +1,176 @@
+Patch stub generated: 2025-11-25T12:09:12.245018 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/radiation/jules_land_albedo_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/radiation/jules_land_albedo_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 93
+  - removed lines (<): 20
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/radiation/jules_land_albedo_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/radiation/jules_land_albedo_jls_mod.F90
+41c41
+<         l_lice_point,                                                          &
+---
+>         l_lice_point, l_lice_surft,                                            &
+91c91
+<   nsoilt, l_lice_surft, rad_nband
+---
+>   nsoilt, rad_nband
+186a187
+> LOGICAL, INTENT(IN) :: l_lice_surft(ntype)
+325,326c326,335
+< DO n = 1,ntype
+<   DO l = 1,land_pts
+---
+> !$OMP PARALLEL DEFAULT(NONE) PRIVATE(j, l, n, n_surft_pft, band, i, k)         &
+> !$OMP SHARED(ntype, land_pts, albsnc, nsurft, alb_surft, alb_type, alb_snow,   &
+> !$OMP        snowdep_surft, snowdepth_surft, can_model, cansnowtile,           &
+> !$OMP        l_snowdep_surf, snow_surft, rho_snow_const, surft_pts, npft,      &
+> !$OMP        surft_index, lai, lai_pft, lai_alb_lim, lai_alb_lim_sn,           &
+> !$OMP        l_aggregate, rad_nband, albobs_scaling_surft, l_albedo_obs,       &
+> !$OMP        pfield, albobs_sc_ij)
+> DO n = 1, ntype
+> !$OMP DO SCHEDULE(STATIC)
+>   DO l = 1, land_pts
+329a339
+> !$OMP END DO NOWAIT
+331,333c341,344
+< DO n = 1,nsurft
+<   DO band = 1,4
+<     DO l = 1,land_pts
+---
+> DO band = 1, 4
+>   DO n = 1, nsurft
+> !$OMP DO SCHEDULE(STATIC)
+>     DO l = 1, land_pts
+335a347
+> !$OMP END DO NOWAIT
+338,340c350,353
+< DO n = 1,ntype
+<   DO band = 1,4
+<     DO l = 1,land_pts
+---
+> DO band = 1, 4
+>   DO n = 1, ntype
+> !$OMP DO SCHEDULE(STATIC)
+>     DO l = 1, land_pts
+343a357
+> !$OMP END DO NOWAIT
+348,349c362,369
+< snowdep_surft(:,:) = snowdepth_surft(:,:)
+< DO n = 1,nsurft
+---
+> DO n = 1, nsurft
+> !$OMP DO SCHEDULE(STATIC)
+>   DO l = 1, land_pts
+>     snowdep_surft(l,n) = snowdepth_surft(l,n)
+>   END DO
+> !$OMP END DO
+> END DO
+> DO n = 1, nsurft
+351c371,372
+<     DO l = 1,land_pts
+---
+> !$OMP DO SCHEDULE(STATIC)
+>     DO l = 1, land_pts
+353a375
+> !$OMP END DO
+367c389,390
+<   DO j = 1,surft_pts(n)
+---
+> !$OMP DO SCHEDULE(STATIC)
+>   DO j = 1, surft_pts(n)
+374a398
+> !$OMP END DO NOWAIT
+377d400
+< 
+381c404,412
+<   albobs_scaling_surft = 1.0
+---
+>   DO k = 1, rad_nband
+>     DO j = 1, ntype
+> !$OMP DO SCHEDULE(STATIC)
+>       DO l = 1, land_pts
+>         albobs_scaling_surft(l,j,k) = 1.0
+>       END DO
+> !$OMP END DO NOWAIT
+>     END DO
+>   END DO
+383c414,423
+< albobs_sc_ij    = rmdi
+---
+> DO k = 1, 2
+>   DO n = 1, nsurft
+> !$OMP DO SCHEDULE(STATIC)
+>     DO i = 1, pfield
+>       albobs_sc_ij(i,n,k) = rmdi
+>     END DO
+> !$OMP END DO NOWAIT
+>   END DO
+> END DO
+> !$OMP END PARALLEL
+520,521c560,566
+<     albsfm_vis(:) = 0.0
+<     albsfm_nir(:) = 0.0
+---
+> !$OMP PARALLEL DO SCHEDULE(STATIC) IF(land_pts>1) DEFAULT(NONE) PRIVATE(l)     &
+> !$OMP SHARED(land_pts, albsfm_vis, albsfm_nir)
+>     DO l = 1, land_pts
+>       albsfm_vis(l) = 0.0
+>       albsfm_nir(l) = 0.0
+>     END DO
+> !$OMP END PARALLEL DO
+531a577,579
+> !$OMP PARALLEL DO SCHEDULE(STATIC) IF(land_pts>1) DEFAULT(NONE) PRIVATE(l)     &
+> !$OMP SHARED(land_pts, albsfm_vis, albsfm_nir, albobs_vis_gb, albobs_nir_gb,   &
+> !$OMP        albsfsc, l_lice_point)
+537a586
+> !$OMP END PARALLEL DO
+559a609,612
+> !$OMP PARALLEL DO SCHEDULE(STATIC) DEFAULT(NONE) PRIVATE(j, l)                 &
+> !$OMP SHARED(n, surft_pts, surft_index, soil, band, alb_type, albsoil_soilt,   &
+> !$OMP        m, disaggregate_albsoil, albsfsc, albsnf_nvgl, albsnf_nvgu, npft, &
+> !$OMP        albobs_scaling_surft, albsnf_nvg)
+593a647
+> !$OMP END PARALLEL DO
+599a654,655
+> !$OMP PARALLEL DO SCHEDULE(STATIC) DEFAULT(NONE) PRIVATE(j, l)                 &
+> !$OMP SHARED(n, surft_pts, surft_index, alb_type, band, l_hapke_soil, cosz_gb)
+607a664
+> !$OMP END PARALLEL DO
+616a674,675
+> !$OMP PARALLEL DEFAULT(NONE) PRIVATE(l, n, band)                               &
+> !$OMP SHARED(npft, land_pts, albobs_scaling_surft, albsfsc)
+618a678
+> !$OMP DO SCHEDULE(STATIC)
+621a682
+> !$OMP END DO NOWAIT
+623a685
+> !$OMP END PARALLEL
+1565c1627,1638
+<   albobs_sc_ij(:,:,:)=1.0
+---
+> !$OMP PARALLEL DEFAULT(NONE) PRIVATE(i, k, n)                                  &
+> !$OMP SHARED(nsurft, pfield, albobs_sc_ij)
+>   DO k = 1, 2
+>     DO n = 1, nsurft
+> !$OMP DO SCHEDULE(STATIC)
+>       DO i = 1, pfield
+>         albobs_sc_ij(i,n,k) = 1.0
+>       END DO
+> !$OMP END DO NOWAIT
+>     END DO
+>   END DO
+> !$OMP END PARALLEL
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_radiation_jules_land_albedo_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_radiation_jules_land_albedo_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

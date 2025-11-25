@@ -1,0 +1,163 @@
+Patch stub generated: 2025-11-25T12:09:12.253833 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/river_routing/um/um_riv_to_jules_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/um/um_riv_to_jules_mod.F90
+
+SUMMARY:
+  - added lines (>): 57
+  - removed lines (<): 41
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/river_routing/um/um_riv_to_jules_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/um/um_riv_to_jules_mod.F90
+54,56c54,56
+<   a_thresh, np_rivers, river_mouth, rivers_dlat, rivers_dlon, rivers_rfm       &
+<   ,rivers_first, rivers_dx, i_river_vn                                         &
+<   ,rivers_regrid, sea, rfm_land, rfm_river, rfm_sea                            &
+---
+>   a_thresh, np_rivers, river_mouth, rivers_dlat=>rivers_dy                     &
+>   ,rivers_dlon=>rivers_dx, rivers_rfm, rivers_first, rivers_length             &
+>   ,i_river_vn, rivers_regrid, sea, rfm_land, rfm_river, rfm_sea                &
+122c122,124
+< INTEGER, ALLOCATABLE :: mapfr(:,:)                   ! map full to river
+---
+> INTEGER, ALLOCATABLE :: grid_riv_pt_number(:,:)
+>   ! Map full river grid to river points. For each location on the grid, this
+>   ! is the river point number.
+155c157,158
+< ! rivers_dx is read from namelist jules_rivers_props in standalone mode;
+---
+> ! In standalone mode rivers_length is read from namelist jules_rivers_props or
+> ! calculated if not given.
+158c161
+< rivers_dx = planet_radius * delta_phi
+---
+> rivers_length = planet_radius * delta_phi
+172c175,176
+<     ALLOCATE( mapfr(global_river_row_length,global_river_rows), STAT = ERROR )
+---
+>     ALLOCATE( grid_riv_pt_number(global_river_row_length,global_river_rows),   &
+>               STAT = ERROR )
+185a190,191
+>     ALLOCATE(rivers_data%rivers_outflow_rp(np_rivers),  STAT = ERROR )
+>     error_sum = error_sum + ERROR
+188c194
+<     ALLOCATE(rivers_data%il_river_grid(np_rivers),      STAT = ERROR )
+---
+>     ALLOCATE(rivers_data%map_river_to_land_points(np_rivers), STAT = ERROR )
+208,209c214,215
+<       rivers_data%rfm_land_rp(ip)      = 0
+<       rivers_data%rfm_iarea_rp(ip)     = 0
+---
+>       rivers_data%rfm_land_rp(ip)       = 0
+>       rivers_data%rfm_iarea_rp(ip)      = 0
+211,217c217,223
+<       rivers_data%rfm_flowobs1_rp(ip)  = 0.0
+<       rivers_data%rfm_surfstore_rp(ip) = 0.0
+<       rivers_data%rfm_substore_rp(ip)  = 0.0
+<       rivers_data%rfm_flowin_rp(ip)    = 0.0
+<       rivers_data%rfm_bflowin_rp(ip)   = 0.0
+<       rivers_data%rfm_rivflow_rp(ip)   = 0.0
+<       rivers_data%rfm_baseflow_rp(ip)  = 0.0
+---
+>       rivers_data%rfm_flowobs1_rp(ip)   = 0.0
+>       rivers_data%rfm_surfstore_rp(ip)  = 0.0
+>       rivers_data%rfm_substore_rp(ip)   = 0.0
+>       rivers_data%rfm_flowin_rp(ip)     = 0.0
+>       rivers_data%rfm_bflowin_rp(ip)    = 0.0
+>       rivers_data%rfm_rivflow_rp(ip)    = 0.0
+>       rivers_data%rfm_baseflow_rp(ip)   = 0.0
+220c226
+<       rivers_data%il_river_grid(ip)    = 0
+---
+>       rivers_data%map_river_to_land_points(ip) = 0
+221a228
+>       rivers_data%rivers_outflow_rp(ip) = 0.0
+226,227c233,234
+<     rivers%il_river_grid => rivers_data%il_river_grid
+<     rivers%ir_land_grid => rivers_data%ir_land_grid
+---
+>     rivers%map_river_to_land_points => rivers_data%map_river_to_land_points
+>     rivers%global_land_index => rivers_data%global_land_index
+240a248
+>     rivers%rivers_outflow_rp => rivers_data%rivers_outflow_rp
+244c252
+<         mapfr(i,j) = 0
+---
+>         grid_riv_pt_number(i,j) = 0
+283c291
+<       mapfr(i,j) = l      ! full 2D rivgrid to rivpts
+---
+>       grid_riv_pt_number(i,j) = l      ! full 2D rivgrid to rivpts
+365c373
+<           rivers%rivers_next_rp(l) = -river_mouth
+---
+>           rivers%rivers_next_rp(l) = river_mouth
+368c376
+<           IF ( mapfr(inext, jnext) > 0 ) THEN
+---
+>           IF ( grid_riv_pt_number(inext, jnext) > 0 ) THEN
+374c382
+<               rivers%rivers_next_rp(l) = mapfr(inext,jnext)
+---
+>               rivers%rivers_next_rp(l) = grid_riv_pt_number(inext,jnext)
+377c385
+<               rivers%rivers_next_rp(l) = -river_mouth
+---
+>               rivers%rivers_next_rp(l) = river_mouth
+382c390
+<             rivers%rivers_next_rp(l) = -river_mouth
+---
+>             rivers%rivers_next_rp(l) = river_mouth
+412c420
+<     !    -9 : a river mouth (value = -1*river_mouth)
+---
+>     !    -9 : a river mouth (value = river_mouth)
+421c429
+<     DEALLOCATE(mapfr)
+---
+>     DEALLOCATE(grid_riv_pt_number)
+490,501c498,517
+<   CALL rivpts_to_landpts( np_rivers, rivers%rfm_flowin_rp, global_land_pts,    &
+<                           flowin_lp, rivers%il_river_grid, rivers%ir_land_grid,&
+<                           rivers%rivers_index_rp)
+<   CALL rivpts_to_landpts( np_rivers, rivers%rfm_bflowin_rp, global_land_pts,   &
+<                           bflowin_lp, rivers%il_river_grid,                    &
+<                           rivers%ir_land_grid, rivers%rivers_index_rp)
+<   CALL rivpts_to_landpts( np_rivers, rivers%rfm_surfstore_rp, global_land_pts, &
+<                           surfstore_lp, rivers%il_river_grid,                  &
+<                           rivers%ir_land_grid, rivers%rivers_index_rp)
+<   CALL rivpts_to_landpts( np_rivers, rivers%rfm_substore_rp, global_land_pts,  &
+<                           substore_lp, rivers%il_river_grid,                   &
+<                           rivers%ir_land_grid, rivers%rivers_index_rp)
+---
+>   CALL rivpts_to_landpts( global_land_pts, np_rivers,                          &
+>                           rivers%map_river_to_land_points,                     &
+>                           rivers%global_land_index,                            &
+>                           rivers%rivers_index_rp,                              &
+>                           rivers%rfm_flowin_rp, flowin_lp )
+>   CALL rivpts_to_landpts( global_land_pts, np_rivers,                          &
+>                           rivers%map_river_to_land_points,                     &
+>                           rivers%global_land_index,                            &
+>                           rivers%rivers_index_rp,                              &
+>                           rivers%rfm_bflowin_rp, bflowin_lp )
+>   CALL rivpts_to_landpts( global_land_pts, np_rivers,                          &
+>                           rivers%map_river_to_land_points,                     &
+>                           rivers%global_land_index,                            &
+>                           rivers%rivers_index_rp,                              &
+>                           rivers%rfm_surfstore_rp, surfstore_lp )
+>   CALL rivpts_to_landpts( global_land_pts, np_rivers,                          &
+>                           rivers%map_river_to_land_points ,                    &
+>                           rivers%global_land_index,                            &
+>                           rivers%rivers_index_rp,                              &
+>                           rivers%rfm_substore_rp, substore_lp )
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_river_routing_um_um_riv_to_jules_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_river_routing_um_um_riv_to_jules_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

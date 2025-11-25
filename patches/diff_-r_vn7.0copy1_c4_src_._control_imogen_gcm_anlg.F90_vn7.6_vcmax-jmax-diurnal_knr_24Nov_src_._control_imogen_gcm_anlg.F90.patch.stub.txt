@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.103933 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/imogen/gcm_anlg.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/gcm_anlg.F90
+
+SUMMARY:
+  - added lines (>): 42
+  - removed lines (<): 102
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/imogen/gcm_anlg.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/gcm_anlg.F90
+13,15c13,14
+<   q,land_pts,n_olevs,dir_patt,f_ocean,kappa_o,                                 &
+<   lambda_l,lambda_o,mu,dtemp_o,longmin_am,latmin_am,longmax_am,                &
+<   latmax_am,mm,imgn_drive, ainfo)
+---
+>   dqradf, land_pts, n_olevs, f_ocean, kappa_o,                                 &
+>   lambda_l, lambda_o, mu, dtemp_o, dtemp_g, mm, imgn_drive, ainfo)
+17,21c16
+< USE io_constants, ONLY: imogen_unit, max_file_name_len
+< 
+< USE imogen_map, ONLY: sgindinv
+< 
+< USE imogen_constants, ONLY: drive_month,n_imogen_land
+---
+> USE imogen_run, ONLY: l_drive_with_global_temps
+53,61d47
+< CHARACTER(LEN=max_file_name_len), INTENT(IN) ::                                &
+<   dir_patt
+<                  ! IN Directory containing anomaly patterns.
+< 
+< 
+< CHARACTER(LEN=max_file_name_len) ::                                            &
+<   driver_patt
+<                  ! File containing anomaly patterns from analogue model.
+< 
+73c59
+<   q
+---
+>   dqradf
+80,87d65
+< REAL ::                                                                        &
+<   lat_am(land_pts),                                                            &
+<                   ! Latitude read from file.
+<   long_am(land_pts),                                                           &
+<                   !Longitude read from file.
+<   dtemp_l
+<                  ! Land mean temperature anomaly (K).
+< 
+89,94c67,68
+<   latmin_am,latmax_am,                                                         &
+<                  ! WORK Latitudinal limits of the area
+<                  !      (degrees).
+<   longmin_am,longmax_am
+<                  ! WORK Longitudinal limits of the area
+<                  !      (degrees).
+---
+>   dtemp_g
+>                  ! Global mean temperature anomaly (K).
+96,98d69
+< !-----------------------------------------------------------------
+< ! Anomaly patterns scaled to land mean temperature anomalies.
+< !-----------------------------------------------------------------
+100,104c71,75
+<   drainfall_pat,                                                               &
+<                  ! WORK Rainfall rate (mm/day/K).
+<   dsnowfall_pat
+<                  ! WORK Snowfall rate (mm/day/K).
+< 
+---
+>   dtemp_l,                                                                     &
+>                  ! Land mean temperature anomaly (K).
+>   dtemp
+>                  ! Mean temperature change either land or global
+>                  ! depends on switch (K).
+106c77
+<   l, im, i, j, id, ijk
+---
+>   l, im, i, j
+110c81
+< ! Calculate new area mean temperature anomalies
+---
+> ! Calculate area mean temperature changes on both land & globally
+112,113c83,88
+< CALL delta_temp(n_olevs,f_ocean,kappa_o,lambda_l,lambda_o,mu,q,                &
+<       dtemp_l,dtemp_o)
+---
+> IF ( .NOT. l_drive_with_global_temps ) THEN
+>   CALL delta_temp(n_olevs, f_ocean, kappa_o, lambda_l, lambda_o, mu, dqradf,   &
+>       dtemp_l, dtemp_o, dtemp_g)
+>   dtemp = dtemp_l
+>   ! ejb land temperature not global temperature - should be an option
+> END IF
+116,117c91,92
+< ! Read in spatial patterns (/K) and convert to anomalies
+< ! use to define the new climate data.
+---
+> ! Loop over months and calculate climate anomalies from patterns (/K)
+> ! and global or land temperature change
+120,174c95,98
+<   !-----------------------------------------------------------------
+<   ! Define the anomaly patterns and read the header
+<   !-----------------------------------------------------------------
+<   driver_patt = TRIM(dir_patt) // drive_month(im)
+< 
+<   OPEN(imogen_unit, FILE=driver_patt,                                          &
+<                     STATUS='old', POSITION='rewind', ACTION='read')
+< 
+<   READ(imogen_unit,*) longmin_am,latmin_am,longmax_am,latmax_am
+< 
+<   !-----------------------------------------------------------------
+<   ! Read in initial climatology and then define the new climate data.
+<   !-----------------------------------------------------------------
+<   DO ijk = 1,n_imogen_land
+<     IF (sgindinv(ijk) > 0) THEN
+<       l = sgindinv(ijk)
+<       j = (ainfo%land_index(l) - 1) / t_i_length + 1
+<       i = ainfo%land_index(l) - (j-1) * t_i_length
+< 
+<       READ(imogen_unit,*)                                                      &
+<         long_am(l),lat_am(l),imgn_drive%t1p5m_ij_patt(i,j,im),                 &
+<         imgn_drive%rh1p5m_ij_patt(i,j,im),                                     &
+<         imgn_drive%uwind_ij_patt(i,j,im),                                      &
+<         imgn_drive%vwind_ij_patt(i,j,im),                                      &
+<         imgn_drive%lwdown_ij_patt(i,j,im),                                     &
+<         imgn_drive%swdown_ij_patt(i,j,im),                                     &
+<         imgn_drive%diurnal_t1p5m_ij_patt(i,j,im),                              &
+<         drainfall_pat,dsnowfall_pat,                                           &
+<         imgn_drive%pstar_ij_patt(i,j,im)
+< 
+<       imgn_drive%precip_ij_patt(i,j,im) = drainfall_pat + dsnowfall_pat
+< 
+<       imgn_drive%t1p5m_ij_anom(i,j,im) =                                       &
+<                      imgn_drive%t1p5m_ij_patt(i,j,im) * dtemp_l
+<       imgn_drive%rh1p5m_ij_anom(i,j,im) =                                      &
+<                      imgn_drive%rh1p5m_ij_patt(i,j,im) * dtemp_l
+<       imgn_drive%uwind_ij_anom(i,j,im) =                                       &
+<                      imgn_drive%uwind_ij_patt(i,j,im) * dtemp_l
+<       imgn_drive%vwind_ij_anom(i,j,im) =                                       &
+<                      imgn_drive%vwind_ij_patt(i,j,im) * dtemp_l
+<       imgn_drive%precip_ij_anom(i,j,im) =                                      &
+<                      imgn_drive%precip_ij_patt(i,j,im) * dtemp_l
+<       imgn_drive%diurnal_t1p5m_ij_anom(i,j,im) =                               &
+<                      imgn_drive%diurnal_t1p5m_ij_patt(i,j,im) * dtemp_l
+<       imgn_drive%lwdown_ij_anom(i,j,im) =                                      &
+<                      imgn_drive%lwdown_ij_patt(i,j,im) * dtemp_l
+<       imgn_drive%swdown_ij_anom(i,j,im) =                                      &
+<                      imgn_drive%swdown_ij_patt(i,j,im) * dtemp_l
+<       imgn_drive%pstar_ij_anom(i,j,im) =                                       &
+<                      imgn_drive%pstar_ij_patt(i,j,im) * dtemp_l
+< 
+<     ELSE
+<       READ(imogen_unit,*)
+<     END IF
+<   END DO     !End of loop over land points
+---
+>   DO l = 1,land_pts
+> 
+>     j = (ainfo%land_index(l) - 1) / t_i_length + 1
+>     i = ainfo%land_index(l) - (j-1) * t_i_length
+176c100,116
+<   CLOSE(imogen_unit)
+---
+>     imgn_drive%tl1_ij_anom(i,j,im) =                                           &
+>                       imgn_drive%tl1_ij_patt(i,j,im) * dtemp
+>     imgn_drive%ql1_ij_anom(i,j,im) =                                           &
+>                      imgn_drive%ql1_ij_patt(i,j,im) * dtemp
+>     imgn_drive%wind_ij_anom(i,j,im) =                                          &
+>                      imgn_drive%wind_ij_patt(i,j,im) * dtemp
+>     imgn_drive%precip_ij_anom(i,j,im) =                                        &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_imogen_gcm_anlg.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_imogen_gcm_anlg.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

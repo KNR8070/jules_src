@@ -1,0 +1,76 @@
+Patch stub generated: 2025-11-25T12:09:12.249544 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/river_routing/rivers_route_trip_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/rivers_route_trip_mod.F90
+
+SUMMARY:
+  - added lines (>): 19
+  - removed lines (<): 18
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/river_routing/rivers_route_trip_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/rivers_route_trip_mod.F90
+44,46c44,47
+<                               riverout_rgrid,rivers_next_rp,rivers_seq_rp,     &
+<                               rivers_sto_rp ,rivers_boxareas_rp, rivers_lat_rp,&
+<                               rivers_lon_rp )
+---
+>                               rivers_outflow_rp, rivers_next_rp,               &
+>                               rivers_seq_rp, rivers_sto_rp ,                   &
+>                               rivers_boxareas_rp,                              &
+>                               rivers_lat_rp, rivers_lon_rp )
+52d52
+< 
+82,83c82,83
+<     ,riverout_rgrid(np_rivers)
+<      ! River outflow into the ocean on river grid (kg s-1)
+---
+>     ,rivers_outflow_rp(np_rivers)
+>      ! River outflow into the ocean (kg s-1)
+86,87c86,90
+< INTEGER, INTENT(IN OUT) :: rivers_next_rp(:)
+< INTEGER, INTENT(IN OUT) :: rivers_seq_rp(:)
+---
+> INTEGER, INTENT(IN)     :: rivers_next_rp(:)
+> INTEGER, INTENT(IN)     :: rivers_seq_rp(:)
+> REAL,    INTENT(IN)     :: rivers_boxareas_rp(:)
+> REAL,    INTENT(IN)     :: rivers_lat_rp(:)
+> REAL,    INTENT(IN)     :: rivers_lon_rp(:)
+89,91d91
+< REAL,    INTENT(IN OUT) :: rivers_boxareas_rp(:)
+< REAL,    INTENT(IN OUT) :: rivers_lat_rp(:)
+< REAL,    INTENT(IN OUT) :: rivers_lon_rp(:)
+95c95
+<      ip,iseq
+---
+>      ip, iseq
+114a115
+> CHARACTER(LEN=*), PARAMETER :: RoutineName='RIVERS_ROUTE_TRIP'
+126,128c127,129
+<   outflow(ip)        = 0.0
+<   baseflow(ip)       = 0.0
+<   riverout_rgrid(ip) = 0.0
+---
+>   outflow(ip)           = 0.0
+>   baseflow(ip)          = 0.0
+>   rivers_outflow_rp(ip) = 0.0
+189c190
+< ! Catch all outflow going into the sea and save it in riverout_rgrid.
+---
+> ! Catch all outflow going into the sea and save it in rivers_outflow_rp.
+194,195c195,196
+<   IF ( rivers_next_rp(ip) == -river_mouth ) THEN
+<     riverout_rgrid(ip) = outflow(ip)
+---
+>   IF ( rivers_next_rp(ip) == river_mouth ) THEN
+>     rivers_outflow_rp(ip) = outflow(ip)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_river_routing_rivers_route_trip_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_river_routing_rivers_route_trip_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

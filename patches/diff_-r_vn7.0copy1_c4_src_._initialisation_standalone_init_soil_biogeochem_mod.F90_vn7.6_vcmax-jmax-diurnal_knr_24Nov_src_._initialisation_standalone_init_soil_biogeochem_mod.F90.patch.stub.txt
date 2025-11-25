@@ -1,0 +1,44 @@
+Patch stub generated: 2025-11-25T12:09:12.196302 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_soil_biogeochem_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_soil_biogeochem_mod.F90
+
+SUMMARY:
+  - added lines (>): 6
+  - removed lines (<): 6
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_soil_biogeochem_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_soil_biogeochem_mod.F90
+38c38
+<    soil_model_ecosse, soil_model_1pool, soil_model_rothc,                      &
+---
+>    soil_model_ecosse, soil_model_1pool, soil_model_4pool,                      &
+125,126c125,126
+< ELSE IF ( soil_bgc_model == soil_model_rothc ) THEN
+<   CALL log_info( RoutineName, "Soil C is modelled using RothC." )
+---
+> ELSE IF ( soil_bgc_model == soil_model_4pool ) THEN
+>   CALL log_info( RoutineName, "Soil C is modelled using 4-pool C model." )
+135c135
+< CASE ( soil_model_1pool, soil_model_rothc )
+---
+> CASE ( soil_model_1pool, soil_model_4pool )
+138c138
+<                    "Q10 equation will be used for soil respiration" )
+---
+>              "Q10 equation used for soil respiration temp dependence" )
+141c141
+<                    "RothC equations will be used for soil respiration" )
+---
+>              "4-pool equation used for soil respiration temp dependence" )
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_init_soil_biogeochem_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_init_soil_biogeochem_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,56 @@
+Patch stub generated: 2025-11-25T12:09:12.163663 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/cable/prognostics/read_cable_progs.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/cable/prognostics/read_cable_progs.F90
+
+SUMMARY:
+  - added lines (>): 19
+  - removed lines (<): 10
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/cable/prognostics/read_cable_progs.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/cable/prognostics/read_cable_progs.F90
+1a2,11
+> !******************************COPYRIGHT********************************************
+> ! (c) CSIRO 2022.
+> ! All rights reserved.
+> !
+> ! This routine has been licensed to the other JULES partners for use and
+> ! distribution under the JULES collaboration agreement, subject to the terms and
+> ! conditions set out therein.
+> !
+> ! [Met Office Ref SC0237]
+> !******************************COPYRIGHT********************************************
+7d16
+< !
+10a20,25
+> ! This MODULE is USEd in:
+> !      init_cable_progs.F90
+> !
+> ! This MODULE contains 1 public Subroutine:
+> !      read_cable_progs
+> !
+25a41,43
+> ! Description:
+> !   Nothing further to add to the module description
+> 
+46,54d63
+< !------------------------------------------------------------------------------
+< ! Description:
+< !
+< !   Reads in information about CABLE prognostic variables for their
+< !   initialisation
+< !
+< ! Code Owner: Please refer to ModuleLeaders.txt
+< ! This file belongs in CABLE SCIENCE
+< !------------------------------------------------------------------------------
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_cable_prognostics_read_cable_progs.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_cable_prognostics_read_cable_progs.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,162 @@
+Patch stub generated: 2025-11-25T12:09:12.130563 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_water_resources_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_water_resources_mod.F90
+
+SUMMARY:
+  - added lines (>): 5
+  - removed lines (<): 130
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_water_resources_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_water_resources_mod.F90
+153c153
+<   nwater_use,                                                                  &
+---
+>   nwater_use = imdi,                                                           &
+154a155,158
+>   !----------------------------------------------------------------------------
+>   ! The following indices should be initialised to zero, to indicate that a
+>   ! water use is not considered.
+>   !----------------------------------------------------------------------------
+170,205d173
+< ! Array variables.
+< INTEGER, ALLOCATABLE ::                                                        &
+<   priority_order(:,:)
+<     ! Priorities of water demands at each gridpoint, in order of decreasing
+<     ! priority. Values are the index in multi-sector arrays.
+<     ! e.g. priority_order(l,1) = 3 indicates that the first priority use is
+<     !      in slice 3 of multi-sector arrays.
+< 
+< REAL(KIND=real_jlslsm), ALLOCATABLE ::                                         &
+<   demand_accum(:,:),                                                           &
+<     ! Demands for water accumulated over the water resource timestep (kg).
+<     ! Note that in general this should be written to restart files (dumps)
+<     ! but this is not done yet.
+<   !---------------------------------------------------------------------------
+<   ! Demands that can be prescribed.
+<   !---------------------------------------------------------------------------
+<   demand_rate_domestic(:),                                                     &
+<     ! Demand for water for domestic use (kg s-1).
+<   demand_rate_industry(:),                                                     &
+<     ! Demand for water for industrial use (kg s-1).
+<   demand_rate_livestock(:),                                                    &
+<     ! Demand for water for livestock (kg s-1).
+<   demand_rate_transfers(:),                                                    &
+<     ! Demand for water for (explicit) transfers (kg s-1).
+<   !---------------------------------------------------------------------------
+<   ! Ancillary fields.
+<   !---------------------------------------------------------------------------
+<   conveyance_loss(:),                                                          &
+<     ! Fraction of water that is lost during conveyance from source to user.
+<   irrig_eff(:),                                                                &
+<     ! Irrigation efficiency i.e. the fraction of the water withdrawn for
+<     ! irrigation that is demanded by the crop scheme.
+<   sfc_water_frac(:)
+<     ! Target for the fraction of demand that will be met from surface water
+<     ! (as opposed to groundwater).
+< 
+745,837d712
+< !#############################################################################
+< !#############################################################################
+< 
+< SUBROUTINE water_resources_alloc( land_pts )
+< 
+< ! Allocate arrays.
+< ! No USE statements other than error reporting and Dr Hook (if required).
+< 
+< IMPLICIT NONE
+< 
+< ! Arguments.
+< INTEGER, INTENT(IN) :: land_pts
+<   ! Number of land points.
+< 
+< ! Local parameters.
+< CHARACTER(LEN=*), PARAMETER :: RoutineName = 'WATER_RESOURCES_ALLOC'
+< 
+< ! Local scalar variables.
+< INTEGER :: land_pts_dim, nwater_use_dim
+< 
+< !-----------------------------------------------------------------------------
+< ! Arrays are always allocated, but with minimal size if the science is not
+< ! selected. Decide on sizes.
+< !-----------------------------------------------------------------------------
+< IF ( l_water_resources ) THEN
+<   land_pts_dim   = land_pts
+<   nwater_use_dim = nwater_use
+< ELSE
+<   land_pts_dim   = 1
+<   nwater_use_dim = 1
+< END IF
+< 
+< !-----------------------------------------------------------------------------
+< ! Individual demands (which can be prescibed).
+< ! We allocate a minimum size if a sector is not being used.
+< !-----------------------------------------------------------------------------
+< IF ( l_water_domestic ) THEN
+<   ALLOCATE( demand_rate_domestic(land_pts_dim) )
+< ELSE
+<   ALLOCATE( demand_rate_domestic(1) )
+< END IF
+< 
+< IF ( l_water_industry ) THEN
+<   ALLOCATE( demand_rate_industry(land_pts_dim) )
+< ELSE
+<   ALLOCATE( demand_rate_industry(1) )
+< END IF
+< 
+< IF ( l_water_livestock ) THEN
+<   ALLOCATE( demand_rate_livestock(land_pts_dim) )
+< ELSE
+<   ALLOCATE( demand_rate_livestock(1) )
+< END IF
+< 
+< IF ( l_water_transfers ) THEN
+<   ALLOCATE( demand_rate_transfers(land_pts_dim) )
+< ELSE
+<   ALLOCATE( demand_rate_transfers(1) )
+< END IF
+< 
+< demand_rate_domestic(:)  = 0.0
+< demand_rate_industry(:)  = 0.0
+< demand_rate_livestock(:) = 0.0
+< demand_rate_transfers(:) = 0.0
+< 
+< !-----------------------------------------------------------------------------
+< ! Accumulated demands.
+< !-----------------------------------------------------------------------------
+< ALLOCATE( demand_accum(land_pts_dim,nwater_use_dim) )
+< demand_accum(:,:) = 0.0
+< 
+< !-----------------------------------------------------------------------------
+< ! Ancillary fields.
+< !-----------------------------------------------------------------------------
+< ALLOCATE( conveyance_loss(land_pts_dim) )
+< IF ( l_water_irrigation ) THEN
+<   ALLOCATE( irrig_eff(land_pts_dim) )
+< ELSE
+<   ALLOCATE( irrig_eff(1) )
+< END IF
+< ALLOCATE( sfc_water_frac(land_pts_dim) )
+< conveyance_loss(:) = 0.0
+< irrig_eff(:)       = 0.0
+< sfc_water_frac(:)  = 0.0
+< 
+< !-----------------------------------------------------------------------------
+< ! Other variables.
+< !-----------------------------------------------------------------------------
+< ALLOCATE( priority_order(land_pts_dim,nwater_use_dim) )
+< priority_order(:,:) = 0
+< 
+< RETURN
+< END SUBROUTINE water_resources_alloc
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_jules_water_resources_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_jules_water_resources_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

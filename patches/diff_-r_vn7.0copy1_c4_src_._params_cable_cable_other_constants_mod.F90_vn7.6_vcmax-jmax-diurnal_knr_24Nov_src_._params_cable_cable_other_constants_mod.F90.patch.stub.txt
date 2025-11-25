@@ -1,0 +1,85 @@
+Patch stub generated: 2025-11-25T12:09:12.228067 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./params/cable/cable_other_constants_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./params/cable/cable_other_constants_mod.F90
+
+SUMMARY:
+  - added lines (>): 30
+  - removed lines (<): 19
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./params/cable/cable_other_constants_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./params/cable/cable_other_constants_mod.F90
+0a1,7
+> !******************************************************************************
+> ! This source code is part of the Community Atmosphere Biosphere Land Exchange
+> ! (CABLE) model. This work is licensed under the CSIRO Open Source Software
+> ! License Agreement (variation of the BSD / MIT License).You may not use this
+> ! this file except in compliance with this License. A copy of the License is
+> ! available at https://trac.nci.org.au/trac/cable/wiki/license.
+> !******************************************************************************
+3,6d9
+< IMPLICIT NONE
+< 
+< PUBLIC
+< 
+11,12c14,17
+< ! Code Owner: Please refer to ModuleLeaders.txt
+< ! This file belongs in CABLE SCIENCE
+---
+> ! This MODULE is USEd throughout CABLE
+> !
+> ! Module specific documentation:https://trac.nci.org.au/trac/cable/wiki/TBC
+> ! Where it fits in the model flow:https://trac.nci.org.au/trac/cable/wiki/TBC
+13a19,29
+> !CABLE science not yet in JAC uses msn to describe number of snow layers
+> USE grid_constants_mod_cbl, ONLY: nrb, nsl, nsCs, nvCs, msn => nsnl
+> 
+> IMPLICIT NONE
+> 
+> PUBLIC
+> 
+> REAL, PARAMETER :: gauss_w(nrb)=[0.308,0.514,0.178 ] ! Gaussian integ. weights
+> 
+> REAL, PARAMETER :: rad_thresh = 0.001 ! min. zenithal angle for downward SW
+> REAL, PARAMETER :: lai_thresh = 0.001 ! min. LAI to be considered as vegetated
+17c33
+<                        !   near infrared)
+---
+>                        ! near infrared)
+19,20c35
+<                        !   (above divided into direct / diffuse)
+<   nrb = 3,           & ! number of radiation bands normally in use
+---
+>                        ! (above divided into direct / diffuse)
+22,23c37
+<   msn = 3,           & ! max # snow layers
+<   r_2  = SELECTED_REAL_KIND(12, 50),                                           &
+---
+>   r_2  = SELECTED_REAL_KIND(12, 50), &!this will be removed
+26,28d39
+<   nsl = 6,           & ! number of soil layers
+<   nscs = 2,          & ! number of soil carbon stores
+<   nvcs = 3,          & ! number of vegetation carbon stores
+36,40c47,51
+< REAL, PARAMETER :: gauss_w(nrb)=[0.308,0.514,0.178 ] ! Gaussian integ. weights
+< REAL, PARAMETER :: rad_thresh = 0.001
+<                         ! minimum zenithal angle for downward SW radiation
+< REAL, PARAMETER :: lai_thresh = 0.001
+<                         ! threshold for minimum significant LAI
+---
+> ! minimum (cosine)zenith angle of sun signalling sunrise
+> REAL, PARAMETER :: coszen_tols = 1.0e-4
+> 
+> REAL, PARAMETER :: z0surf_min = 1.0e-7 ! min. roughness of bare soil surface
+> !H!REAL, PARAMETER :: z0snow_min = 1.e-7 ! min. roughness of bare snow surface
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._params_cable_cable_other_constants_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._params_cable_cable_other_constants_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

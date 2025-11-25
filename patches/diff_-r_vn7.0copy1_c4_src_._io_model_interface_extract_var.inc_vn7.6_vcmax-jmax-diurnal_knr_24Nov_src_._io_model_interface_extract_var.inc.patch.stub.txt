@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.221346 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/model_interface/extract_var.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/model_interface/extract_var.inc
+
+SUMMARY:
+  - added lines (>): 197
+  - removed lines (<): 200
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/model_interface/extract_var.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/model_interface/extract_var.inc
+13c13
+<                             lake_vars, chemvars, rivers
+---
+>                             lake_vars, chemvars, rivers, water_resources
+17d16
+< USE jules_fields_mod, ONLY: toppdm
+18a18
+> USE imgn_vars_mod, ONLY: imgn_vars
+30,32d29
+< USE csigma, ONLY:                                                              &
+<   sbcon
+< 
+43,46c40,42
+<   conveyance_loss, demand_accum, irrig_eff, l_water_domestic,                  &
+<   l_water_environment, l_water_industry, l_water_irrigation,                   &
+<   l_water_livestock, l_water_transfers, sfc_water_frac, use_domestic,          &
+<   use_environment, use_industry, use_irrigation, use_livestock, use_transfers
+---
+>   l_water_domestic, l_water_environment, l_water_industry, l_water_irrigation, &
+>   l_water_livestock, l_water_transfers, use_domestic, use_environment,         &
+>   use_industry, use_irrigation, use_livestock, use_transfers
+58c54
+<   grid_area_ij, latitude, longitude
+---
+>   grid_area_ij, latitude, longitude, projection_x_coord, projection_y_coord
+61c57
+<   dim_cs1, dim_cslayer, land_pts, nsurft, soil_pts, surft_pts, nsoilt
+---
+>   dim_cs1, dim_cslayer, land_pts, nsurft, soil_pts, nsoilt
+72,74d67
+< USE jules_deposition_mod, ONLY:                                                &
+<   tracer_field
+< 
+76c69
+<   soil_model_rothc
+---
+>   soil_model_4pool
+100,103c93,94
+< USE imogen_progs, ONLY:                                                        &
+<   d_land_atmos_co2, d_ocean_atmos, c_emiss_out
+< 
+< USE jules_rivers_mod, ONLY: nstep_rivers, np_rivers
+---
+> USE jules_rivers_mod, ONLY: nstep_rivers, np_rivers, n_rivers,                 &
+>    calc_outflow_per_river
+115a107,108
+> USE parallel_mod, ONLY: is_master_task
+> 
+188c181
+< REAL :: co2_tmp(land_pts) ! Used to out put the 1-d co2_mmr variable
+---
+> REAL :: onedvar_tmp(land_pts) ! Used to out put the 1-d variable
+208a202,207
+> CASE ( 'projection_x_coord' )
+>   cube = cube_from_array(projection_x_coord)
+> 
+> CASE ( 'projection_y_coord' )
+>   cube = cube_from_array(projection_y_coord)
+> 
+214a214,219
+> CASE ( 'rivers_x_coord_rp' )
+>   cube = cube_from_array(rivers%rivers_x_coord_rp)
+> 
+> CASE ( 'rivers_y_coord_rp' )
+>   cube = cube_from_array(rivers%rivers_y_coord_rp)
+> 
+708,763d712
+< CASE ( 't_growth' )
+<   ! n.b. t_growth is calculated here to make sure it is
+<   ! consistent with t_growth_gb after t_growth_gb is updated
+<   workspace_land(:) = SUM(progs%t_growth_gb * ainfo%frac_surft(:,1:npft), 2)
+<   cube_land = cube_from_array(workspace_land)
+<   cube = map_from_land(cube_land)
+< 
+< CASE ( 'l_growth' )
+<   ! n.b. l_growth is calculated here to make sure it is
+<   ! consistent with l_growth_gb after l_growth_gb is updated
+<   workspace_land(:) = SUM(progs%l_growth_gb * ainfo%frac_surft(:,1:npft), 2)
+<   cube_land = cube_from_array(workspace_land)
+<   cube = map_from_land(cube_land)
+< 
+< CASE ( 'co2_growth' )
+<   ! n.b. co2_growth is calculated here to make sure it is
+<   ! consistent with co2_growth_gb after co2_growth_gb is updated
+<   workspace_land(:) = SUM(progs%co2_growth_gb * ainfo%frac_surft(:,1:npft), 2)
+<   cube_land = cube_from_array(workspace_land)
+<   cube = map_from_land(cube_land)
+< 
+< CASE ( 'pstar_growth' )
+<   ! n.b. pstar_growth is calculated here to make sure it is
+<   ! consistent with pstar_growth_gb after pstar_growth_gb is updated
+<   workspace_land(:) = SUM(progs%pstar_growth_gb * ainfo%frac_surft(:,1:npft), 2)
+<   cube_land = cube_from_array(workspace_land)
+<   cube = map_from_land(cube_land)
+< 
+< CASE ( 'vpd_growth' )
+<   ! n.b. vpd_growth is calculated here to make sure it is
+<   ! consistent with vpd_growth_gb after vpd_growth_gb is updated
+<   workspace_land(:) = SUM(progs%vpd_growth_gb * ainfo%frac_surft(:,1:npft), 2)
+<   cube_land = cube_from_array(workspace_land)
+<   cube = map_from_land(cube_land)
+< 
+< CASE ( 'xipam_gb' )
+<   ! n.b. xipam_gb is calculated here to make sure it is
+<   ! consistent with xipam_opt after xipam_opt is updated
+<   workspace_land(:) = SUM(progs%xipam_opt * ainfo%frac_surft(:,1:npft), 2)
+<   cube_land = cube_from_array(workspace_land)
+<   cube = map_from_land(cube_land)
+< 
+< CASE ( 'jmax25_gb' )
+<   ! n.b. xipam_gb is calculated here to make sure it is
+<   ! consistent with jmax_opt after jmax_opt is updated
+<   workspace_land(:) = SUM(progs%jmax_opt * ainfo%frac_surft(:,1:npft), 2)
+<   cube_land = cube_from_array(workspace_land)
+<   cube = map_from_land(cube_land)
+< 
+< CASE ( 'vcmax25_gb' )
+<   ! n.b. xipam_gb is calculated here to make sure it is
+<   ! consistent with vcmax_opt after vcmax_opt is updated
+<   workspace_land(:) = SUM(progs%vcmax_opt * ainfo%frac_surft(:,1:npft), 2)
+<   cube_land = cube_from_array(workspace_land)
+<   cube = map_from_land(cube_land)
+< 
+950c899
+<   CASE ( soil_model_rothc )
+---
+>   CASE ( soil_model_4pool )
+1004c953
+<   CASE ( soil_model_rothc )
+---
+>   CASE ( soil_model_4pool )
+1177c1126
+<     DO j = 1,surft_pts(n)
+---
+>     DO j = 1,ainfo%surft_pts(n)
+1188c1137
+<     DO j = 1,surft_pts(n)
+---
+>     DO j = 1,ainfo%surft_pts(n)
+1385,1430d1333
+< CASE ( 'gpp_lyr' )
+<   cube_land = cube_from_array(trifctltype%gpp_pft_lay)
+<   cube = map_from_land(cube_land)
+< 
+< CASE ( 'wlite_lyr' )
+<   cube_land = cube_from_array(trifctltype%wlite_pft_lay)
+<       cube = map_from_land(cube_land)
+< 
+< CASE ( 'apar_lyr' )
+<   cube_land = cube_from_array(trifctltype%apar_pft_lay)
+<   cube = map_from_land(cube_land)
+< 
+< CASE ( 'cmpf_lyr' )
+<   cube_land = cube_from_array(trifctltype%cmpf_pft_lay)
+<   cube = map_from_land(cube_land)
+< 
+< CASE ( 'vcmax_lyr' )
+<   cube_land = cube_from_array(trifctltype%vcmax_pft_lay)
+<   cube = map_from_land(cube_land)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_model_interface_extract_var.inc_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_model_interface_extract_var.inc.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

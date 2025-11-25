@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.254538 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/snow/canopysnow_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/snow/canopysnow_mod.F90
+
+SUMMARY:
+  - added lines (>): 162
+  - removed lines (<): 27
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/snow/canopysnow_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/snow/canopysnow_mod.F90
+21c21,22
+< SUBROUTINE canopysnow ( land_pts, surft_pts, timestep, cansnowtile,            &
+---
+> SUBROUTINE canopysnow ( land_pts, surft_pts, n_wtrac_jls,                      &
+>                         timestep, cansnowtile,                                 &
+23,24c24,27
+<                         unload_backgrnd_surft,                                 &
+<                         melt_surft, snow_can, snowfall, graupfall )
+---
+>                         unload_backgrnd_surft, melt_surft,                     &
+>                         con_snow_wtrac, ls_snow_wtrac, ls_graup_wtrac,         &
+>                         snow_can, snow_can_wtrac,                              &
+>                         snowfall, graupfall, snowfall_wtrac, graupfall_wtrac )
+34a38,40
+> USE jules_science_fixes_mod, ONLY: l_fix_neg_snow
+> USE jules_water_tracers_mod, ONLY: l_wtrac_jls, wtrac_calc_ratio_fn_jules
+> 
+48c54
+<   surft_pts
+---
+>   surft_pts,                                                                   &
+49a56,57
+>   n_wtrac_jls
+>     !  Number of water tracers.
+74c82
+<   unload_backgrnd_surft(land_pts)
+---
+>   unload_backgrnd_surft(land_pts),                                             &
+75a84,89
+>   con_snow_wtrac(land_pts,n_wtrac_jls),                                        &
+>     ! Water tracer convective snowfall rate (kg/m2/s).
+>   ls_snow_wtrac(land_pts,n_wtrac_jls),                                         &
+>     ! Water tracer large-scale frozen precip fall rate (kg/m2/s).
+>   ls_graup_wtrac(land_pts,n_wtrac_jls)
+>     ! Water tracer large-scale graupel fall rate (kg/m2/s).
+81c95
+<   snow_can(land_pts)
+---
+>   snow_can(land_pts),                                                          &
+82a97,98
+>   snow_can_wtrac(land_pts,n_wtrac_jls)
+>     ! Water tracer canopy snow load (kg/m2).
+90c106
+<   graupfall(land_pts)
+---
+>   graupfall(land_pts),                                                         &
+91a108,111
+>   snowfall_wtrac(land_pts,n_wtrac_jls),                                        &
+>     ! Water tracer frozen precip reaching the ground in timestep (kg/m2).
+>   graupfall_wtrac(land_pts,n_wtrac_jls)
+>     ! Water tracer graupel reaching the ground in timestep (kg/m2).
+99c119
+<   k
+---
+>   k,                                                                           &
+100a121,122
+>   i_wt
+>     ! Water tracer index
+103c125
+<   intercept,                                                                   &
+---
+>   intercept(surft_pts),                                                        &
+105c127
+<  unload
+---
+>   unload(surft_pts)
+107a130,145
+> REAL(KIND=real_jlslsm) ::                                                      &
+>   intercept_wtrac,                                                             &
+>     ! Water tracer snow intercepted by canopy in timestep (kg/m2).
+>   unload_wtrac,                                                                &
+>     ! Water tracer canopy snow unloaded in timestep (kg/m2).
+>   ratio_snowfall,                                                              &
+>     ! Ratio of water tracer to water for snow fall
+>   ratio_snow_can
+>     ! Ratio of water tracer to water for canopy snow
+> 
+> REAL(KIND=real_jlslsm), ALLOCATABLE ::                                         &
+>   snowfall_old(:),                                                             &
+>     ! Initial snowfall
+>   snow_can_old(:)
+>     ! Initial canopy snow load
+> 
+120,123c158,169
+< !$OMP PARALLEL DO                                                              &
+< !$OMP SCHEDULE(STATIC)                                                         &
+< !$OMP DEFAULT(NONE)                                                            &
+< !$OMP PRIVATE(k,i,intercept,unload)                                            &
+---
+>   ! Allocate temporary fields for water tracers use
+>   IF (l_wtrac_jls) THEN
+>     ALLOCATE(snowfall_old(surft_pts))
+>     ALLOCATE(snow_can_old(surft_pts))
+>   ELSE
+>     ALLOCATE(snowfall_old(1))
+>     ALLOCATE(snow_can_old(1))
+>   END IF
+> 
+> !$OMP PARALLEL DEFAULT(NONE)                                                   &
+> !$OMP PRIVATE(k,i,i_wt,ratio_snowfall,ratio_snow_can,intercept_wtrac,          &
+> !$OMP         unload_wtrac)                                                    &
+126c172,189
+< !$OMP        unload_backgrnd_surft,snowinterceptfact,snowunloadfact)
+---
+> !$OMP        unload_backgrnd_surft,snowinterceptfact,snowunloadfact,           &
+> !$OMP        intercept,unload,snowfall_old,snow_can_old,l_wtrac_jls,           &
+> !$OMP        snowfall_wtrac,ls_snow_wtrac,ls_graup_wtrac, con_snow_wtrac,      &
+> !$OMP        graupfall_wtrac,snow_can_wtrac,n_wtrac_jls, l_fix_neg_snow)
+>   IF (l_wtrac_jls) THEN
+>     ! If water tracers, save initial values of some fields for use later on.
+>     ! (Note, these 'old' fields have size surft_pts)
+> !$OMP DO SCHEDULE(STATIC)
+>     DO k = 1,surft_pts
+>       i = surft_index(k)
+>       snowfall_old(k) = ( ls_snow(i) - ls_graup(i) + con_snow(i) ) * timestep
+>       snow_can_old(k) = snow_can(i)
+>     END DO
+> !$OMP END DO
+>   END IF
+> 
+> 
+> !$OMP DO SCHEDULE(STATIC)
+131c194
+<     intercept    = snowinterceptfact * (catch_snow(i) - snow_can(i))           &
+---
+>     intercept(k) = snowinterceptfact * (catch_snow(i) - snow_can(i))           &
+133c196
+<     unload       = snowunloadfact * melt_surft(i) * timestep                   &
+---
+>     unload(k)    = snowunloadfact * melt_surft(i) * timestep                   &
+143,145c206,223
+<     unload      = MAX( MIN( unload, snow_can(i) ), 0.0 )
+<     snow_can(i) = snow_can(i) + intercept - unload
+<     snowfall(i) = snowfall(i) + graupfall(i) - intercept + unload
+---
+>     IF (l_fix_neg_snow) THEN
+>       ! Ensure the interception and the unloading are non-negative
+>       ! and ensure that the final canopy snow amount does not exceed
+>       ! the canopy capacity.
+>       intercept(k) = MAX(0.0, intercept(k))
+>       unload(k)    = MAX(0.0, unload(k))
+>       snow_can(i) = snow_can(i) + intercept(k) - unload(k)
+>       IF (snow_can(i) > catch_snow(i)) THEN
+>         unload(k) = unload(k) + (snow_can(i) - catch_snow(i))
+>         snow_can(i) = catch_snow(i)
+>       END IF
+>     ELSE
+>       ! Do not limit the interception and limit the unloading based
+>       ! solely on the existing canopy amounts.
+>       unload(k)      = MAX( MIN( unload(k), snow_can(i) ), 0.0 )
+>       snow_can(i) = snow_can(i) + intercept(k) - unload(k)
+>     END IF
+>     snowfall(i) = snowfall(i) + graupfall(i) - intercept(k) + unload(k)
+147c225,267
+< !$OMP END PARALLEL DO
+---
+> !$OMP END DO
+> 
+>   IF (l_wtrac_jls) THEN
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_snow_canopysnow_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_snow_canopysnow_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

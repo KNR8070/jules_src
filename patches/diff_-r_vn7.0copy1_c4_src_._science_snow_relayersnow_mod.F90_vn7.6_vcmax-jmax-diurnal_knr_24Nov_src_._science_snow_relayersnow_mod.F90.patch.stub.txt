@@ -1,0 +1,155 @@
+Patch stub generated: 2025-11-25T12:09:12.255183 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/snow/relayersnow_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/snow/relayersnow_mod.F90
+
+SUMMARY:
+  - added lines (>): 97
+  - removed lines (<): 9
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/snow/relayersnow_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/snow/relayersnow_mod.F90
+21c21
+< SUBROUTINE relayersnow( land_pts, surft_pts, surft_index,                      &
+---
+> SUBROUTINE relayersnow( land_pts, surft_pts, n_wtrac_jls, surft_index,         &
+23,25c23,25
+<                         tsnow0, nsnow, ds, rgrain, rgrainl, sice,              &
+<                         rho_snow_grnd, sliq, tsnow, rho_snow,                  &
+<                         snowdepth )
+---
+>                         tsnow0, sice0_wtrac, nsnow, ds, rgrain, rgrainl, sice, &
+>                         rho_snow_grnd, sliq, tsnow, sice_wtrac, sliq_wtrac,    &
+>                         rho_snow, snowdepth )
+54a55,56
+> USE jules_water_tracers_mod, ONLY: l_wtrac_jls
+> 
+68c70
+<   surft_pts
+---
+>   surft_pts,                                                                   &
+69a72,73
+>   n_wtrac_jls
+>     ! Number of water tracers
+90c94
+<   tsnow0(land_pts)
+---
+>   tsnow0(land_pts),                                                            &
+91a96,98
+>   sice0_wtrac(land_pts,n_wtrac_jls)
+>      ! Water tracer ice content of fresh snow (kg/m2).
+>      ! Where nsnow=0, sice0 is the mass of the snowpack.
+112c119
+<   tsnow(land_pts,nsmax)
+---
+>   tsnow(land_pts,nsmax),                                                       &
+113a121,124
+>   sice_wtrac(land_pts,nsmax,n_wtrac_jls),                                      &
+>     ! Water tracer ice content of snow layers (kg/m2).
+>   sliq_wtrac(land_pts,nsmax,n_wtrac_jls)
+>     ! Water tracer liquid content of snow layers (kg/m2).
+147c158
+<   old
+---
+>   old,                                                                         &
+148a160,161
+>   i_wt
+>     ! Water tracer index.
+180a194,200
+> REAL(KIND=real_jlslsm), ALLOCATABLE ::                                         &
+>   s_wtrac(:,:),                                                                &
+>     ! Water tracer ice content before adjustment (kg/m2).
+>   w_wtrac(:,:)
+>     ! Water tracer liquid content before adjustment (kg/m2).
+> 
+> 
+193a214,222
+> ! Allocate water tracer working arrays
+> IF (l_wtrac_jls) THEN
+>   ALLOCATE(s_wtrac(0:nsmax,n_wtrac_jls))
+>   ALLOCATE(w_wtrac(0:nsmax,n_wtrac_jls))
+> ELSE
+>   ALLOCATE(s_wtrac(1,1))
+>   ALLOCATE(w_wtrac(1,1))
+> END IF
+> 
+285c314
+< !$OMP         r,s,w,u,errcode,errmsg)
+---
+> !$OMP         r,s,w,u,errcode,errmsg,i_wt,s_wtrac,w_wtrac)
+322a352,364
+>     IF (l_wtrac_jls) THEN
+>       ! Repeat for water tracers
+>       DO i_wt = 1, n_wtrac_jls
+>         s_wtrac(0,i_wt) = sice0_wtrac(i,i_wt)
+>         w_wtrac(0,i_wt) = 0.0
+> 
+>         DO n = 1,nold(i)
+>           s_wtrac(n,i_wt) = sice_wtrac(i,n,i_wt)
+>           w_wtrac(n,i_wt) = sliq_wtrac(i,n,i_wt)
+>         END DO
+>       END DO
+>     END IF ! l_wtrac_jls
+> 
+332a375,384
+>     IF (l_wtrac_jls) THEN
+>       ! Repeat for water tracers
+>       DO i_wt = 1,n_wtrac_jls
+>         DO n = 1, nsmax
+>           sice_wtrac(i,n,i_wt) = 0.0
+>           sliq_wtrac(i,n,i_wt) = 0.0
+>         END DO
+>       END DO
+>     END IF     ! l_wtrac_jls
+> 
+372a425,435
+> 
+>             IF (l_wtrac_jls) THEN
+>               ! Repeat for water tracers
+>               DO i_wt = 1,n_wtrac_jls
+>                 sice_wtrac(i,new,i_wt) = sice_wtrac(i,new,i_wt)                &
+>                                          + s_wtrac(old,i_wt) * wt
+>                 sliq_wtrac(i,new,i_wt) = sliq_wtrac(i,new,i_wt)                &
+>                                          + w_wtrac(old,i_wt) * wt
+>               END DO
+>             END IF     ! l_wtrac_jls
+> 
+402a466,476
+> 
+>             IF (l_wtrac_jls) THEN
+>               ! Repeat for water tracers
+>               DO i_wt = 1,n_wtrac_jls
+>                 sice_wtrac(i,new,i_wt) = sice_wtrac(i,new,i_wt)                &
+>                                          + s_wtrac(old,i_wt) * wt
+>                 sliq_wtrac(i,new,i_wt) = sliq_wtrac(i,new,i_wt)                &
+>                                          + w_wtrac(old,i_wt) * wt
+>               END DO
+>             END IF     ! l_wtrac_jls
+> 
+486a561,570
+> 
+>     IF (l_wtrac_jls) THEN
+>       ! Repeat for water tracers
+>       DO i_wt = 1,n_wtrac_jls
+>         DO n = nsnow(i) + 1, nsmax
+>           sice_wtrac(i,n,i_wt)      = 0.0
+>           sliq_wtrac(i,n,i_wt)      = 0.0
+>         END DO
+>       END DO
+>     END IF     ! l_wtrac_jls
+490a575,578
+> 
+> ! Deallocate water tracer working arrays
+> DEALLOCATE(w_wtrac)
+> DEALLOCATE(s_wtrac)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_snow_relayersnow_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_snow_relayersnow_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

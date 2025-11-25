@@ -1,0 +1,112 @@
+Patch stub generated: 2025-11-25T12:09:12.157594 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/um/check_unavailable_options_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/um/check_unavailable_options_mod.F90
+
+SUMMARY:
+  - added lines (>): 39
+  - removed lines (<): 35
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/um/check_unavailable_options_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/um/check_unavailable_options_mod.F90
+20,23c20,22
+< USE jules_vegetation_mod, ONLY: photo_acclim_model, photo_collatz,             &
+<     photo_farquhar, photo_model, stomata_jacobs, stomata_model,                &
+<     l_gleaf_fix, l_o3_damage, l_use_pft_psi, fsmc_shape, l_prescsow,           &
+<     l_croprotate, l_trif_biocrop, l_ag_expand
+---
+> USE jules_vegetation_mod, ONLY: l_gleaf_fix, l_o3_damage, l_use_pft_psi,       &
+>     fsmc_shape, l_prescsow, l_croprotate, l_trif_biocrop, l_ag_expand,         &
+>     l_sugar, stomata_model
+26,27c25,26
+< USE jules_rivers_mod, ONLY: i_river_vn, rivers_trip
+< USE jules_soil_biogeochem_mod, ONLY: l_ch4_microbe, l_layeredc
+---
+> USE jules_rivers_mod, ONLY: l_riv_overbank, i_river_vn, rivers_trip
+> USE jules_soil_biogeochem_mod, ONLY: l_ch4_microbe, l_label_frac_cs
+30d28
+< USE overbank_inundation_mod, ONLY: l_riv_overbank
+31a30
+> USE jules_deposition_mod, ONLY: l_deposition_from_ukca, l_deposition_gc_corr
+79c78
+< IF ( l_layeredc ) THEN
+---
+> IF ( l_label_frac_cs ) THEN
+82,83c81,82
+<      ": layered soil carbon is only available to standalone JULES. " //        &
+<      "l_layeredc = ", l_layeredc
+---
+>      ": tracing of soil carbon is only available to standalone JULES. " //     &
+>      "l_label_frac_cs = ", l_label_frac_cs
+122,144c121,122
+< ! photo_farquhar is not allowed yet, but if it is allowed further work will
+< ! still be required to allow photo_acclim_model /= 0.
+< !*******************************************************************************
+< ! Clarification: IF photo_model == photo_collatz
+< ! * photo_acclim_model does nothing regardless of value of photo_acclim_model.
+< ! * photo_acclim_model == imdi when photo_model == photo_collatz, therefore the
+< !   photo_model == photo_farquhar condition is required here. It appears
+< !   inconsistent with the metadata, however it is not.
+< IF ( photo_model == photo_farquhar .AND. photo_acclim_model /= 0 ) THEN
+<   error_sum = error_sum + 1
+<   WRITE(jules_message,'(I0,A)') error_sum,                                     &
+<      ": photo_acclim_model must be set to zero (no acclimation)."
+<   CALL jules_print(RoutineName, jules_message, level = PrNorm)
+< END IF
+< 
+< IF ( photo_model /= photo_collatz ) THEN
+<   error_sum = error_sum + 1
+<   WRITE(jules_message,'(I0,A)') error_sum,                                     &
+<      ": photo_model must be set to use the Collatz model."
+<   CALL jules_print(RoutineName, jules_message, level = PrNorm)
+< END IF
+< 
+< IF ( stomata_model /= stomata_jacobs ) THEN
+---
+> ! jules_vegetation
+> IF ( l_sugar ) THEN
+146,147c124,126
+<   WRITE(jules_message,'(I0,A)') error_sum,                                     &
+<      ": stomata_model must be set to use the original (Jacobs) model."
+---
+>   WRITE(jules_message,'(I0,A,I0)') error_sum,                                  &
+>      ": Sugar only available standalone " //                                   &
+>      "l_sugar= ", l_sugar
+207a187,194
+> IF ( stomata_model == 3 ) THEN
+>   error_sum = error_sum + 1
+>   WRITE(jules_message,'(I0,A,I0)') error_sum,                                  &
+>      ": SOX stomata model is not currently available in the um " //            &
+>      "stomata_model= ", stomata_model
+>   CALL jules_print(RoutineName, jules_message, level = PrNorm)
+> END IF
+> 
+230a218,234
+>   CALL jules_print(RoutineName, jules_message, level = PrNorm)
+> END IF
+> 
+> ! Deposition switch settings not available for use in UM-coupled JULES
+> IF ( .NOT. l_deposition_from_ukca ) THEN
+>   error_sum = error_sum + 1
+>   WRITE(jules_message,'(I0,A,L1)') error_sum,                                  &
+>      ": JULES-based deposition routines can only be called from the UKCA. " // &
+>      "l_deposition_from_ukca must be true but = ", l_deposition_from_ukca
+>   CALL jules_print(RoutineName, jules_message, level = PrNorm)
+> END IF
+> 
+> IF ( l_deposition_gc_corr ) THEN
+>   error_sum = error_sum + 1
+>   WRITE(jules_message,'(I0,A,L1)') error_sum,                                  &
+>      ": Stomatal conductance corrected for bare soil evaporation is not " //   &
+>      "available in the UKCA. l_deposition_gc_corr = ", l_deposition_gc_corr
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_um_check_unavailable_options_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_um_check_unavailable_options_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

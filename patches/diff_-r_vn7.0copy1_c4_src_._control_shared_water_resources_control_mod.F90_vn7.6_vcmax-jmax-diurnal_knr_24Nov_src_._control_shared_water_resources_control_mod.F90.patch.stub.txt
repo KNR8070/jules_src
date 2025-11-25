@@ -1,0 +1,46 @@
+Patch stub generated: 2025-11-25T12:09:12.142832 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/water_resources_control_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/water_resources_control_mod.F90
+
+SUMMARY:
+  - added lines (>): 6
+  - removed lines (<): 6
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Signature rename: unify timestep_len/timestep or provide wrapper.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/water_resources_control_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/water_resources_control_mod.F90
+111c111
+< USE model_time_mod, ONLY: timestep_number=>timestep
+---
+> USE model_time_mod, ONLY: timestep_number
+506c506
+< USE timestep_mod, ONLY: timestep_len=>timestep
+---
+> USE timestep_mod, ONLY: timestep
+548c548
+<                                  + demand_rate_domestic(:) * timestep_len      &
+---
+>                                  + demand_rate_domestic(:) * timestep          &
+554c554
+<                                  + demand_rate_industry(:) * timestep_len      &
+---
+>                                  + demand_rate_industry(:) * timestep          &
+560c560
+<                                   + demand_rate_livestock(:) * timestep_len    &
+---
+>                                   + demand_rate_livestock(:) * timestep        &
+566c566
+<                                   + demand_rate_transfers(:) * timestep_len
+---
+>                                   + demand_rate_transfers(:) * timestep
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_water_resources_control_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_water_resources_control_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

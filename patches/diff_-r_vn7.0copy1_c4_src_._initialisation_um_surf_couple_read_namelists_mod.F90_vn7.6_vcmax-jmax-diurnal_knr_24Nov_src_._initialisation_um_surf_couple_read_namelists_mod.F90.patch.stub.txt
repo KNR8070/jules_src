@@ -1,0 +1,51 @@
+Patch stub generated: 2025-11-25T12:09:12.206131 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/um/surf_couple_read_namelists_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/um/surf_couple_read_namelists_mod.F90
+
+SUMMARY:
+  - added lines (>): 13
+  - removed lines (<): 5
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Namelist/IO changes: reconcile derived types and broadcast logic.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/um/surf_couple_read_namelists_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/um/surf_couple_read_namelists_mod.F90
+39c39,40
+<     read_jules_irrigation
+---
+>     read_jules_irrigation,                                                     &
+>     read_jules_deposition, read_jules_deposition_species
+41c42,46
+< USE jules_rivers_mod, ONLY: l_rivers
+---
+> USE jules_deposition_mod, ONLY: l_deposition
+> 
+> USE jules_rivers_mod, ONLY: l_riv_overbank
+> 
+> USE jules_vegetation_mod, ONLY: l_triffid
+68c73
+< IF (l_rivers) CALL read_jules_overbank(shared_unit)
+---
+> IF ( l_riv_overbank ) CALL read_jules_overbank(shared_unit)
+77c82
+< 
+---
+> CALL read_jules_deposition(shared_unit)
+83c88
+<   CALL read_jules_triffid(atmoscntl_unit)
+---
+>   IF ( l_triffid ) CALL read_jules_triffid(atmoscntl_unit)
+84a90,92
+>   IF (l_deposition) THEN
+>     CALL read_jules_deposition_species(atmoscntl_unit)
+>   END IF
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_um_surf_couple_read_namelists_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_um_surf_couple_read_namelists_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,38 @@
+Patch stub generated: 2025-11-25T12:09:12.215385 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/file_handling/core/drivers/ascii/file_ascii_generic_sync_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/file_handling/core/drivers/ascii/file_ascii_generic_sync_mod.F90
+
+SUMMARY:
+  - added lines (>): 5
+  - removed lines (<): 5
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/file_handling/core/drivers/ascii/file_ascii_generic_sync_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/file_handling/core/drivers/ascii/file_ascii_generic_sync_mod.F90
+140c140
+< USE precision_mod, ONLY: INT32
+---
+> USE precision_mod, ONLY: int_32
+154,156c154,156
+< INTEGER(KIND=INT32) :: tmp_unitno=-1
+< INTEGER(KIND=INT32) :: unit_32 = -1
+< INTEGER(KIND=INT32) :: tmp_error = 1
+---
+> INTEGER(KIND=int_32) :: tmp_unitno=-1
+> INTEGER(KIND=int_32) :: unit_32 = -1
+> INTEGER(KIND=int_32) :: tmp_error = 1
+168c168
+< unit_32 = INT(unitno, KIND=INT32)
+---
+> unit_32 = INT(unitno, KIND=int_32)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_file_handling_core_drivers_ascii_file_ascii_generic_sync_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_file_handling_core_drivers_ascii_file_as.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

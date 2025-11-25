@@ -1,0 +1,84 @@
+Patch stub generated: 2025-11-25T12:09:12.284791 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/screen_tq_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/screen_tq_jls.F90
+
+SUMMARY:
+  - added lines (>): 18
+  - removed lines (<): 23
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/screen_tq_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/screen_tq_jls.F90
+707c707
+<           !	         Calculate the value for air-sea-decoupled screen height
+---
+>           !              Calculate the value for air-sea-decoupled screen height
+846,847c846,847
+<           !	     Calculate the value for air-surface-decoupled screen height
+<           !          temperature over land tiles.
+---
+>           ! Calculate the value for air-surface-decoupled screen height
+>           ! temperature over land tiles.
+903c903
+< !$OMP PARALLEL DO                                                              &
+---
+> !$OMP PARALLEL                                                                 &
+905,908c905,910
+< !$OMP SCHEDULE(STATIC)                                                         &
+< !$OMP SHARED( tdims, sf_diag, flandg, epsilon_ssi,                             &
+< !$OMP         chr1p5m_sice, qw_1, qs)                                          &
+< !$OMP PRIVATE( i, j, cer1p5m)
+---
+> !$OMP SHARED( nsurft, land_pts, sf_diag, tstar_surft, pstar_land, pstar,       &
+> !$OMP         l_mr_physics, surft_pts, surft_index, i_ind, j_ind, resft,       &
+> !$OMP         chr1p5m, qw_1, flandg, tile_frac, epsilon_surft,                 &
+> !$OMP         tdims, epsilon_ssi, chr1p5m_sice, qs)                            &
+> !$OMP PRIVATE( i, j, k, l, n, cer1p5m, qs_surft)
+> !$OMP DO SCHEDULE(STATIC)
+924c926
+< !$OMP END PARALLEL DO
+---
+> !$OMP END DO
+926,930c928
+< !$OMP PARALLEL DO                                                              &
+< !$OMP DEFAULT(NONE)                                                            &
+< !$OMP SCHEDULE(STATIC)                                                         &
+< !$OMP SHARED(pstar_land, pstar, i_ind, j_ind, land_pts)                        &
+< !$OMP PRIVATE(l, i, j)
+---
+> !$OMP DO SCHEDULE(STATIC)
+936c934
+< !$OMP END PARALLEL DO
+---
+> !$OMP END DO
+938,944c936
+< !$OMP PARALLEL DO                                                              &
+< !$OMP DEFAULT(NONE)                                                            &
+< !$OMP SCHEDULE(STATIC)                                                         &
+< !$OMP SHARED( nsurft, land_pts, sf_diag, tstar_surft, pstar_land,              &
+< !$OMP         l_mr_physics, surft_pts, surft_index, i_ind, j_ind, resft,       &
+< !$OMP         chr1p5m, qw_1, flandg, tile_frac,epsilon_surft)                  &
+< !$OMP PRIVATE( i, j, k, l, n, cer1p5m, qs_surft)
+---
+> !$OMP DO SCHEDULE(STATIC)
+968c960
+< !$OMP END PARALLEL DO
+---
+> !$OMP END DO
+970a963
+> !$OMP DO SCHEDULE(STATIC)
+977a971
+> !$OMP END DO
+979a974
+> !$OMP END PARALLEL
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_screen_tq_jls.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_screen_tq_jls.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

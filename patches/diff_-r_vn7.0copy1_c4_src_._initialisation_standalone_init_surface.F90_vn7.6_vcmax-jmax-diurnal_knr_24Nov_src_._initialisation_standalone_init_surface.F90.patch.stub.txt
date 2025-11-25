@@ -1,0 +1,29 @@
+Patch stub generated: 2025-11-25T12:09:12.197896 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_surface.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_surface.F90
+
+SUMMARY:
+  - added lines (>): 3
+  - removed lines (<): 1
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_surface.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_surface.F90
+29c29,30
+< USE jules_surface_mod, ONLY: jules_surface, l_aggregate, check_jules_surface
+---
+> USE jules_surface_mod, ONLY: jules_surface, l_aggregate, check_jules_surface,  &
+>    print_nlist_jules_surface
+74a76
+> CALL print_nlist_jules_surface()
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_init_surface.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_init_surface.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

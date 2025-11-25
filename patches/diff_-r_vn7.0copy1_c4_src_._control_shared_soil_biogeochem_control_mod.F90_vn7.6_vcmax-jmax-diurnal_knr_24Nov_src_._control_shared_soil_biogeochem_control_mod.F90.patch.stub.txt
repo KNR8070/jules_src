@@ -1,0 +1,34 @@
+Patch stub generated: 2025-11-25T12:09:12.134928 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/soil_biogeochem_control_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/soil_biogeochem_control_mod.F90
+
+SUMMARY:
+  - added lines (>): 3
+  - removed lines (<): 3
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Signature rename: unify timestep_len/timestep or provide wrapper.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/soil_biogeochem_control_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/soil_biogeochem_control_mod.F90
+117c117
+<   timestep_number=>timestep
+---
+>   timestep_number
+121c121
+<   timestep_len_real=>timestep
+---
+>   timestep
+258c258
+< nstep = NINT( dt_soilc / timestep_len_real )
+---
+> nstep = NINT( dt_soilc / timestep )
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_soil_biogeochem_control_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_soil_biogeochem_control_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

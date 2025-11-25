@@ -1,0 +1,121 @@
+Patch stub generated: 2025-11-25T12:09:12.132297 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/land_tile_ids_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/land_tile_ids_mod.F90
+
+SUMMARY:
+  - added lines (>): 88
+  - removed lines (<): 3
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/land_tile_ids_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/land_tile_ids_mod.F90
+20a21,24
+> USE free_tracers_inputs_mod, ONLY: max_wtrac
+> 
+> USE jules_sea_seaice_mod, ONLY: nice_max
+> 
+123c127
+<                 ! Array which maps pseudo levels to tile types
+---
+>               ! Array which maps pseudo levels to tile types
+126c130
+<                 ! Array which maps pseudo levels to tile types
+---
+>               ! Array which maps pseudo levels to tile types
+129c133,144
+<                 ! Tile IDs in the input header
+---
+>               ! Tile IDs in the input header
+> 
+> INTEGER :: surface_type_wtrac_ids(ntype_max*max_wtrac) = imdi
+>               ! Array which maps pseudo levels to tile types and water tracers
+> 
+> INTEGER :: ml_snow_type_wtrac_ids(ntype_max*snow_layers_max*max_wtrac) = imdi
+>               ! Array which maps pseudo levels to tile types, snow layers and
+>               !  water tracers
+> 
+> INTEGER :: seaice_wtrac_ids(nice_max*max_wtrac) = imdi
+>               ! Array which maps pseudo levels to sea ice categories and
+>               !  water tracers
+294a310,379
+> 
+> ! ============================================================
+> 
+> SUBROUTINE set_surface_type_wtrac_ids ()
+> 
+> USE jules_surface_types_mod, ONLY: ntype
+> USE jules_water_tracers_mod, ONLY: n_wtrac_jls
+> 
+> IMPLICIT NONE
+> 
+> INTEGER      :: i, i_wt ! Loop counter
+> INTEGER      :: pseudo
+> 
+> ! Set up land tiles * water tracers type (pl_code = 23) ids array
+> DO i = 1, ntype
+>   DO i_wt = 1, n_wtrac_jls
+>     pseudo = i + (i_wt-1) * ntype
+>     surface_type_wtrac_ids(pseudo) = surface_type_ids(i) * 1000 + i_wt
+>   END DO
+> END DO
+> 
+> END SUBROUTINE set_surface_type_wtrac_ids
+> 
+> ! ======================================================================
+> 
+> SUBROUTINE set_ml_snow_type_wtrac_ids ( )
+> 
+> USE jules_surface_types_mod, ONLY: ntype
+> USE jules_snow_mod,          ONLY: nsmax
+> USE jules_water_tracers_mod, ONLY: n_wtrac_jls
+> 
+> IMPLICIT NONE
+> 
+> INTEGER      :: i, j, i_wt ! Loop counter
+> INTEGER      :: pseudo
+> 
+> ! Set up multilayer snow * water tracer type (pl_code = 24) ids array
+> DO i = 1, ntype
+>   DO j = 1, nsmax
+>     DO i_wt = 1, n_wtrac_jls
+>       pseudo = i + (j-1) * ntype + (i_wt-1) * ntype*nsmax
+>       ml_snow_type_wtrac_ids(pseudo) = surface_type_ids(i) * 1000000           &
+>                                         + j*1000 + i_wt
+>     END DO
+>   END DO
+> END DO
+> 
+> END SUBROUTINE set_ml_snow_type_wtrac_ids
+> 
+> ! ======================================================================
+> 
+> SUBROUTINE set_seaice_wtrac_ids ( )
+> 
+> USE jules_sea_seaice_mod,    ONLY: nice
+> USE jules_water_tracers_mod, ONLY: n_wtrac_jls
+> 
+> IMPLICIT NONE
+> 
+> INTEGER      :: i, i_wt ! Loop counter
+> INTEGER      :: pseudo
+> 
+> ! Set up sea ice category * water tracer type (pl_code = 25) ids array
+> DO i = 1, nice
+>   DO i_wt = 1, n_wtrac_jls
+>     pseudo = i + (i_wt-1) * nice
+>     seaice_wtrac_ids(pseudo) = i * 1000 + i_wt
+>   END DO
+> END DO
+> 
+> END SUBROUTINE set_seaice_wtrac_ids
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_land_tile_ids_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_land_tile_ids_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,55 @@
+Patch stub generated: 2025-11-25T12:09:12.129129 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_urban_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_urban_mod.F90
+
+SUMMARY:
+  - added lines (>): 18
+  - removed lines (<): 7
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_urban_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_urban_mod.F90
+18a19
+> USE missing_data_mod,  ONLY: rmdi
+23,26c24,27
+<    anthrop_heat_scale = 1.0 ! Scales anthropogenic heat source of roof
+<                             ! canyon from being equally distributed (= 1.0)
+<                             ! to all being released in the canyon (= 0.0).
+<                             ! Takes a value between 0.0 - 1.0
+---
+>    anthrop_heat_scale = rmdi ! Scales anthropogenic heat source of roof
+>                              ! canyon from being equally distributed (= 1.0)
+>                              ! to all being released in the canyon (= 0.0).
+>                              ! Takes a value between 0.0 - 1.0
+72,73c73,74
+< USE jules_print_mgr, ONLY: jules_print
+< USE jules_surface_mod, ONLY: l_urban2t, l_aggregate
+---
+> USE jules_print_mgr, ONLY: jules_print, jules_message
+> USE jules_surface_mod, ONLY: l_urban2t, l_aggregate, l_anthrop_heat_src
+134a136,145
+> IF ( l_urban2t .AND. l_anthrop_heat_src ) THEN
+>   IF ( anthrop_heat_scale < 0.0 .OR. anthrop_heat_scale > 1.0 ) THEN
+>     errcode = 50
+>     WRITE(jules_message,*)                                                     &
+>        "anthrop_heat_scale is out of range: anthrop_heat_scale = ",            &
+>        anthrop_heat_scale
+>     CALL ereport(RoutineName, errcode, jules_message)
+>   END IF
+> END IF
+> 
+138c149
+<     errcode = 50
+---
+>     errcode = 60
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_jules_urban_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_jules_urban_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.239222 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/params/pftparm_io_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/pftparm_io_mod.F90
+
+SUMMARY:
+  - added lines (>): 104
+  - removed lines (<): 107
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/params/pftparm_io_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/pftparm_io_mod.F90
+62d61
+<   beta_c3c4_io(npft_max) = rmdi,                                               &       
+83,85d81
+<   eagamma_io(npft_max) = rmdi,                                                 &
+<   eakc_io(npft_max) = rmdi,                                                    &
+<   eako_io(npft_max) = rmdi,                                                    & 
+101c97
+<   gamma25_io(npft_max) = rmdi,                                                 &
+---
+>   sug_g0_io(npft_max) = rmdi,                                                  &
+105a102
+>   sug_grec_io(npft_max) = rmdi,                                                &
+111d107
+<   kc25_io(npft_max) = rmdi,                                                    &
+115d110
+<   ko25_io(npft_max) = rmdi,                                                    &
+142a138
+>   sug_yg_io(npft_max) = rmdi,                                                  &
+145,146c141,144
+<   z0v_io(npft_max) = rmdi
+< 
+---
+>   z0v_io(npft_max) = rmdi,                                                     &
+>   sox_a_io(npft_max) = rmdi,                                                   &
+>   sox_p50_io(npft_max) = rmdi,                                                 &
+>   sox_rp_min_io(npft_max) = rmdi
+161,175c159,172
+<   avg_ba_io,       beta_c3c4_io,     b_wl_io,                                  &
+<   c3_io,           can_struct_a_io,  catch0_io,                                &
+<   ccleaf_max_io,   ccleaf_min_io,    ccwood_max_io,                            &
+<   ccwood_min_io,   ci_st_io,         dcatch_dlai_io,                           & 
+<   deact_jmax_io,   deact_vcmax_io,   dfp_dcuo_io,                              &     
+<   dgl_dm_io,       dgl_dt_io,        dqcrit_io,                                &      
+<   ds_jmax_io,      ds_vcmax_io,      dust_veg_scj_io,                          &
+<   dz0v_dh_io,      eagamma_io,       eakc_io,                                  &        
+<   eako_io,         emis_pft_io,      eta_sl_io,                                &     
+<   f0_io,           fef_bc_io,        fef_ch4_io,                               &    
+<   fef_co_io,       fef_co2_io,       fef_nox_io,                               &     
+<   fef_oc_io,       fef_so2_io,       fd_io,                                    &         
+<   fire_mort_io,    fl_o3_ct_io,      fsmc_of_io,                               &
+<   fsmc_p0_io,      g1_stomata_io,    g_leaf_0_io,                              &
+<   glmin_io,        gamma25_io,       gpp_st_io,                                &  
+---
+>   avg_ba_io,       b_wl_io,          c3_io,                                    &
+>   can_struct_a_io, catch0_io,        ccleaf_max_io,                            &
+>   ccleaf_min_io,   ccwood_max_io,    ccwood_min_io,                            &
+>   ci_st_io,        dcatch_dlai_io,   deact_jmax_io,                            &
+>   deact_vcmax_io,  dfp_dcuo_io,      dgl_dm_io,                                &
+>   dgl_dt_io,       dqcrit_io,        ds_jmax_io,                               &
+>   ds_vcmax_io,     dust_veg_scj_io,  dz0v_dh_io,                               &
+>   emis_pft_io,     eta_sl_io,        f0_io,                                    &
+>   fef_bc_io,       fef_ch4_io,       fef_co_io,                                &
+>   fef_co2_io,      fef_nox_io,       fef_oc_io,                                &
+>   fef_so2_io,      fd_io,            fire_mort_io,                             &
+>   fl_o3_ct_io,     fsmc_of_io,       fsmc_p0_io,                               &
+>   sug_g0_io,       g1_stomata_io,    g_leaf_0_io,                              &
+>   glmin_io,        gpp_st_io,        sug_grec_io,                              &
+177,189c174,187
+<   infil_f_io,      jv25_ratio_io,    kc25_io,                                  &   
+<   ko25_io,         kext_io,          kn_io,                                    &
+<   knl_io,          kpar_io,          lai_alb_lim_io,                           &
+<   lma_io,          mef_io,           neff_io,                                  &
+<   nl0_io,          nmass_io,         nr_io,                                    &
+<   nr_nl_io,        ns_nl_io,         nsw_io,                                   &
+<   omega_io,        omegal_io,        omegau_io,                                &
+<   omnir_io,        omnirl_io,        omniru_io,                                &
+<   orient_io,       q10_leaf_io,      r_grow_io,                                &
+<   rootd_ft_io,     sigl_io,          tef_io,                                   &
+<   tleaf_of_io,     tlow_io,          tupp_io,                                  &
+<   vint_io,         vsl_io,           z0hm_pft_io,                              &
+<   z0hm_classic_pft_io,  z0v_io
+---
+>   infil_f_io,      jv25_ratio_io,    kext_io,                                  &
+>   kn_io,           knl_io,           kpar_io,                                  &
+>   lai_alb_lim_io,  lma_io,           mef_io,                                   &
+>   neff_io,         nl0_io,           nmass_io,                                 &
+>   nr_io,           nr_nl_io,         ns_nl_io,                                 &
+>   nsw_io,          omega_io,         omegal_io,                                &
+>   omegau_io,       omnir_io,         omnirl_io,                                &
+>   omniru_io,       orient_io,        q10_leaf_io,                              &
+>   r_grow_io,       rootd_ft_io,      sigl_io,                                  &
+>   tef_io,          tleaf_of_io,      tlow_io,                                  &
+>   tupp_io,         vint_io,          vsl_io,                                   &
+>   sug_yg_io,       z0hm_pft_io,      z0hm_classic_pft_io,                      &
+>   z0v_io,          sox_a_io,         sox_p50_io,                               &
+>   sox_rp_min_io
+243,244d240
+< WRITE(lineBuffer,*)' beta_c3c4_io = ',beta_c3c4_io
+< CALL jules_print('pftparm_io',lineBuffer)
+285,290d280
+< WRITE(lineBuffer,*)' eagamma_io = ',eagamma_io
+< CALL jules_print('pftparm_io',lineBuffer)
+< WRITE(lineBuffer,*)' eakc_io = ',eakc_io
+< CALL jules_print('pftparm_io',lineBuffer)
+< WRITE(lineBuffer,*)' eako_io = ',eako_io
+< CALL jules_print('pftparm_io',lineBuffer)
+321c311
+< WRITE(lineBuffer,*)' gamma25_io = ',gamma25_io
+---
+> WRITE(lineBuffer,*)' sug_g0_io = ',sug_g0_io
+330a321,322
+> WRITE(lineBuffer,*)' sug_grec_io = ',sug_grec_io
+> CALL jules_print('pftparm_io',lineBuffer)
+341,342d332
+< WRITE(lineBuffer,*)' kc25_io = ',kc25_io
+< CALL jules_print('pftparm_io',lineBuffer)
+349,350d338
+< WRITE(lineBuffer,*)' ko25_io = ',ko25_io
+< CALL jules_print('pftparm_io',lineBuffer)
+398a387,388
+> WRITE(lineBuffer,*)' sug_yg_io = ',sug_yg_io
+> CALL jules_print('pftparm_io',lineBuffer)
+402a393,398
+> WRITE(lineBuffer,*)' sox_a_io = ',sox_a_io
+> CALL jules_print('pftparm_io',lineBuffer)
+> WRITE(lineBuffer,*)' sox_p50_io = ',sox_p50_io
+> CALL jules_print('pftparm_io',lineBuffer)
+> WRITE(lineBuffer,*)' sox_rp_min_io = ',sox_rp_min_io
+> CALL jules_print('pftparm_io',lineBuffer)
+439c435
+< INTEGER, PARAMETER :: n_real = 95 * npft_max
+---
+> INTEGER, PARAMETER :: n_real = 101 * npft_max
+464d459
+<   REAL(KIND=real_jlslsm) :: beta_c3c4_io(npft_max)
+485,487d479
+<   REAL(KIND=real_jlslsm) :: eagamma_io(npft_max)
+<   REAL(KIND=real_jlslsm) :: eakc_io(npft_max)
+<   REAL(KIND=real_jlslsm) :: eako_io(npft_max)
+502c494
+<   REAL(KIND=real_jlslsm) :: gamma25_io(npft_max)
+---
+>   REAL(KIND=real_jlslsm) :: sug_g0_io(npft_max)
+506a499
+>   REAL(KIND=real_jlslsm) :: sug_grec_io(npft_max)
+512d504
+<   REAL(KIND=real_jlslsm) :: kc25_io(npft_max)
+516d507
+<   REAL(KIND=real_jlslsm) :: ko25_io(npft_max)
+543a535
+>   REAL(KIND=real_jlslsm) :: sug_yg_io(npft_max)
+546a539,541
+>   REAL(KIND=real_jlslsm) :: sox_a_io(npft_max)
+>   REAL(KIND=real_jlslsm) :: sox_p50_io(npft_max)
+>   REAL(KIND=real_jlslsm) :: sox_rp_min_io(npft_max)
+584d578
+<   my_nml % beta_c3c4_io     = beta_c3c4_io
+605,607d598
+<   my_nml % eagamma_io     = eagamma_io
+<   my_nml % eakc_io        = eakc_io
+<   my_nml % eako_io        = eako_io
+623c614
+<   my_nml % gamma25_io     = gamma25_io
+---
+>   my_nml % sug_g0_io      = sug_g0_io
+627a619
+>   my_nml % sug_grec_io    = sug_grec_io
+633d624
+<   my_nml % kc25_io        = kc25_io
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_params_pftparm_io_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_params_pftparm_io_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

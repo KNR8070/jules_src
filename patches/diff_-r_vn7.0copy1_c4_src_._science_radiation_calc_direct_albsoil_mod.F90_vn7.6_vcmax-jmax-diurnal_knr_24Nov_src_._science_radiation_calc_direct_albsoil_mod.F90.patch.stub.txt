@@ -1,0 +1,46 @@
+Patch stub generated: 2025-11-25T12:09:12.243539 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/radiation/calc_direct_albsoil_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/radiation/calc_direct_albsoil_mod.F90
+
+SUMMARY:
+  - added lines (>): 0
+  - removed lines (<): 17
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/radiation/calc_direct_albsoil_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/radiation/calc_direct_albsoil_mod.F90
+10,12d9
+< USE parkind1,                 ONLY: jprb, jpim
+< USE yomhook,                  ONLY: lhook, dr_hook
+< 
+15,16d11
+< CHARACTER(LEN=*), PARAMETER, PRIVATE :: ModuleName='CALC_DIRECT_ALBSOIL_MOD'
+< 
+37,42d31
+< INTEGER(KIND=jpim), PARAMETER :: zhook_in  = 0
+< INTEGER(KIND=jpim), PARAMETER :: zhook_out = 1
+< REAL(KIND=jprb)               :: zhook_handle
+< 
+< CHARACTER(LEN=*), PARAMETER :: RoutineName='CALC_DIRECT_ALBSOIL'
+< 
+44,45d32
+< IF (lhook) CALL dr_hook(ModuleName//':'//RoutineName,zhook_in,zhook_handle)
+< 
+61d47
+< IF (lhook) CALL dr_hook(ModuleName//':'//RoutineName,zhook_out,zhook_handle)
+64d49
+< 
+66,67d50
+< 
+<
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_radiation_calc_direct_albsoil_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_radiation_calc_direct_albsoil_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

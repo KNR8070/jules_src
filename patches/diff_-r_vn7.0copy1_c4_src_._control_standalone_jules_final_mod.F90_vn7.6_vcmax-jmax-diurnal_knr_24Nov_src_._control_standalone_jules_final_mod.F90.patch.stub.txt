@@ -1,0 +1,29 @@
+Patch stub generated: 2025-11-25T12:09:12.148435 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/standalone/jules_final_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/jules_final_mod.F90
+
+SUMMARY:
+  - added lines (>): 3
+  - removed lines (<): 2
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/standalone/jules_final_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/jules_final_mod.F90
+76,77c76,78
+<   CALL log_error(proc_name, 'The deposition code is not fully functional ' //  &
+<                             'in this version. It should not be used!')
+---
+>   CALL log_warn(proc_name, 'The deposition code is available in this ' //      &
+>                            'version but should be used with caution '  //      &
+>                            'as it is still under development')
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_standalone_jules_final_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_standalone_jules_final_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

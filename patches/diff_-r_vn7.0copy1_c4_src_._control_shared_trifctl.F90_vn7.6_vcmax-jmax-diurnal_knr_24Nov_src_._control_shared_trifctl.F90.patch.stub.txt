@@ -1,0 +1,143 @@
+Patch stub generated: 2025-11-25T12:09:12.140506 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/trifctl.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/trifctl.F90
+
+SUMMARY:
+  - added lines (>): 33
+  - removed lines (<): 73
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/trifctl.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/trifctl.F90
+57,74d56
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: gpp_pft_lay(:,:,:)  
+<       ! Gross primary productivity on PFTs per canopy layer (kg C/m2/s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: apar_pft_lay(:,:,:)  
+<       ! Absorbed PAR on PFTs per canopy layer (W/m2)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: cmpf_pft_lay(:,:,:)  
+<       ! CO2 compensation point correction factor per canopy layer (unitless)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: vcmax_pft_lay(:,:,:)  
+<       ! Vcmax on PFTs per canopy layer (mol CO2/m2/s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: vcmax25_pft_lay(:,:,:)  
+<       ! Vcmax25 on PFTs per canopy layer (mol CO2/m2/s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: wlite_pft_lay(:,:,:)  
+<       ! Light-limited photosynthesis rate per canopy layer (mol CO2/m2/s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: wcarb_pft_lay(:,:,:)  
+<       ! Carbon-limited photosynthesis rate per canopy layer (mol CO2/m2/s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: wmin_pft_lay(:,:,:)  
+<       ! Minimum of light- and carbon-limited photosynthesis per layer (mol CO2/m2/s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: ej_pft_lay(:,:,:)  
+<       ! Electron transport rate per canopy layer (mol/m2/s)
+106a89,97
+>   REAL(KIND=real_jlslsm), ALLOCATABLE :: growth_sug_gb(:)
+>     ! Structural carbon growth rate (kg C/m2/s)
+>   REAL(KIND=real_jlslsm), ALLOCATABLE :: growth_sug_pft(:,:)
+>     ! Structural carbon growth rate on PFT (kg C/m2/s)
+>   REAL(KIND=real_jlslsm), ALLOCATABLE :: lwp_c_pft(:,:)
+>     ! Diagnostic for canopy leaf water potential
+>     ! in the SOX stomatal model (MPa)
+>   REAL(KIND=real_jlslsm), ALLOCATABLE :: psi_root_zone_pft(:,:)
+>     ! (Negative) soil water potential in the root zone (Pa)
+124,132d114
+<   REAL(KIND=real_jlslsm), POINTER :: gpp_pft_lay(:,:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: apar_pft_lay(:,:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: cmpf_pft_lay(:,:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: vcmax_pft_lay(:,:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: vcmax25_pft_lay(:,:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: wlite_pft_lay(:,:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: wcarb_pft_lay(:,:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: wmin_pft_lay(:,:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: ej_pft_lay(:,:,:)
+147a130,133
+>   REAL(KIND=real_jlslsm), POINTER :: growth_sug_gb(:)
+>   REAL(KIND=real_jlslsm), POINTER :: growth_sug_pft(:,:)
+>   REAL(KIND=real_jlslsm), POINTER :: lwp_c_pft(:,:)
+>   REAL(KIND=real_jlslsm), POINTER :: psi_root_zone_pft(:,:)
+157d142
+< USE jules_vegetation_mod,     ONLY: ilayers       
+189,197d173
+< ALLOCATE(trifctl_data%gpp_pft_lay(land_pts, npft, ilayers))
+< ALLOCATE(trifctl_data%apar_pft_lay(land_pts, npft, ilayers))
+< ALLOCATE(trifctl_data%cmpf_pft_lay(land_pts, npft, ilayers))
+< ALLOCATE(trifctl_data%vcmax_pft_lay(land_pts, npft, ilayers))
+< ALLOCATE(trifctl_data%vcmax25_pft_lay(land_pts, npft, ilayers))
+< ALLOCATE(trifctl_data%wlite_pft_lay(land_pts, npft, ilayers))
+< ALLOCATE(trifctl_data%wcarb_pft_lay(land_pts, npft, ilayers))
+< ALLOCATE(trifctl_data%wmin_pft_lay(land_pts, npft, ilayers))
+< ALLOCATE(trifctl_data%ej_pft_lay(land_pts, npft, ilayers))
+212a189,192
+> ALLOCATE(trifctl_data%growth_sug_gb(land_pts))
+> ALLOCATE(trifctl_data%growth_sug_pft(land_pts,npft))
+> ALLOCATE(trifctl_data%lwp_c_pft(land_pts,npft))
+> ALLOCATE(trifctl_data%psi_root_zone_pft(land_pts,npft))
+225,233d204
+< trifctl_data%gpp_pft_lay(:,:,:)        = 0.0
+< trifctl_data%apar_pft_lay(:,:,:)       = 0.0
+< trifctl_data%cmpf_pft_lay(:,:,:)       = 0.0
+< trifctl_data%vcmax_pft_lay(:,:,:)      = 0.0
+< trifctl_data%vcmax25_pft_lay(:,:,:)    = 0.0
+< trifctl_data%wlite_pft_lay(:,:,:)      = 0.0
+< trifctl_data%wcarb_pft_lay(:,:,:)      = 0.0
+< trifctl_data%wmin_pft_lay(:,:,:)       = 0.0
+< trifctl_data%ej_pft_lay(:,:,:)         = 0.0
+248a220,223
+> trifctl_data%growth_sug_gb(:)          = 0.0
+> trifctl_data%growth_sug_pft(:,:)       = 0.0
+> trifctl_data%lwp_c_pft(:,:)            = 0.0
+> trifctl_data%psi_root_zone_pft(:,:)    = 0.0
+290,298d264
+< DEALLOCATE(trifctl_data%gpp_pft_lay)
+< DEALLOCATE(trifctl_data%apar_pft_lay)
+< DEALLOCATE(trifctl_data%cmpf_pft_lay)
+< DEALLOCATE(trifctl_data%vcmax_pft_lay)
+< DEALLOCATE(trifctl_data%vcmax25_pft_lay)
+< DEALLOCATE(trifctl_data%wlite_pft_lay)
+< DEALLOCATE(trifctl_data%wcarb_pft_lay)
+< DEALLOCATE(trifctl_data%wmin_pft_lay)
+< DEALLOCATE(trifctl_data%ej_pft_lay)
+313a280,283
+> DEALLOCATE(trifctl_data%growth_sug_gb)
+> DEALLOCATE(trifctl_data%growth_sug_pft)
+> DEALLOCATE(trifctl_data%lwp_c_pft)
+> DEALLOCATE(trifctl_data%psi_root_zone_pft)
+361,369d330
+< trifctl%gpp_pft_lay      => trifctl_data%gpp_pft_lay
+< trifctl%apar_pft_lay     => trifctl_data%apar_pft_lay
+< trifctl%cmpf_pft_lay     => trifctl_data%cmpf_pft_lay
+< trifctl%vcmax_pft_lay    => trifctl_data%vcmax_pft_lay
+< trifctl%vcmax25_pft_lay  => trifctl_data%vcmax25_pft_lay
+< trifctl%wlite_pft_lay    => trifctl_data%wlite_pft_lay
+< trifctl%wcarb_pft_lay    => trifctl_data%wcarb_pft_lay
+< trifctl%wmin_pft_lay     => trifctl_data%wmin_pft_lay
+< trifctl%ej_pft_lay       => trifctl_data%ej_pft_lay
+384a346,349
+> trifctl%growth_sug_gb        => trifctl_data%growth_sug_gb
+> trifctl%growth_sug_pft       => trifctl_data%growth_sug_pft
+> trifctl%lwp_c_pft            => trifctl_data%lwp_c_pft
+> trifctl%psi_root_zone_pft    => trifctl_data%psi_root_zone_pft
+427,435d391
+< NULLIFY(trifctl%gpp_pft_lay)
+< NULLIFY(trifctl%apar_pft_lay)
+< NULLIFY(trifctl%cmpf_pft_lay)
+< NULLIFY(trifctl%vcmax_pft_lay)
+< NULLIFY(trifctl%vcmax25_pft_lay)
+< NULLIFY(trifctl%wlite_pft_lay)
+< NULLIFY(trifctl%wcarb_pft_lay)
+< NULLIFY(trifctl%wmin_pft_lay)
+< NULLIFY(trifctl%ej_pft_lay)
+450a407,410
+> NULLIFY(trifctl%growth_sug_gb)
+> NULLIFY(trifctl%growth_sug_pft)
+> NULLIFY(trifctl%lwp_c_pft)
+> NULLIFY(trifctl%psi_root_zone_pft)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_trifctl.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_trifctl.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

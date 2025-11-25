@@ -1,0 +1,166 @@
+Patch stub generated: 2025-11-25T12:09:12.263878 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil/soil_hyd_wt_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/soil_hyd_wt_mod.F90
+
+SUMMARY:
+  - added lines (>): 108
+  - removed lines (<): 10
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil/soil_hyd_wt_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/soil_hyd_wt_mod.F90
+19,20c19,21
+< SUBROUTINE soil_hyd_wt (npnts, nshyd, soil_pts, timestep, stf_slow_runoff,     &
+<                         l_top, soil_index,                                     &
+---
+> SUBROUTINE soil_hyd_wt (npnts, nshyd, soil_pts, curr_soilt, nsoilt,            &
+>                         n_wtrac_jls, timestep,                                 &
+>                         stf_slow_runoff, l_top, soil_index,                    &
+22c23,25
+<                         smcl, surf_roff, qbase_l, smclzw, zw,                  &
+---
+>                         fw_wtrac, w_flux_wtrac, smcl, surf_roff, qbase_l,      &
+>                         smclzw, zw,                                            &
+>                         surf_roff_wtrac, qbase_l_wtrac, sthzw_wtrac,           &
+24c27,28
+<                         surf_roff_inc)
+---
+>                         surf_roff_inc, slow_runoff_wtrac, qbase_wtrac,         &
+>                         surf_roff_inc_wtrac )
+28a33,34
+> USE jules_water_tracers_mod, ONLY: l_wtrac_jls
+> 
+44c50
+<   soil_pts
+---
+>   soil_pts,                                                                    &
+45a52,57
+>   curr_soilt,                                                                  &
+>     ! Current soil tile.
+>   nsoilt,                                                                      &
+>     ! Number of soil tiles
+>   n_wtrac_jls
+>     ! Number of water tracers
+77c89
+<   w_flux(npnts,0:nshyd)
+---
+>   w_flux(npnts,0:nshyd),                                                       &
+78a91,96
+>   fw_wtrac(npnts,n_wtrac_jls),                                                 &
+>     ! Water tracer throughfall from canopy plus snowmelt minus surface
+>     ! runoff (kg/m2/s).
+>   w_flux_wtrac(npnts,0:nshyd,n_wtrac_jls)
+>     ! The fluxes of water tracer between layers (kg/m2/s).
+> 
+92c110
+<   zw(npnts)
+---
+>   zw(npnts),                                                                   &
+93a112,120
+>   surf_roff_wtrac(npnts,n_wtrac_jls),                                          &
+>     ! Surface water tracer runoff (kg/m2/s).
+>   qbase_l_wtrac(npnts,nshyd+1,n_wtrac_jls),                                    &
+>     ! Water tracer base flow from each level (kg/m2/s).
+>   sthzw_wtrac(npnts,nsoilt,n_wtrac_jls)
+>     ! Soil water tracer fraction in deep layer.
+>     ! (Note, unlike the water equivalent, this is the full field for all soil
+>     !  tiles)
+> 
+107c134
+<   surf_roff_inc(npnts)
+---
+>   surf_roff_inc(npnts),                                                        &
+108a136,141
+>   slow_runoff_wtrac(npnts,n_wtrac_jls),                                        &
+>     ! Water tracer drainage from the base of the soil profile (kg/m2/s).
+>   qbase_wtrac(npnts,n_wtrac_jls),                                              &
+>     ! Water tracer base flow (kg/m2/s).
+>   surf_roff_inc_wtrac(npnts,n_wtrac_jls)
+>     ! Increment to surface water tracer runoff (kg m-2 s-1).
+114c147,151
+<   i, j, n                ! WORK Loop counters.
+---
+>   i, j, n, i_wt              ! WORK Loop counters.
+> 
+> REAL(KIND=real_jlslsm) ::                                                      &
+>   smclzw_wtrac
+>     ! Water tracer content in deep layer (kg/m2)
+142a180,193
+>   IF (l_wtrac_jls) THEN
+>     ! Update water tracer deep layer soil moisture fraction
+>     DO i_wt = 1, n_wtrac_jls
+>       DO j = 1,soil_pts
+>         i = soil_index(j)
+>         smclzw_wtrac = sthzw_wtrac(i,curr_soilt,i_wt) * smclsatzw(i)
+>         smclzw_wtrac = smclzw_wtrac - (qbase_l_wtrac(i,nshyd+1,i_wt)           &
+>                                       - w_flux_wtrac(i,nshyd,i_wt)) * timestep
+>         ! Update prognostic deep layer water tracer soil moisture fraction
+>         sthzw_wtrac(i,curr_soilt,i_wt) = smclzw_wtrac / smclsatzw(i)
+>       END DO
+>     END DO
+>   END IF ! l_wtrac_jls
+> 
+154a206,220
+>   IF (l_wtrac_jls) THEN
+>     ! Repeat for water tracers
+>     DO i_wt = 1, n_wtrac_jls
+>       DO j = 1,soil_pts
+>         i = soil_index(j)
+>         qbase_wtrac(i,i_wt) = 0.0
+>         DO n = 1,nshyd+1
+>           qbase_l_wtrac(i,n,i_wt) = MAX(qbase_l_wtrac(i,n,i_wt),0.0)
+>           qbase_wtrac(i,i_wt)     = qbase_wtrac(i,i_wt)                        &
+>                                     + qbase_l_wtrac(i,n,i_wt)
+>         END DO
+>       END DO
+>     END DO
+>   END IF
+> 
+165c231
+<     ! Ensure correct field is output as deep runoff: dependant on L_TOP
+---
+>     ! Ensure correct field is output as deep runoff: dependent on L_TOP
+182a249,280
+> 
+> !-----------------------------------------------------------------------------
+> ! Output water tracer slow runoff and update surface runoff
+> !-----------------------------------------------------------------------------
+> 
+> IF (l_wtrac_jls) THEN
+> 
+>   ! Initialise water tracer slow_runoff
+>   DO i_wt = 1, n_wtrac_jls
+>     DO i = 1, npnts
+>       slow_runoff_wtrac(i,i_wt) = 0.0
+>     END DO
+>   END DO
+> 
+>   DO i_wt = 1, n_wtrac_jls
+>     DO j = 1, soil_pts
+>       i = soil_index(j)
+> 
+>       ! Ensure correct field is output as deep runoff: dependant on L_TOP
+>       IF (l_top) THEN
+>         slow_runoff_wtrac(i,i_wt) = qbase_wtrac(i,i_wt)
+>       ELSE
+>         slow_runoff_wtrac(i,i_wt) = w_flux_wtrac(i,nshyd,i_wt)
+>       END IF
+> 
+>       surf_roff_wtrac(i,i_wt)     = surf_roff_wtrac(i,i_wt)                    &
+>                                   + (fw_wtrac(i,i_wt) - w_flux_wtrac(i,0,i_wt))
+>       surf_roff_inc_wtrac(i,i_wt) = fw_wtrac(i,i_wt) - w_flux_wtrac(i,0,i_wt)
+> 
+>     END DO
+>   END DO
+> END IF  ! l_wtrac_jls
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_soil_hyd_wt_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_soil_hyd_wt_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

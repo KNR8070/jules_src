@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.289299 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/sf_resist_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/sf_resist_jls.F90
+
+SUMMARY:
+  - added lines (>): 93
+  - removed lines (<): 35
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/sf_resist_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/sf_resist_jls.F90
+23c23,24
+<  vshr,fraca,resfs,resft,resfs_stom,l_et_stom,l_et_stom_surft)
+---
+>  vshr,tstar,fracaero_t, fracaero_s,resfs,resft,                                &
+>  resfs_stom,l_et_stom,l_et_stom_surft)
+29c30,31
+< USE jules_science_fixes_mod, ONLY: l_fix_snow_frac
+---
+> USE jules_science_fixes_mod, ONLY: l_fix_snow_frac, l_fix_neg_snow
+> USE water_constants_mod, ONLY: tm, rho_ice
+80a83,84
+> ,tstar(land_pts)                                                               &
+>                      ! IN Surface temperature (K)
+86,88c90,101
+<  fraca(land_pts)                                                               &
+<                      ! OUT Fraction of surface moisture flux with
+< !                          !     only aerodynamic resistance.
+---
+>  fracaero_t(land_pts)                                                          &
+>                      ! OUT Total fraction of surface moisture flux with
+> !                          !     only aerodynamic resistance
+> !                          !     frozen fractions (:,2).
+> ,fracaero_s(land_pts)                                                          &
+>                      ! OUT Fractions of surface moisture flux with
+> !                          !     only aerodynamic resistance over a frozen
+> !                          !     surface.
+> !                          !     i.e. the fraction of the tile with
+> !                          !     sublimation or deposition is fracaero_s
+> !                          !     and the fraction with evaporation or
+> !                          !     condensation is fracaero_t-fracaero_s
+91c104
+< !                          !     resistance factor for fraction 1-FRACA.
+---
+> !                          !     resistance factor for fraction 1-fracaero_t.
+94c107
+< !                          !     FRACA+(1-FRACA)*RESFS.
+---
+> !                          !     fracaero_t+(1-fracaero_t)*RESFS.
+97c110
+< !                          !     resistance factor for fraction 1-FRACA.
+---
+> !                          !     resistance factor for fraction 1-fracaero_t.
+105a119,121
+> REAL(KIND=real_jlslsm) ::                                                      &
+>  msk_sndpth
+>              ! Temporary scalar
+118,119d133
+< !     Set FRACA (= fA in the documentation) according to P243.68,
+< !     and RESFS (= fS) according to P243.75 and P243.61.
+122c136
+< !$OMP PARALLEL DO                                                              &
+---
+> !$OMP PARALLEL DO IF(surft_pts > 1)                                            &
+125,127c139,141
+< !$OMP PRIVATE(l,k,j,i)                                                         &
+< !$OMP SHARED(surft_pts,surft_index,land_index,t_i_length,fraca,dq,             &
+< !$OMP        snowdep_surft,                                                    &
+---
+> !$OMP PRIVATE(l,k,j,i,msk_sndpth)                                              &
+> !$OMP SHARED(surft_pts,surft_index,land_index,t_i_length,fracaero_t,fracaero_s,&
+> !$OMP        dq,snowdep_surft,tstar,snow_surft,                                &
+130c144
+< !$OMP        canopy,epdt,resft,l_fix_snow_frac)
+---
+> !$OMP        canopy,epdt,resft,l_fix_snow_frac, l_fix_neg_snow)
+140a155,156
+>   ! Calculate for a snow-free canopy then adjust for snow. With the fix,
+>   ! the potential fraction depends on the canopy water content.
+142,152c158,186
+<   fraca(l) = 1.0
+<   IF (dq(l) <  0.0 .AND. snowdep_surft(l) <= 0.0) fraca(l) = 0.0
+<   IF (dq(l) <  0.0 .AND. snowdep_surft(l) <= 0.0 .AND. catch(l) >  0.0)        &
+<     fraca(l) = canopy(l) / ( epdt(l) + catch(l) )
+<   IF (snowdep_surft(l) > 0.0) THEN
+<     IF (frac_snow_subl_melt == 1) THEN
+<       IF (l_fix_snow_frac) THEN
+<         ! Use linear expansion of exponential if non-linear term
+<         ! is of order EPSILON (i.e., x^2.0/2.0 ~ EPSILON)
+<         IF (snowdep_surft(l)  >   SQRT(2.0*EPSILON(snowdep_surft))/maskd) THEN
+<           fraca(l) = 1.0 - EXP(-maskd * snowdep_surft(l)) * (1.0 - fraca(l))
+---
+>   IF (l_fix_neg_snow) THEN
+>     ! Make the logic more transparent.
+>     IF (dq(l) >= 0.0) THEN
+>       ! Only aerodynamic resistance for downward fluxes.
+>       fracaero_t(l) = 1.0
+>       IF (tstar(l) > tm) THEN
+>         ! All downward moisture flux is added to canopy water.
+>         fracaero_s(l) = 0.0
+>       ELSE
+>         ! All downward moisture flux is added to snow.
+>         fracaero_s(l) = 1.0
+>       END IF
+>     ELSE
+>       ! For upward fluxes, calculate the fraction for canopy water,
+>       ! then apply that fraction on the snow-free part of the grid box.
+>       IF (catch(l) > 0.0) THEN
+>         fracaero_t(l) = canopy(l) / ( epdt(l) + catch(l) )
+>       ELSE
+>         fracaero_t(l) = 0.0
+>       END IF
+>       msk_sndpth = MAX(snowdep_surft(l), snow_surft(l) / rho_ice)
+>       IF (msk_sndpth > 0.0) THEN
+>         IF (frac_snow_subl_melt == 1) THEN
+>           msk_sndpth = maskd * msk_sndpth
+>           IF (msk_sndpth > SQRT(2.0 * EPSILON(msk_sndpth))) THEN
+>             fracaero_s(l) = 1.0 - EXP(-msk_sndpth)
+>           ELSE
+>             fracaero_s(l) = msk_sndpth
+>           END IF
+154c188,189
+<           fraca(l) = fraca(l) + (1.0 - fraca(l)) * maskd * snowdep_surft(l)
+---
+>           ! Snow is assumed to cover the entire canopy.
+>           fracaero_s(l) = 1.0
+155a191
+>         fracaero_t(l) = fracaero_s(l) + (1.0 - fracaero_s(l)) * fracaero_t(l)
+157c193,217
+<         fraca(l) = 1.0 - EXP(-maskd * snowdep_surft(l))
+---
+>         ! Set the sublimation fraction to 0.
+>         fracaero_s(l) = 0.0
+>       END IF
+>     END IF
+>   ELSE
+>     !   Original code
+>     fracaero_t(l) = 1.0
+>     IF (dq(l) <  0.0 .AND. snowdep_surft(l) <= 0.0) fracaero_t(l) = 0.0
+>     IF (dq(l) <  0.0 .AND. snowdep_surft(l) <= 0.0 .AND. catch(l) >  0.0)      &
+>       fracaero_t(l) = canopy(l) / ( epdt(l) + catch(l) )
+>     IF (snowdep_surft(l) > 0.0) THEN
+>       IF (frac_snow_subl_melt == 1) THEN
+>         IF (l_fix_snow_frac) THEN
+>           ! Use linear expansion of exponential if non-linear term
+>           ! is of order EPSILON (i.e., x^2.0/2.0 ~ EPSILON)
+>           IF (snowdep_surft(l) > SQRT(2.0*EPSILON(snowdep_surft))/maskd) THEN
+>             fracaero_t(l) = 1.0 - EXP(-maskd * snowdep_surft(l)) *             &
+>                          (1.0 - fracaero_t(l))
+>           ELSE
+>             fracaero_t(l) = fracaero_t(l) +                                    &
+>                          (1.0 - fracaero_t(l)) * maskd * snowdep_surft(l)
+>           END IF
+>         ELSE
+>           fracaero_t(l) = 1.0 - EXP(-maskd * snowdep_surft(l))
+>         END IF
+159a220
+>     fracaero_t(l) = MIN(fracaero_t(l),1.0)
+161d221
+<   fraca(l) = MIN(fraca(l),1.0)
+172c232
+<                         ( fraca(l) + (1.0 - fraca(l)) * resfs(l) )
+---
+>                         ( fracaero_t(l) + (1.0 - fracaero_t(l)) * resfs(l) )
+184,185c244,245
+< !$OMP                 snow_surft, gc, vshr, fraca,                             &
+< !$OMP                 resfs, ch, resft)   SCHEDULE(STATIC)
+---
+> !$OMP                 snow_surft, gc, vshr, fracaero_t,                        &
+> !$OMP                 resfs, ch, resft) SCHEDULE(STATIC)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_sf_resist_jls.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_sf_resist_jls.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,105 @@
+Patch stub generated: 2025-11-25T12:09:12.141149 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/trif_vars_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/trif_vars_mod.F90
+
+SUMMARY:
+  - added lines (>): 1
+  - removed lines (<): 73
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/trif_vars_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/trif_vars_mod.F90
+348,365d347
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: gpp_pft_lay(:,:,:)     
+<                         ! Gross primary productivity on PFTs per canopy layer (kg C/m2/s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: apar_pft_lay(:,:,:)    
+<                         ! Absorbed PAR on PFTs per canopy layer (W/m2)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: cmpf_pft_lay(:,:,:)    
+<                         ! CO2 compensation point correction factor per canopy layer (unitless)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: vcmax_pft_lay(:,:,:) 
+<                         ! Vcmax on PFTs per canopy layer (mol CO2/m2/s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: vcmax25_pft_lay(:,:,:)
+<                         ! Vcmax25 on PFTs per canopy layer (mol CO2/m2/s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: wlite_pft_lay(:,:,:)    
+<                         ! Light-limited photosynthesis rate per canopy layer (mol CO2/m2/s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: wcarb_pft_lay(:,:,:) 
+<                         ! Carbon-limited photosynthesis rate per canopy layer (mol CO2/m2/s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: wmin_pft_lay(:,:,:) 
+<                         ! Minimum of light- and carbon-limited photosynthesis per layer (mol CO2/m2/s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: ej_pft_lay(:,:,:)      
+<                         ! Electron transport rate per canopy layer (mol/m2/s)
+555,563d536
+<   REAL(KIND=real_jlslsm), POINTER :: gpp_pft_lay(:,:,:)      
+<   REAL(KIND=real_jlslsm), POINTER :: apar_pft_lay(:,:,:)     
+<   REAL(KIND=real_jlslsm), POINTER :: cmpf_pft_lay(:,:,:)     
+<   REAL(KIND=real_jlslsm), POINTER :: vcmax_pft_lay(:,:,:)    
+<   REAL(KIND=real_jlslsm), POINTER :: vcmax25_pft_lay(:,:,:)  
+<   REAL(KIND=real_jlslsm), POINTER :: wlite_pft_lay(:,:,:)    
+<   REAL(KIND=real_jlslsm), POINTER :: wcarb_pft_lay(:,:,:)    
+<   REAL(KIND=real_jlslsm), POINTER :: wmin_pft_lay(:,:,:)     
+<   REAL(KIND=real_jlslsm), POINTER :: ej_pft_lay(:,:,:)
+606c579
+< USE jules_vegetation_mod,     ONLY: ilayers            
+---
+> 
+738,746d710
+< ALLOCATE(trif_vars_data%gpp_pft_lay(land_pts_dim, npft_dim, ilayers))
+< ALLOCATE(trif_vars_data%apar_pft_lay(land_pts_dim, npft_dim, ilayers))
+< ALLOCATE(trif_vars_data%cmpf_pft_lay(land_pts_dim, npft_dim, ilayers))
+< ALLOCATE(trif_vars_data%vcmax_pft_lay(land_pts_dim, npft_dim, ilayers))
+< ALLOCATE(trif_vars_data%vcmax25_pft_lay(land_pts_dim, npft_dim, ilayers))
+< ALLOCATE(trif_vars_data%wlite_pft_lay(land_pts_dim, npft_dim, ilayers))
+< ALLOCATE(trif_vars_data%wcarb_pft_lay(land_pts_dim, npft_dim, ilayers))
+< ALLOCATE(trif_vars_data%wmin_pft_lay(land_pts_dim, npft_dim, ilayers))
+< ALLOCATE(trif_vars_data%ej_pft_lay(land_pts_dim, npft_dim, ilayers))
+789,797d752
+< trif_vars_data%gpp_pft_lay(:,:,:)           = 0.0
+< trif_vars_data%apar_pft_lay(:,:,:)          = 0.0
+< trif_vars_data%cmpf_pft_lay(:,:,:)          = 0.0
+< trif_vars_data%vcmax_pft_lay(:,:,:)         = 0.0
+< trif_vars_data%vcmax25_pft_lay(:,:,:)       = 0.0
+< trif_vars_data%wlite_pft_lay(:,:,:)         = 0.0
+< trif_vars_data%wcarb_pft_lay(:,:,:)         = 0.0
+< trif_vars_data%wmin_pft_lay(:,:,:)          = 0.0
+< trif_vars_data%ej_pft_lay(:,:,:)            = 0.0
+1027,1035d981
+< DEALLOCATE(trif_vars_data%gpp_pft_lay)
+< DEALLOCATE(trif_vars_data%apar_pft_lay)
+< DEALLOCATE(trif_vars_data%cmpf_pft_lay)
+< DEALLOCATE(trif_vars_data%vcmax_pft_lay)
+< DEALLOCATE(trif_vars_data%vcmax25_pft_lay)
+< DEALLOCATE(trif_vars_data%wlite_pft_lay)
+< DEALLOCATE(trif_vars_data%wcarb_pft_lay)
+< DEALLOCATE(trif_vars_data%wmin_pft_lay)
+< DEALLOCATE(trif_vars_data%ej_pft_lay)
+1203,1211d1148
+< trif_vars%gpp_pft_lay      => trif_vars_data%gpp_pft_lay
+< trif_vars%apar_pft_lay     => trif_vars_data%apar_pft_lay
+< trif_vars%cmpf_pft_lay     => trif_vars_data%cmpf_pft_lay
+< trif_vars%vcmax_pft_lay    => trif_vars_data%vcmax_pft_lay
+< trif_vars%vcmax25_pft_lay  => trif_vars_data%vcmax25_pft_lay
+< trif_vars%wlite_pft_lay    => trif_vars_data%wlite_pft_lay
+< trif_vars%wcarb_pft_lay    => trif_vars_data%wcarb_pft_lay
+< trif_vars%wmin_pft_lay     => trif_vars_data%wmin_pft_lay
+< trif_vars%ej_pft_lay       => trif_vars_data%ej_pft_lay
+1377,1385d1313
+< NULLIFY(trif_vars%gpp_pft_lay)
+< NULLIFY(trif_vars%apar_pft_lay)
+< NULLIFY(trif_vars%cmpf_pft_lay)
+< NULLIFY(trif_vars%vcmax_pft_lay)
+< NULLIFY(trif_vars%vcmax25_pft_lay)
+< NULLIFY(trif_vars%wlite_pft_lay)
+< NULLIFY(trif_vars%wcarb_pft_lay)
+< NULLIFY(trif_vars%wmin_pft_lay)
+< NULLIFY(trif_vars%ej_pft_lay)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_trif_vars_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_trif_vars_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

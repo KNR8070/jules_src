@@ -1,0 +1,34 @@
+Patch stub generated: 2025-11-25T12:09:12.216668 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/file_handling/timeseries/file_ts_seek_to_datetime.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/file_handling/timeseries/file_ts_seek_to_datetime.inc
+
+SUMMARY:
+  - added lines (>): 3
+  - removed lines (<): 3
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/file_handling/timeseries/file_ts_seek_to_datetime.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/file_handling/timeseries/file_ts_seek_to_datetime.inc
+13c13
+< USE precision_mod, ONLY: INT64
+---
+> USE precision_mod, ONLY: int_64
+60c60
+< INTEGER(KIND=INT64) :: secs_from_start      ! the requested timestep?
+---
+> INTEGER(KIND=int_64) :: secs_from_start      ! the requested timestep?
+217c217
+<   IF ( MOD(secs_from_start, INT(FILE%data_period, INT64)) /= 0 )               &
+---
+>   IF ( MOD(secs_from_start, INT(FILE%data_period, int_64)) /= 0 )              &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_file_handling_timeseries_file_ts_seek_to_datetime.inc_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_file_handling_timeseries_file_ts_seek_to_datetime.i.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

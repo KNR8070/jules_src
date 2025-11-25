@@ -1,0 +1,182 @@
+Patch stub generated: 2025-11-25T12:09:12.283612 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/physiol_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/physiol_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 345
+  - removed lines (<): 312
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+- Signature rename: unify timestep_len/timestep or provide wrapper.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/physiol_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/physiol_jls_mod.F90
+21,22c21,22
+<   sm_levels,nsurft,surft_pts,surft_index,                                      &
+<   dim_cs1,dim_cs2,                                                             &
+---
+>   sm_levels,nsurft,n_wtrac_jls,surft_pts,surft_index,                          &
+>   dim_cs1,                                                                     &
+25c25
+<   lai_pft,pstar,qw_1,tl_1, sthu_soilt,sthf_soilt,t_soil_soilt,tstar_surft,     &
+---
+>   lai_pft,pstar,qw_1,sthu_soilt,sthf_soilt,t_soil_soilt,tstar_surft,           &
+27,30c27,28
+<   canhc_surft,vfrac_surft,emis_surft,emis_soil,flake,                          &
+<   g_leaf,gs,gc_surft,gc_stom_surft,gpp,gpp_pft,gpp_pft_lay, apar_pft_lay,      &
+<   cmpf_pft_lay, vcmax_pft_lay, vcmax25_pft_lay, wlite_pft_lay, wcarb_pft_lay,  &
+<   wmin_pft_lay, ej_pft_lay, npp,npp_pft,                                       &
+---
+>   canhc_surft,vfrac_surft,emis_surft,l_emis_surft_set,emis_soil,flake,         &
+>   g_leaf,gs,gc_surft,gc_stom_surft,gc_corr,gpp,gpp_pft,npp,npp_pft,            &
+37a36,39
+>   !SUGAR variables
+>   f_nsc_pft, growth_sug_gb, growth_sug_pft,                                    &
+>   ! SOX variables
+>   psi_root_zone_pft, lwp_c_pft,                                                &
+40,42c42
+<   t_home_gb,t_growth_gb,l_growth_gb,vpd_growth_gb,co2_growth_gb,               &
+<   pstar_growth_gb, xipam_opt,vcmax_opt,jmax_opt,t_sum,l_sum,                   &
+<   t_night,nt_sum,vpd_sum,co2_sum,pstar_sum,                                    &
+---
+>   t_home_gb,t_growth_gb,                                                       &
+61c61,65
+<   diff_frac)
+---
+>   diff_frac,                                                                   &
+>   ! water tracers (IN)
+>   sthu_soilt_wtrac,                                                            &
+>   ! water tracers (OUT)
+>   smc_soilt_wtrac)
+75c79
+< USE conversions_mod, ONLY: zerodegc
+---
+> 
+86c90
+<   soil_model_1pool, soil_model_rothc,                                          &
+---
+>   soil_model_1pool, soil_model_4pool,                                          &
+100c104
+<   l_crop, l_use_pft_psi, l_triffid, n_day_photo_acclim
+---
+>   l_crop, l_use_pft_psi, l_triffid
+106,107c110
+< USE pftparm, ONLY: emis_pft, fsmc_p0, rootd_ft, gsoil_f,beta_c3c4,eagamma,     & 
+<               eakc, eako, gamma25, kc25, ko25
+---
+> USE pftparm, ONLY: emis_pft, fsmc_p0, rootd_ft, gsoil_f
+121,122d123
+< USE model_time_mod, ONLY: timestep_len, current_time
+< 
+138a140,141
+> USE jules_water_tracers_mod, ONLY: l_wtrac_jls, wtrac_calc_ratio_fn_jules
+> 
+158a162,163
+>   n_wtrac_jls,                                                                 &
+>     !Number of water tracers in JULES
+165c170
+<   dim_cs1, dim_cs2
+---
+>   dim_cs1
+169c174
+<   l_co2_interactive
+---
+>   l_co2_interactive,                                                           &
+170a176,177
+>   l_emis_surft_set(nsurft)
+>     !switch for varying surface emissivity of surface tiles
+193,194d199
+<   tl_1(tdims%i_start:tdims%i_end,tdims%j_start:tdims%j_end),                   &
+<     ! Ice/liquid water temperature
+227a233,234
+>   emis_surft(land_pts,nsurft),                                                 &
+>     !Emissivity for land tiles
+240c247
+<   gpp(land_pts)                                                                &
+---
+>   gpp(land_pts),                                                               &
+242,261c249,250
+< ,gpp_pft(land_pts, npft)                                                       &
+<   ! Gross primary productivity on PFTs (kg C/m2/s)
+< ,gpp_pft_lay(land_pts, npft, ilayers)                                          &
+<   ! Gross primary productivity per layer (kg C/m2/s)
+< ,apar_pft_lay(land_pts, npft, ilayers)                                         &
+<   ! Absorbed PAR per layer (W/m2)
+< ,cmpf_pft_lay(land_pts, npft, ilayers)                                         &
+<   ! CO2 compensation factor per layer (unitless)
+< ,vcmax_pft_lay(land_pts, npft, ilayers)                                        &
+<   ! Vcmax per layer (mol CO2/m2/s)
+< ,vcmax25_pft_lay(land_pts, npft, ilayers)                                      &
+<   ! Vcmax25 per layer (mol CO2/m2/s)
+< ,wlite_pft_lay(land_pts, npft, ilayers)                                        &
+<   ! Light-limited photosynthesis per layer (mol CO2/m2/s)
+< ,wcarb_pft_lay(land_pts, npft, ilayers)                                        &
+<   ! Carbon-limited photosynthesis per layer (mol CO2/m2/s)
+< ,wmin_pft_lay(land_pts, npft, ilayers)                                         &
+<   ! Minimum of light- and carbon-limited photosynthesis per layer (mol CO2/m2/s)
+< ,ej_pft_lay(land_pts, npft, ilayers),                                          &
+<   ! Electron transport per layer (mol/m2/s)
+---
+>   gpp_pft(land_pts,npft),                                                      &
+>     !Gross primary productivity (kg C/m2/s).
+287c276
+<     !Available moisture in the  soil profile (mm).
+---
+>     !Available moisture in the soil profile (mm).
+290,291d278
+<   emis_surft(land_pts,nsurft),                                                 &
+<     !Emissivity for land tiles
+303c290
+<   gc_stom_surft(land_pts,nsurft)
+---
+>   gc_stom_surft(land_pts,nsurft),                                              &
+304a292,304
+>   gc_corr(land_pts,npft),                                                      &
+>     !Stomatal conductance without bare soil evaporation
+>   f_nsc_pft(land_pts,npft),                                                    &
+>     !Plant non-structural carbohdrate mass fraction (kgC/kgC)
+>   growth_sug_gb(land_pts),                                                     &
+>     !Gridbox mean structural C growth rate (kg C/m2/s)
+>   growth_sug_pft(land_pts,npft),                                               &
+>     !Plant structural C growth rate (kg C/m2/s)
+>   psi_root_zone_pft(land_pts,npft),                                            &
+>     !Water potential in the root zone (Pa)
+>   lwp_c_pft(land_pts,npft)
+>     !Canopy leaf water potential (MPa)
+> 
+315,329d314
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: t_growth_gb(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: l_growth_gb(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: vpd_growth_gb(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: co2_growth_gb(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: pstar_growth_gb(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: xipam_opt(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: vcmax_opt(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: jmax_opt(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: t_sum(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: l_sum(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: t_night(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: nt_sum(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: vpd_sum(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: co2_sum(land_pts,npft)
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: pstar_sum(land_pts,npft)
+345a331
+> REAL(KIND=real_jlslsm), INTENT(IN) :: t_growth_gb(land_pts)
+364d349
+< 
+377a363,374
+> ! Water tracers (IN)
+> REAL(KIND=real_jlslsm), INTENT(IN) :: sthu_soilt_wtrac(land_pts,nsoilt,        &
+>                                                        sm_levels,n_wtrac_jls)
+>                                      ! Water tracer soil moisture content in
+>                                      ! each lyr as a fraction of saturation
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_physiol_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_physiol_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

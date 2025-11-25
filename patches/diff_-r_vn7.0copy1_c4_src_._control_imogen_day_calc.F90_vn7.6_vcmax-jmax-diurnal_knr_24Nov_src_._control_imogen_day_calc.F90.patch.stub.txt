@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.099055 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/imogen/day_calc.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/day_calc.F90
+
+SUMMARY:
+  - added lines (>): 72
+  - removed lines (<): 55
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/imogen/day_calc.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/day_calc.F90
+12,17c12,16
+<   land_pts,swdown_daily,precip_daily,t1p5m_daily,diurnal_t1p5m_daily,          &
+<   lwdown_daily, pstar_daily,wind_daily,rh1p5m_daily,swdown_subdaily,           &
+<   t1p5m_subdaily, lwdown_subdaily,conv_rain_subdaily,ls_rain_subdaily,         &
+<   ls_snow_subdaily, pstar_subdaily,wind_subdaily,q1p5m_subdaily,               &
+<   imonth,iday, lat,lon,nsdmax,seed_rain                                        &
+< )
+---
+>   land_pts, swdown_daily, precip_daily, tl1_daily, diurnal_tl1_daily,          &
+>   lwdown_daily, pstar_daily, wind_daily, ql1_daily, swdown_subdaily,           &
+>   tl1_subdaily, lwdown_subdaily, conv_rain_subdaily, ls_rain_subdaily,         &
+>   ls_snow_subdaily, pstar_subdaily, wind_subdaily, ql1_subdaily,               &
+>   imonth, iday, nsdmax, seed_rain)
+20c19,20
+< USE update_mod, ONLY: dur_ls_rain,dur_conv_rain,dur_ls_snow
+---
+> USE update_mod, ONLY: dur_ls_rain, dur_conv_rain, dur_ls_snow
+> ! ejb these above are fixed in init_drive and not read in
+23a24,29
+> USE model_grid_mod, ONLY: latitude, longitude
+> USE theta_field_sizes, ONLY: t_i_length, t_j_length
+> USE jules_fields_mod, ONLY: ainfo
+> ! USE update_mod, ONLY: t_for_snow, t_for_con_rain
+> ! ejb add trap in imogen nml to ensure they are read
+> ! not activated in #1322 because metadata is a nightmare
+64c70
+<   t1p5m_daily(land_pts),                                                       &
+---
+>   tl1_daily(land_pts),                                                         &
+66c72
+<   diurnal_t1p5m_daily(land_pts),                                               &
+---
+>   diurnal_tl1_daily(land_pts),                                                 &
+74,75c80,81
+<   rh1p5m_daily(land_pts)
+<           ! Relative humidity (%)
+---
+>   ql1_daily(land_pts)
+>           ! Daily values of specific humidity (kg/kg)
+79,80c85,86
+< ! periods. NOTE: diurnal_t1p5m_subdaily does not exist as t1p5m_subdaily
+< ! combines t1p5m_daily and diurnal_t1p5m_daily
+---
+> ! periods. NOTE: diurnal_tl1_subdaily does not exist as tl1_subdaily
+> ! combines tl1_daily and diurnal_tl1_daily
+86c92
+<   t1p5m_subdaily(land_pts,nsdmax),                                             &
+---
+>   tl1_subdaily(land_pts,nsdmax),                                               &
+94,95c100,101
+<   q1p5m_subdaily(land_pts,nsdmax),                                             &
+<           ! Sub_daily humidity calculated from rh1p5m (kg/kg)
+---
+>   ql1_subdaily(land_pts,nsdmax),                                               &
+>           ! Sub_daily humidity calculated from rhl1 (kg/kg)
+103,108d108
+< REAL, INTENT(IN) ::                                                            &
+<   lat(land_pts),                                                               &
+<           ! Latitude (degrees)
+<   lon(land_pts)
+<           ! Longitude (degrees)
+< 
+121,122c121,126
+<   qs_subdaily(land_pts)
+<           ! Saturated humidity deficit from t1p5m_subdaily and pstar_subdaily
+---
+>   rhl1_daily(land_pts),                                                        &
+>           ! Relative humidity (%)
+>   qs_subdaily(land_pts),                                                       &
+>           ! Saturated humidity from tl1_subdaily and pstar_subdaily
+>   qs_daily(land_pts)
+>           ! Saturated humidity from tl1_daily and pstar_daily
+148,149c152,153
+< PARAMETER(temp_conv = 293.15) !ejb these need sorting in next ticket
+< PARAMETER(temp_snow = 275.15) !ejb these need sorting in next ticket
+---
+> PARAMETER(temp_conv = 293.15) ! these need sorting in next ticket
+> PARAMETER(temp_snow = 275.15) ! these need sorting in next ticket
+173,175d176
+<   max_precip_rate,                                                             &
+<           ! Maximum precip. rate allowed within  each sub-daily timestep
+<           ! (mm/day). Only applies when timesteps_in_day >= 2
+177,178c178
+<           !WORK Length of period (hr)
+< 
+---
+>           ! Length of period (hr)
+185a186,188
+> REAL, PARAMETER :: max_precip_rate = 350.0
+>           ! Maximum precip. rate allowed within  each sub-daily timestep
+>           ! (mm/day). Only applies when timesteps_in_day >= 2
+187d189
+< PARAMETER(max_precip_rate = 350.0)
+220,222c222,236
+<   CALL sunny(                                                                  &
+<     daynumber,timesteps_in_day,land_pts,current_time%year,lat,lon,             &
+<     sun,time_max)
+---
+>   CALL sunny(daynumber, timesteps_in_day, t_i_length * t_j_length,             &
+>                     current_time%year,                                         &
+>                     RESHAPE(latitude(:,:),  [ t_i_length * t_j_length ]),      &
+>                     RESHAPE(longitude(:,:), [ t_i_length * t_j_length ]),      &
+>                     sun, time_max)
+> 
+>   !-----------------------------------------------------------------------
+>   ! derive daily relative humidity and check it is between 0 and 100 %
+>   !-----------------------------------------------------------------------
+>   CALL qsat(qs_daily, tl1_daily, pstar_daily, land_pts)
+>   rhl1_daily = ql1_daily / qs_daily * 100.0
+>   DO l = 1,land_pts
+>     rhl1_daily(l) = MIN(rhl1_daily(l), 100.0)
+>     rhl1_daily(l) = MAX(rhl1_daily(l), 0.0)
+>   END DO
+235,236c249,250
+<       t1p5m_subdaily(l,istep) = t1p5m_daily(l) + 0.5 * diurnal_t1p5m_daily(l) *&
+<                     COS(2.0 * pi * (time_day - rsec_per_hour * time_max(l))    &
+---
+>       tl1_subdaily(l,istep) = tl1_daily(l) + 0.5 * diurnal_tl1_daily(l) *      &
+>               COS(2.0 * pi * (time_day - rsec_per_hour * time_max(l))          &
+239c253
+<                      * (4.0 * t1p5m_subdaily(l,istep) / t1p5m_daily(l) - 3.0)
+---
+>                      * (4.0 * tl1_subdaily(l,istep) / tl1_daily(l) - 3.0)
+253,254c267,268
+<     ! Check that humidity value is not greater than qsat (but otherwise, q1p5m
+<     ! is not split up into diurnal behaviour).
+---
+>     ! Get subdaily humidity from daily relative humidity and subdaily
+>     ! saturated specific humidity
+256c270
+<     CALL qsat(qs_subdaily, t1p5m_subdaily(:,istep),                            &
+---
+>     CALL qsat(qs_subdaily, tl1_subdaily(:,istep),                              &
+260c274,275
+<       q1p5m_subdaily(l,istep) = 0.01 * rh1p5m_daily(l) * qs_subdaily(l)
+---
+>       ! same rhl1_daily all day
+>       ql1_subdaily(l,istep) = 0.01 * rhl1_daily(l) * qs_subdaily(l)
+279c294
+<     ! mean daily temperature, t1p5m_daily. The cutoffs are:
+---
+>     ! mean daily temperature, tl1_daily. The cutoffs are:
+281,283c296,299
+<     ! Convective scale rain (duration conv_rain_dur): t1p5m_daily > 20.0oC
+<     ! Large scale rain (duration ls_rain_dur) : 20.0oC > t1p5m_daily > 2oC
+<     ! Large scale snow (duration ls_snow_dur) : t1p5m_daily < 2oC
+---
+>     ! Convective scale rain (duration conv_rain_dur): tl1_daily > t_for_con_rain
+>     ! Large scale rain (duration ls_rain_dur) :
+>     !                             t_for_snow > tl1_daily > t_for_con_rain
+>     ! Large scale snow (duration ls_snow_dur) : tl1_daily < t_for_snow
+302c318
+<     IF (t1p5m_daily(l) >= temp_conv) THEN
+---
+>     IF (tl1_daily(l) >= temp_conv) THEN
+344c360,361
+<     ELSE IF (t1p5m_daily(l) < temp_conv .AND. t1p5m_daily(l) >= temp_snow) THEN
+---
+>     ELSE IF (tl1_daily(l) < temp_conv .AND. tl1_daily(l) >= temp_snow)         &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_imogen_day_calc.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_imogen_day_calc.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

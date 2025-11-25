@@ -1,0 +1,76 @@
+Patch stub generated: 2025-11-25T12:09:12.234390 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/fire/inferno_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/fire/inferno_mod.F90
+
+SUMMARY:
+  - added lines (>): 36
+  - removed lines (<): 10
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/fire/inferno_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/fire/inferno_mod.F90
+552,553c552,554
+< USE jules_soil_biogeochem_mod, ONLY: soil_bgc_model, soil_model_rothc,         &
+<                                      soil_model_1pool
+---
+> USE jules_soil_biogeochem_mod, ONLY: soil_bgc_model, soil_model_4pool,         &
+>                                      soil_model_1pool, z_burn_max, l_layeredc
+> USE jules_soil_mod, ONLY: dzsoil
+574a576,583
+> REAL(KIND=real_jlslsm) ::                                                      &
+>   z2,                                                                          &
+>    ! depth of bottom of soil layer for soil C burnt calculation
+>   z1,                                                                          &
+>    ! depth of top of soil layer for soil C burnt calculation
+>   prop_cs_burnt
+>    ! proportion of soil carbon burnt
+> 
+582a592,593
+> c_soil_dpm_gb(:) = 0.0
+> c_soil_rpm_gb(:) = 0.0
+586,587c597,600
+< ! In future a layered soil model could pass the near-surface soil C only.
+< IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+> IF ( soil_bgc_model == soil_model_4pool ) THEN
+> 
+>   c_soil_dpm_gb(:) = 0.0
+>   c_soil_rpm_gb(:) = 0.0
+591,596c604,622
+<     c_soil_dpm_gb(i) = 0.0
+<     c_soil_rpm_gb(i) = 0.0
+< 
+<     DO n = 1,dim_cslayer
+<       c_soil_dpm_gb(i) = c_soil_dpm_gb(i) + cs_pool_soilt(i,m,n,1)
+<       c_soil_rpm_gb(i) = c_soil_rpm_gb(i) + cs_pool_soilt(i,m,n,2)
+---
+>     z2 = 0.0
+>     DO n=1,dim_cslayer
+>       IF ( l_layeredc ) THEN
+>         z1 = z2
+>         z2 = z2 + dzsoil(n)
+>         prop_cs_burnt = 0.0
+>         IF ( z2 <  z_burn_max ) THEN
+>           prop_cs_burnt = 1.0
+>         ELSE IF ( z2 >= z_burn_max .AND. z1 <  z_burn_max ) THEN
+>           prop_cs_burnt = (z_burn_max - z1) / (z2 - z1)
+>         END IF
+>       ELSE
+>         prop_cs_burnt = 1.0
+>       END IF
+> 
+>       c_soil_dpm_gb(i) = c_soil_dpm_gb(i) + cs_pool_soilt(i,m,n,1) *           &
+>                                                                   prop_cs_burnt
+>       c_soil_rpm_gb(i) = c_soil_rpm_gb(i) + cs_pool_soilt(i,m,n,2) *           &
+>                                                                   prop_cs_burnt
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_fire_inferno_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_fire_inferno_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

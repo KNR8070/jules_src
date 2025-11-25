@@ -1,0 +1,73 @@
+Patch stub generated: 2025-11-25T12:09:12.258745 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil/calc_zw_inund_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/calc_zw_inund_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 18
+  - removed lines (<): 19
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil/calc_zw_inund_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/calc_zw_inund_jls_mod.F90
+52c52
+<   bexp(npnts),                                                                 &
+---
+>   bexp(npnts,nshyd),                                                           &
+54c54
+<   sathh(npnts),                                                                &
+---
+>   sathh(npnts,nshyd),                                                          &
+204c204,205
+<     ! Interpolate thetaf to zw and use this in psisat.
+---
+>     ! Interpolate thetaf to zw and use this in psisat
+>     ! and include frozen soil into calc of psisat
+207a209,211
+>       fac1 = MAX(MIN(1.0 - sthfk, 1.0), 0.0)
+>       facb = MAX(fac1**bexp(i,1), EPSILON(1.0))
+>       psisat = -sathh(i,1) / facb
+208a213
+> 
+212a218,220
+>         fac1 = MAX(MIN(1.0 - sthfk, 1.0), 0.0)
+>         facb = MAX(fac1**bexp(i,n), EPSILON(1.0))
+>         psisat = -sathh(i,n) / facb
+214a223
+> 
+216a226,228
+>       fac1 = MAX(MIN(1.0 - sthfk, 1.0), 0.0)
+>       facb = MAX(fac1**bexp(i,nshyd), EPSILON(1.0))
+>       psisat = -sathh(i,nshyd) / facb
+219,228d230
+<     !-------------------------------------------------------------------------
+<     ! Now include frozen soil into calc of PSI_sat:
+<     !-------------------------------------------------------------------------
+<     fac1   = (1.0 - sthfk)
+<     fac1   = MIN(fac1,1.0)
+<     fac1   = MAX(fac1,0.0)
+<     facb   = fac1**bexp(i)
+<     facb   = MAX(facb,EPSILON(1.0))
+<     psisat = -sathh(i) / facb
+< 
+231,236c233,235
+<       fac2       = sthu(i,n)
+<       fac2       = MIN(fac2,1.0)
+<       fac2       = MAX(fac2,0.0)
+<       facb       = fac2**bexp(i)
+<       facb       = MAX(facb,EPSILON(1.0))
+<       psi(n)     = -sathh(i) / facb
+---
+>       fac2 = MAX(MIN(sthu(i,n), 1.0), 0.0)
+>       facb = MAX(fac2**bexp(i,n), EPSILON(1.0))
+>       psi(n) = -sathh(i,n) / facb
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_calc_zw_inund_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_calc_zw_inund_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

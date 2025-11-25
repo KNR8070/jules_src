@@ -1,0 +1,182 @@
+Patch stub generated: 2025-11-25T12:09:12.262134 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil/hydrol_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/hydrol_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 349
+  - removed lines (<): 98
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+- Signature rename: unify timestep_len/timestep or provide wrapper.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil/hydrol_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/hydrol_jls_mod.F90
+25c25
+<      asteps_since_triffid, timestep,                                           &
+---
+>      asteps_since_triffid, n_wtrac_jls, timestep, l_lice_surft,                &
+34a35
+>      con_rain_land_wtrac, ls_rain_land_wtrac,                                  &
+36,38c37,40
+<      ecan_surft, ext_irr_soilt,  ext_soilt,                                    &
+<      snowdepth_surft, melt_surft, snow_melt,                                   &
+<      snow_soil_htf,                                                            &
+---
+>      ecan_surft, ext_irr_soilt,  ext_soilt, ecan_surft_wtrac,                  &
+>      ext_soilt_wtrac,                                                          &
+>      snowdepth_surft, melt_surft, snow_melt, melt_surft_wtrac,                 &
+>      snow_melt_wtrac, snow_soil_htf,                                           &
+41,42c43,44
+<      npp_soilt, inlandout_atm_gb,                                              &
+<      canopy_surft, smcl_soilt, sthf_soilt,                                     &
+---
+>      npp_soilt, inlandout_atm_gb, inlandout_atm_gb_wtrac,                      &
+>      canopy_surft, canopy_surft_wtrac, smcl_soilt, sthf_soilt,                 &
+45c47,48
+<      fsat_soilt, fwetl_soilt, sthzw_soilt, zw_soilt,                           &
+---
+>      smcl_soilt_wtrac, sthf_soilt_wtrac, sthu_soilt_wtrac,                     &
+>      fsat_soilt, fwetl_soilt, sthzw_soilt, zw_soilt, sthzw_soilt_wtrac,        &
+54c57,58
+<      w_flux_soilt, qbase_soilt, qbase_l_soilt, qbase_zw_soilt,                 &
+---
+>      w_flux_soilt, surf_roff_gb_wtrac, sub_surf_roff_gb_wtrac, qbase_soilt,    &
+>      qbase_l_soilt, qbase_zw_soilt,                                            &
+59a64,65
+> USE ancil_info,               ONLY: dim_cslayer, nsoilt
+> USE calc_baseflow_jules_mod,  ONLY: calc_baseflow_jules
+62,64c68,71
+< USE surf_hyd_mod,             ONLY: surf_hyd
+< USE soilt_mod,                ONLY: soilt
+< USE soilmc_mod,               ONLY: soilmc
+---
+> USE elev_htc_mod,             ONLY: elev_htc
+> USE ereport_mod,              ONLY: ereport
+> USE ice_htc_mod,              ONLY: ice_htc
+> USE n_leach_mod,              ONLY: n_leach
+67a75
+> USE soil_hyd_wtrac_mod,       ONLY: soil_hyd_wtrac
+69,80c77,82
+< USE ice_htc_mod,              ONLY: ice_htc
+< USE calc_baseflow_jules_mod,  ONLY: calc_baseflow_jules
+< USE n_leach_mod,              ONLY: n_leach
+< 
+< !Use in relevant variables
+< USE ancil_info,               ONLY:                                            &
+<   nsoilt
+< 
+< USE jules_hydrology_mod, ONLY:                                                 &
+<   l_wetland_unfrozen, ti_max, zw_max
+< 
+< USE ancil_info, ONLY: dim_cslayer
+---
+> USE soil_htc_wtrac_mod,       ONLY: soil_htc_wtrac
+> USE soilmc_mod,               ONLY: soilmc
+> USE soilt_mod,                ONLY: soilt
+> USE surf_hyd_mod,             ONLY: surf_hyd
+> USE um_types,                 ONLY: real_jlslsm
+> USE water_constants_mod,      ONLY: rho_water  ! Density of pure water (kg/m3).
+82c84,88
+< USE elev_htc_mod, ONLY: elev_htc
+---
+> USE jules_hydrology_mod,      ONLY: l_wetland_unfrozen, ti_max, zw_max
+> USE jules_vegetation_mod,     ONLY: l_nitrogen
+> USE jules_irrig_mod,          ONLY: l_irrig_dmd
+> USE jules_surface_mod,        ONLY: l_elev_land_ice
+> USE jules_surface_types_mod,  ONLY: ntype
+86c92
+<   soil_model_ecosse, soil_model_rothc, soil_model_1pool,                       &
+---
+>   soil_model_ecosse, soil_model_4pool, soil_model_1pool,                       &
+95,105c101,103
+< USE jules_vegetation_mod, ONLY: l_nitrogen
+< 
+< USE jules_irrig_mod, ONLY: l_irrig_dmd
+< 
+< USE jules_surface_mod, ONLY: l_elev_land_ice
+< 
+< USE ereport_mod, ONLY: ereport
+< 
+< USE water_constants_mod, ONLY:                                                 &
+<   rho_water  ! Density of pure water (kg/m3).
+< 
+---
+> USE jules_water_tracers_mod, ONLY: l_wtrac_jls
+> USE wtrac_hyd_mod,           ONLY: wtrac_hy_type, wtrac_alloc_hyd,             &
+>                                    wtrac_dealloc_hyd
+108d105
+< USE model_time_mod, ONLY: timestep_len
+114,115d110
+< USE um_types, ONLY: real_jlslsm
+< 
+142c137
+<   asteps_since_triffid
+---
+>   asteps_since_triffid,                                                        &
+143a139,140
+>   n_wtrac_jls
+>     ! Number of water tracers
+161c158
+< 
+---
+> LOGICAL, INTENT(IN) :: l_lice_surft(ntype)
+220c217
+<   surf_ht_flux_ld(land_pts)
+---
+>   surf_ht_flux_ld(land_pts),                                                   &
+221a219,222
+>   con_rain_land_wtrac(land_pts,n_wtrac_jls),                                   &
+>     ! Water tracer convective rain (kg/m2/s).
+>   ls_rain_land_wtrac(land_pts,n_wtrac_jls)
+>     ! Water tracer large-scale rain (kg/m2/s).
+229c230
+<   ext_soilt(land_pts,nsoilt,sm_levels)
+---
+>   ext_soilt(land_pts,nsoilt,sm_levels),                                        &
+230a232,235
+>   ecan_surft_wtrac(land_pts,nsurft,n_wtrac_jls),                               &
+>     ! Water tracer canopy evaporation from land tiles (kg/m2/s).
+>   ext_soilt_wtrac(land_pts,nsoilt,sm_levels,n_wtrac_jls)
+>     ! Extraction of water tracer from each soil layer (kg/m2/s).
+240c245
+<   snow_soil_htf(land_pts,nsurft)
+---
+>   snow_soil_htf(land_pts,nsurft),                                              &
+241a247,250
+>   melt_surft_wtrac(land_pts,nsurft,n_wtrac_jls),                               &
+>     ! Water tracer snowmelt on tiles (kg/m2/s).
+>   snow_melt_wtrac(land_pts,n_wtrac_jls)
+>     ! Water tracer snowmelt (kg/m2/s).
+265c274
+<   inlandout_atm_gb(land_pts)
+---
+>   inlandout_atm_gb(land_pts),                                                  &
+266a276,278
+>   inlandout_atm_gb_wtrac(land_pts,n_wtrac_jls)
+>     ! IN TRIP inland basin water tracer outflow for land points only
+>     ! (kg/m2/s=mm)
+274c286
+<   canopy_surft(land_pts,nsurft)
+---
+>   canopy_surft(land_pts,nsurft),                                               &
+275a288,289
+>   canopy_surft_wtrac(land_pts,nsurft,n_wtrac_jls)
+>     ! Canopy water tracer content for land tiles (kg/m2).
+299c313
+<   tsurf_elev_surft(land_pts,nsurft)
+---
+>   tsurf_elev_surft(land_pts,nsurft),                                           &
+300a315,322
+>   smcl_soilt_wtrac(land_pts,nsoilt,sm_levels,n_wtrac_jls),                     &
+>     ! Soil moisture content of each layer (kg/m2).
+>   sthf_soilt_wtrac(land_pts,nsoilt,sm_levels,n_wtrac_jls),                     &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_hydrol_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_hydrol_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

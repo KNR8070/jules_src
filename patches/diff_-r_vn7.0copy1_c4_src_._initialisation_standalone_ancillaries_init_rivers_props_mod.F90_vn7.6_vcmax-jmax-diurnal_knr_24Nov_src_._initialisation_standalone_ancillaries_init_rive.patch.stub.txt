@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.179726 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/ancillaries/init_rivers_props_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/ancillaries/init_rivers_props_mod.F90
+
+SUMMARY:
+  - added lines (>): 3300
+  - removed lines (<): 872
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Namelist/IO changes: reconcile derived types and broadcast logic.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/ancillaries/init_rivers_props_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/ancillaries/init_rivers_props_mod.F90
+10c10
+< IMPLICIT NONE
+---
+> USE model_interface_mod, ONLY: identifier_len
+12c12
+< CONTAINS
+---
+> USE jules_rivers_mod, ONLY: inland_drainage, river_mouth, sea
+14c14
+< SUBROUTINE init_rivers_props(rivers, rivers_data)
+---
+> USE logging_mod, ONLY: log_fatal, log_info, log_warn
+16,17c16
+< USE ancil_namelist_mod, ONLY: check_namelist_values, initialise_namelist_vars, &
+<                               set_constant_vars, set_file_vars
+---
+> USE missing_data_mod, ONLY: imdi, rmdi
+19c18
+< USE mpi, ONLY: mpi_comm_world
+---
+> USE string_utils_mod, ONLY: to_string
+21c20
+< USE io_constants, ONLY: max_sdf_name_len, max_file_name_len, namelist_unit
+---
+> USE um_types, ONLY: real_jlslsm
+23c22
+< USE grid_utils_mod, ONLY: grid_create, grid_info
+---
+> IMPLICIT NONE
+25,28c24,80
+< USE input_mod, ONLY:                                                           &
+<     od_grid => grid,                                                           &
+<     dummy_grid => grid,                                                        &
+<     use_subgrid
+---
+> !------------------------------------------------------------------------------
+> ! Terminology and grids used:
+> ! Land grid:
+> !   the 2-D grid used by JULES (not rivers) and on which land points sit.
+> !   If JULES is using a 1-D grid, the model grid is the notional 2D grid
+> !   across which the points can be scattered.
+> ! River input grid:
+> !   the 2-D river input grid (as held in ancillary files).
+> ! River grid:
+> !   the 2-D river grid. In many configurations this is identical to the river
+> !   input grid, but in others the input grid is transformed (e.g. the order
+> !   of the rows is reversed and/or the columns of a global grid have undergone
+> !   a cyclic shift).
+> ! River domain:
+> !   that part of the river grid that is scanned for river points.
+> !   The size and location of this depends on the configuration, but ideally it
+> !   should be just large enough to cover all land points.
+> ! River points:
+> !    the points within the river domain at which rivers are modelled.
+> !------------------------------------------------------------------------------
+> 
+> !------------------------------------------------------------------------------
+> ! Scalar parameters.
+> !------------------------------------------------------------------------------
+> ! The values of dir_mouth and dir_inland_drainage should differ and should not
+> ! be in the range 1:SIZE(flow_dir_delta,1), i.e. not in the range of values
+> ! used to encode the flow directions.
+> INTEGER, PARAMETER :: dir_mouth = 9
+>   ! The value of the flow direction field that indicates a river mouth.
+> INTEGER, PARAMETER :: dir_inland_drainage = 10
+>   ! The value of the flow direction field that indicates an inland drainage
+>   ! point, i.e. an endorheic catchment.
+> 
+> INTEGER, PARAMETER :: land_off_domain = sea + 1
+>     ! The value of river_mask that is used to indicate a land point (according
+>     ! to the river ancillary) that is outside of the valid river domain, i.e.
+>     ! it is not in the area covered by land and hence cannot become a river
+>     ! point. This value must not be either of sea or land_in_domain.
+> 
+> INTEGER, PARAMETER :: land_in_domain = land_off_domain + 1
+>     ! The value of river_mask that is used to indicate a land point (according
+>     ! to the river ancillary) that is inside the valid river domain, i.e. it is
+>     ! in the area covered by land and hence can become a river point.
+>     ! This value must not be either sea or land_off_domain.
+> 
+> INTEGER, PARAMETER :: nvars_max = 6
+>   ! The maximum possible number of ancillary variables that are read in.
+> 
+> REAL(KIND=real_jlslsm), PARAMETER :: frac_toler = 1.0e-3
+>   ! Tolerance (fraction of a gridbox) used when testing whether model points
+>   ! lie on a regular grid, if grids have the same resolution, and when setting
+>   ! some bounding values.
+> 
+> LOGICAL, PARAMETER :: l_use_direction = .TRUE.
+>   ! Parameter indicating that we are provided with a flow direction ancillary.
+>   ! At present this is always the case, but anticipated developments will
+>   ! create a need to start from nextx & nexty fields.
+30c82,84
+< USE missing_data_mod, ONLY: imdi, rmdi
+---
+> LOGICAL ::                                                                     &
+>   l_riv_number = .FALSE.
+>     ! Flag indicating if river number ancillary has been specified.
+32c86,114
+< USE ancil_info, ONLY: land_pts
+---
+> !------------------------------------------------------------------------------
+> ! Array parameters.
+> !------------------------------------------------------------------------------
+> INTEGER, PARAMETER :: flow_dir_river(10) =                                     &
+>   [ 1, 2, 3, 4, 5, 6, 7, 8, dir_mouth, dir_inland_drainage ]
+>     ! The values of flow direction that are acceptable for a river point.
+>     ! Effectively these also the only values that indicate land points in the
+>     ! flow direction field. The first 8 places represent "compass directions"
+>     ! for the 8 points immediately neighbouring a given point and these should
+>     ! be >0. All values should be unique.
+> 
+> INTEGER, PARAMETER :: flow_dir_river_edge(8) = -flow_dir_river(1:8)
+>   ! Values of nextx_grid that are used to indicate flow across the edge of the
+>   ! river domain or grid. These are -1 * values of flow_dir_river that indicate
+>   ! a "physical" flow direction and as such will have values <0.
+> 
+> !------------------------------------------------------------------------------
+> ! Scalar variables.
+> !------------------------------------------------------------------------------
+> INTEGER :: nvars_required
+>   ! The number of routing variables that are required in this configuration.
+> 
+> !------------------------------------------------------------------------------
+> ! Array variables.
+> !------------------------------------------------------------------------------
+> INTEGER, ALLOCATABLE :: direction_grid(:,:)
+>   ! Integer version of rivers_dir (the river routing direction index).
+>   ! We use the REAL version for i.o (JULES cannot read an integer ancillary
+>   ! field) but thereafter the integer version is easier to use.
+34c116,128
+< USE logging_mod, ONLY: log_info, log_warn, log_fatal
+---
+> INTEGER, ALLOCATABLE :: grid_riv_pt_number(:,:)
+>   ! Map full river grid to river points. For each location on the grid, this
+>   ! is the river point number.
+> 
+> INTEGER, ALLOCATABLE :: nextx_grid(:,:)
+>   ! x index of the next downstream point.
+> 
+> INTEGER, ALLOCATABLE :: nexty_grid(:,:)
+>   ! y index of the next downstream point.
+> 
+> INTEGER, ALLOCATABLE :: river_mask(:,:)
+>   ! Indicates type of each point.
+>   ! Values are sea, land_off_domain or land_in_domain.
+36c130,131
+< USE fill_variables_from_file_mod, ONLY: fill_variables_from_file
+---
+> CHARACTER(LEN=identifier_len) :: required_vars(nvars_max)
+>   ! The variable identifiers of the required variables
+38c133,134
+< USE string_utils_mod, ONLY: to_string
+---
+> PRIVATE  !  private scope by default
+> PUBLIC init_rivers_props
+40c136
+< USE templating_mod, ONLY: tpl_has_var_name
+---
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_ancillaries_init_rivers_props_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_ancillaries_init_rive.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

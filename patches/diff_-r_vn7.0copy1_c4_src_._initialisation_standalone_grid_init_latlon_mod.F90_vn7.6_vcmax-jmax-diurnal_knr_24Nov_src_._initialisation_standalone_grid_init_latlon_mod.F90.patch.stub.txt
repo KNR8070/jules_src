@@ -1,0 +1,100 @@
+Patch stub generated: 2025-11-25T12:09:12.184529 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/grid/init_latlon_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/grid/init_latlon_mod.F90
+
+SUMMARY:
+  - added lines (>): 43
+  - removed lines (<): 14
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/grid/init_latlon_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/grid/init_latlon_mod.F90
+12,13c12,13
+< LOGICAL :: l_const_latlon
+<   ! TRUE if at least one of latitude and longitude is set using a constant.
+---
+> LOGICAL :: l_const_coord
+>   ! TRUE if at least one coordinate is set using a constant.
+30a31
+> USE update_mod, ONLY: l_imogen
+35c36,37
+<       grid_lon => longitude
+---
+>       grid_lon => longitude, grid_x_coord => projection_x_coord,               &
+>       grid_y_coord => projection_y_coord, l_coord_latlon
+66c68
+< INTEGER, PARAMETER :: max_vars = 3
+---
+> INTEGER, PARAMETER :: max_vars = 5
+101c103,104
+< ! Definition of the jules_latlon namelist
+---
+> ! Definition of the jules_latlon namelist. This also uses l_coord_latlon from
+> ! a module.
+131c134,135
+<                           use_file, var_name, tpl_name, const_val
+---
+>                           use_file, var_name, tpl_name, const_val,             &
+>                           l_coord_latlon
+161a166,172
+> ! Projection coordinates are always allocated, though if l_coord_latlon=T
+> ! the coordinates are simply a copy of latitude and longitude.
+> ALLOCATE(grid_x_coord(input_grid%nx,input_grid%ny), STAT = ERROR)
+> error_sum = error_sum + ERROR
+> ALLOCATE(grid_y_coord(input_grid%nx,input_grid%ny), STAT = ERROR)
+> error_sum = error_sum + ERROR
+> 
+193,194c204,215
+< ! If irrigation is used, add gridbox area (unless it will be read from dump).
+< IF ( l_water_irrigation ) THEN
+---
+> ! If the grid is not defined by latitude and longitude, add projection
+> ! coordinates, regardless of the value of read_from_dump.
+> IF ( .NOT. l_coord_latlon ) THEN
+>   nvars_required = nvars_required + 1
+>   required_vars(nvars_required) = 'projection_x_coord'
+>   nvars_required = nvars_required + 1
+>   required_vars(nvars_required) = 'projection_y_coord'
+> END IF
+> 
+> ! If irrigation or imogen is used, add gridbox area
+> ! (unless it will be read from dump).
+> IF ( l_water_irrigation .OR. l_imogen) THEN
+223,225c244,245
+< ! Initialise flag to show that neither latitude nor longitude is set using a
+< ! constant.
+< l_const_latlon = .FALSE.
+---
+> ! Initialise flag to show that no coordinates were set using constants.
+> l_const_coord = .FALSE.
+256c276
+<       ! Set flag if a constant value has been used for latitude or longitude.
+---
+>       ! Set flag if a constant value has been used for a coordinate.
+258,259c278,280
+<       CASE ( 'latitude', 'longitude' )
+<         l_const_latlon = .TRUE.
+---
+>       CASE ( 'latitude', 'longitude', 'projection_x_coord',                    &
+>              'projection_y_coord' )
+>         l_const_coord = .TRUE.
+311a333,340
+> END IF
+> 
+> !-----------------------------------------------------------------------------
+> ! Copy latitude and longitude into coordinate variables, if required.
+> !-----------------------------------------------------------------------------
+> IF ( l_coord_latlon ) THEN
+>   grid_x_coord(:,:) = grid_lon(:,:)
+>   grid_y_coord(:,:) = grid_lat(:,:)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_grid_init_latlon_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_grid_init_latlon_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

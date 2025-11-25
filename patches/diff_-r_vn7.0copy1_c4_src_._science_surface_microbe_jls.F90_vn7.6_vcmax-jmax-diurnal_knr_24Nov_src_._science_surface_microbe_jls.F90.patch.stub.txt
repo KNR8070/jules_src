@@ -1,0 +1,86 @@
+Patch stub generated: 2025-11-25T12:09:12.282905 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/microbe_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/microbe_jls.F90
+
+SUMMARY:
+  - added lines (>): 16
+  - removed lines (<): 16
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/microbe_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/microbe_jls.F90
+21c21
+< SUBROUTINE microbe (land_pts,dim_cs1,dim_cs2,l_q10,cs,                         &
+---
+> SUBROUTINE microbe (land_pts,dim_cs1,l_q10,cs,                                 &
+27c27
+<    soil_model_1pool, soil_model_rothc,                                         &
+---
+>    soil_model_1pool, soil_model_4pool,                                         &
+32c32
+<    kaps_roth
+---
+>    kaps_4pool
+51c51
+< ,dim_cs1, dim_cs2           ! IN soil carbon dimensions
+---
+> ,dim_cs1                    ! IN soil carbon dimensions
+59c59
+< !                                 !    For RothC (dim_cs1=4), the pools
+---
+> !                                 !    For 4-pool soil C (dim_cs1=4), the pools
+61c61
+< ,veg_frac(dim_cs2)                                                             &
+---
+> ,veg_frac(land_pts)                                                            &
+197c197
+<   ! use RothC temperature formula (using TSOIL for now...)
+---
+>   ! use 4-pool temperature formula (using TSOIL for now...)
+212c212
+< !        only set for RothC runs.
+---
+> !        only set for 4-pool soil C runs.
+214c214
+< IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+> IF ( soil_bgc_model == soil_model_4pool ) THEN
+222c222
+< ! set 1-D or 4-D soil resp depending on whether using RothC or not
+---
+> ! set 1-D or 4-D soil resp depending on whether using 4-pools or not
+224c224
+<   IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+>   IF ( soil_bgc_model == soil_model_4pool ) THEN
+228c228
+<         resp_s(l,1,n) = kaps_roth(n) * cs(l,1,n) * fsth(l,1) * ftemp(l,1) *    &
+---
+>         resp_s(l,1,n) = kaps_4pool(n) * cs(l,1,n) * fsth(l,1) * ftemp(l,1) *   &
+231c231
+<           resp_s(l,j,n) = kaps_roth(n) * cs(l,j,n) * fsth(l,j) * ftemp(l,j) *  &
+---
+>           resp_s(l,j,n) = kaps_4pool(n) * cs(l,j,n) * fsth(l,j) * ftemp(l,j) * &
+257c257
+<   IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+>   IF ( soil_bgc_model == soil_model_4pool ) THEN
+262c262
+<           resp_s(l,1,n) = kaps_roth(n) * cs(l,1,n) * fsth(l,2) *               &
+---
+>           resp_s(l,1,n) = kaps_4pool(n) * cs(l,1,n) * fsth(l,2) *              &
+265c265
+<           resp_s(l,1,n) = kaps_roth(n) * cs(l,1,n) * fsth(l,1) *               &
+---
+>           resp_s(l,1,n) = kaps_4pool(n) * cs(l,1,n) * fsth(l,1) *              &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_microbe_jls.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_microbe_jls.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

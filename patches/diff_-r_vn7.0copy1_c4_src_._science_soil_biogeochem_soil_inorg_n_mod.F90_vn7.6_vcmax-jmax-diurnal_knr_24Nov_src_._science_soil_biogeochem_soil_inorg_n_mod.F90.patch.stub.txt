@@ -1,0 +1,66 @@
+Patch stub generated: 2025-11-25T12:09:12.268315 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil_biogeochem/soil_inorg_n_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil_biogeochem/soil_inorg_n_mod.F90
+
+SUMMARY:
+  - added lines (>): 11
+  - removed lines (<): 11
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil_biogeochem/soil_inorg_n_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil_biogeochem/soil_inorg_n_mod.F90
+58c58
+<   soil_model_rothc,                                                            &
+---
+>   soil_model_4pool,                                                            &
+125c125
+< IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+> IF ( soil_bgc_model == soil_model_4pool ) THEN
+152c152
+< END IF  !  soil_bgc_model = RothC
+---
+> END IF  !  soil_bgc_model = 4-pool soil C
+172c172
+<   soil_model_ecosse, soil_model_rothc,                                         &
+---
+>   soil_model_ecosse, soil_model_4pool,                                         &
+276c276
+< IF ( soil_bgc_model == soil_model_rothc .OR.                                   &
+---
+> IF ( soil_bgc_model == soil_model_4pool .OR.                                   &
+358c358
+<   soil_model_ecosse, soil_model_rothc,                                         &
+---
+>   soil_model_ecosse, soil_model_4pool,                                         &
+477c477
+< IF ( soil_bgc_model == soil_model_rothc .OR.                                   &
+---
+> IF ( soil_bgc_model == soil_model_4pool .OR.                                   &
+498c498
+<     IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+>     IF ( soil_bgc_model == soil_model_4pool ) THEN
+584c584
+<   soil_model_ecosse, soil_model_rothc,                                         &
+---
+>   soil_model_ecosse, soil_model_4pool,                                         &
+731c731
+<     IF ( soil_bgc_model == soil_model_rothc .OR.                               &
+---
+>     IF ( soil_bgc_model == soil_model_4pool .OR.                               &
+783c783
+<   IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+>   IF ( soil_bgc_model == soil_model_4pool ) THEN
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_biogeochem_soil_inorg_n_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_biogeochem_soil_inorg_n_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

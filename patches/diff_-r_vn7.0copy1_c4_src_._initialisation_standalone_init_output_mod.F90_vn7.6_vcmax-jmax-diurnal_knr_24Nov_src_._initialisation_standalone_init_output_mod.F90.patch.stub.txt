@@ -1,0 +1,182 @@
+Patch stub generated: 2025-11-25T12:09:12.193828 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_output_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_output_mod.F90
+
+SUMMARY:
+  - added lines (>): 140
+  - removed lines (<): 41
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Namelist/IO changes: reconcile derived types and broadcast logic.
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_output_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_output_mod.F90
+49a50,51
+> USE jules_rivers_mod, ONLY: l_outflow_per_river
+> 
+53a56,57
+> USE jules_print_mgr, ONLY: jules_message, jules_format
+> 
+79a84,86
+> LOGICAL :: l_outflow_per_river_check = .FALSE.
+>     ! Check that both ancillary and diagnostic/send field has been specified.
+> 
+133c140,142
+< NAMELIST  / jules_output_profile/ profile_name, output_initial, output_spinup, &
+---
+> CHARACTER(LEN=*), PARAMETER :: RoutineName='INIT_OUTPUT'
+> 
+> NAMELIST  /jules_output_profile/ profile_name, output_initial, output_spinup,  &
+154c163
+<   CALL log_fatal("init_output",                                                &
+---
+>   CALL log_fatal(RoutineName,                                                  &
+162c171
+< CALL log_info("init_output", "Reading JULES_OUTPUT namelist...")
+---
+> CALL log_info(RoutineName, "Reading JULES_OUTPUT namelist...")
+165c174
+<   CALL log_fatal("init_output",                                                &
+---
+>   CALL log_fatal(RoutineName,                                                  &
+175c184
+< IF ( LEN_TRIM(run_id) == 0 ) CALL log_fatal("init_output", "No run_id given")
+---
+> IF ( LEN_TRIM(run_id) == 0 ) CALL log_fatal(RoutineName, "No run_id given")
+186c195
+<   CALL log_fatal("init_output",                                                &
+---
+>   CALL log_fatal(RoutineName,                                                  &
+195,196c204
+<   CALL log_warn(                                                               &
+<     "init_output",                                                             &
+---
+>   CALL log_warn(RoutineName,                                                   &
+205c213
+<   CALL log_warn("init_output",                                                 &
+---
+>   CALL log_warn(RoutineName,                                                   &
+229c237
+<   output_type(:)  = 'S'
+---
+>   output_type(:)  = ''
+232c240
+<   CALL log_info("init_output", "Reading JULES_OUTPUT_PROFILE namelist...")
+---
+>   CALL log_info(RoutineName, "Reading JULES_OUTPUT_PROFILE namelist...")
+236c244
+<     CALL log_fatal("init_output",                                              &
+---
+>     CALL log_fatal(RoutineName,                                                &
+246,247c254,255
+<   CALL check_output_vars( nvars, var, var_name, output_type, any_river_out )
+< 
+---
+>   CALL check_output_vars( nvars, var, var_name, output_type, any_river_out,    &
+>                           l_outflow_per_river_check )
+252c260
+<     CALL log_error("init_output",                                              &
+---
+>     CALL log_error(RoutineName,                                                &
+283a292,301
+> ! If riv_number_file specified in error reset switch as no need to output
+> ! rivers_outflow_rp to dump and could also probably reduce the allocation of
+> ! rivers%rivers_outflow_number_rp to nominal size.
+> IF ( .NOT. l_outflow_per_river_check .AND. l_outflow_per_river ) THEN
+>   WRITE(jules_message,*)                                                       &
+>      "outflow_per_river not requested; " //                                    &
+>      "river number ancillary specified in error."
+>   CALL log_warn(RoutineName, jules_message)
+>   l_outflow_per_river = .FALSE.
+> END IF
+294c312
+<   CALL log_fatal("init_output",                                                &
+---
+>   CALL log_fatal(RoutineName,                                                  &
+306c324,325
+< SUBROUTINE check_output_vars( nvars, var, var_name, output_type, any_river_out )
+---
+> SUBROUTINE check_output_vars( nvars, var, var_name, output_type,               &
+>                               any_river_out, l_outflow_per_river_check )
+309a329,330
+> USE jules_model_environment_mod, ONLY: l_oasis_rivers
+> 
+312c333
+< USE jules_soil_biogeochem_mod, ONLY: soil_model_ecosse, soil_model_rothc,      &
+---
+> USE jules_soil_biogeochem_mod, ONLY: soil_model_ecosse, soil_model_4pool,      &
+320c341
+<     photo_acclim_model
+---
+>     photo_acclim_model, l_sugar, stomata_model, stomata_sox
+326c347,348
+< USE jules_rivers_mod, ONLY: l_rivers, i_river_vn, rivers_rfm, rivers_trip
+---
+> USE jules_rivers_mod, ONLY: l_rivers, l_riv_overbank, l_outflow_per_river,     &
+>     i_river_vn, rivers_rfm, rivers_trip
+328c350
+< USE logging_mod, ONLY: log_error
+---
+> USE jules_deposition_mod, ONLY: l_deposition, l_deposition_flux
+330c352
+< USE overbank_inundation_mod, ONLY: l_riv_overbank
+---
+> USE logging_mod, ONLY: log_error, log_warn, log_info, log_fatal
+335a358,363
+> USE jules_print_mgr, ONLY: jules_message
+> 
+> USE string_utils_mod, ONLY: to_string
+> 
+> USE parallel_mod, ONLY: is_master_task
+> 
+361c389
+<   any_river_out
+---
+>   any_river_out,                                                               &
+362a391,392
+>   l_outflow_per_river_check
+>     ! Check that both ancillary and diagnostic/send field has been specified.
+385a416,431
+> !---------------------------------------------------------------------------
+> ! First check output variables requiring extra ancillaries.
+> !---------------------------------------------------------------------------
+> IF ( is_master_task() ) THEN
+>   ! Rivers is only called on the master task
+>   IF ( l_outflow_per_river ) THEN
+>     IF ( ANY( var(:) == 'outflow_per_river' ) .OR. l_oasis_rivers ) THEN
+>       l_outflow_per_river_check = .TRUE.
+>     END IF
+>   ELSE IF ( ANY( var(:) == 'outflow_per_river' ) ) THEN
+>     WRITE(jules_message,*)                                                     &
+>        'outflow_per_river requested without a river number ancillary specified.'
+>     CALL log_fatal(RoutineName, jules_message)
+>   END IF
+> END IF
+> 
+403a450,461
+>   ! Coordinates are automatically included in output files and should not be
+>   ! requested separately.
+>   !---------------------------------------------------------------------------
+>   SELECT CASE ( var(j) )
+>   CASE ( 'latitude', 'longitude', 'projection_x_coord', 'projection_y_coord',  &
+>          'rivers_lat_rp', 'rivers_lon_rp', 'rivers_x_coord_rp',                &
+>          'rivers_y_coord_rp' )
+>     remove_var = .TRUE.
+>     message    = 'Coordinates are automatically included in files.'
+>   END SELECT
+> 
+>   !---------------------------------------------------------------------------
+413,416d470
+< 
+<     CASE DEFAULT
+<       remove_var = .FALSE.
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_init_output_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_init_output_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

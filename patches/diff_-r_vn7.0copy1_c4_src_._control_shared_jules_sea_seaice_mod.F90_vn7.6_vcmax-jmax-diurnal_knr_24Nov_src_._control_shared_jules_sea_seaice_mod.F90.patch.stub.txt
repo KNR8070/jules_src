@@ -1,0 +1,27 @@
+Patch stub generated: 2025-11-25T12:09:12.125135 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_sea_seaice_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_sea_seaice_mod.F90
+
+SUMMARY:
+  - added lines (>): 4
+  - removed lines (<): 0
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_sea_seaice_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_sea_seaice_mod.F90
+122a123,126
+> ! The following setting is needed for setting up (UM-JULES) pseudo level IDs
+> ! for water tracer fields on multiple sea ice categories.  It is not used
+> ! anywhere else in the code.
+> INTEGER, PARAMETER :: nice_max=25 ! maximum number of sea ice categories
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_jules_sea_seaice_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_jules_sea_seaice_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

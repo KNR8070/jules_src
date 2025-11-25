@@ -1,0 +1,91 @@
+Patch stub generated: 2025-11-25T12:09:12.181619 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/ancillaries/init_urban_props_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/ancillaries/init_urban_props_mod.F90
+
+SUMMARY:
+  - added lines (>): 19
+  - removed lines (<): 35
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/ancillaries/init_urban_props_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/ancillaries/init_urban_props_mod.F90
+26a27
+> USE calc_urban_aero_fields_mod,     ONLY: calc_urban_aero_fields
+33c34
+< USE ancil_info, ONLY: land_pts, surft_pts
+---
+> USE ancil_info, ONLY: land_pts
+35c36
+< USE jules_surface_types_mod, ONLY: ice, urban, urban_canyon
+---
+> USE jules_surface_types_mod, ONLY: urban_canyon, urban_roof
+39,40d39
+< USE urban_param_mod, ONLY: cdz, kappa2, a, z0m_mat
+< 
+83,87d81
+< REAL(KIND=real_jlslsm) :: sc_hwr(land_pts), d_h(land_pts)  ! Work variables
+< REAL(KIND=real_jlslsm) :: lambdaf, lambdap
+< 
+< INTEGER :: i,l  ! Index variables
+< 
+157,159c151,153
+< CALL tilepts(land_pts, ainfo%frac_surft, surft_pts, ainfo%surft_index,         &
+<              ainfo%l_lice_point)
+< IF ( surft_pts(urban_canyon) == 0 )                                            &
+---
+> CALL tilepts(land_pts, ainfo%frac_surft, ainfo%surft_pts, ainfo%surft_index,   &
+>              ainfo%l_lice_point, ainfo%l_lice_surft)
+> IF ( ainfo%surft_pts(urban_canyon) == 0 )                                      &
+189,191c183,191
+<   ! For urban2t, we only need wrr
+<   nvars_required = 1
+<   required_vars(1) = 'wrr'
+---
+>   ! For urban2t, we only need wrr if there are no urban_roof points. This
+>   ! indicates that total urban fraction is contained in frac(urban_canyon)
+>   IF ( ainfo%surft_pts(urban_roof) == 0 .AND.                                  &
+>        ainfo%surft_pts(urban_canyon) > 0 ) THEN
+>     CALL log_info(RoutineName,                                                 &
+>        "wrr is a required variable as total urban fraction supplied")
+>     nvars_required = 1
+>     required_vars(1) = 'wrr'
+>   END IF
+218c218
+<                                   urban_param)
+---
+>                                   ainfo%surft_pts, urban_param)
+222,240c222,224
+<   ! Macdonald Formulation
+<   CALL log_info(RoutineName, "Using MacDonald formulation")
+< 
+<   sc_hwr(:) = 0.5 * ( urban_param%hwr_gb(:) / (2.0 * ATAN(1.0)) )
+<   d_h(:)    = 1.0 - urban_param%wrr_gb(:) *                                    &
+<               ( a**(urban_param%wrr_gb(:) - 1.0) )
+<   DO l = 1,land_pts
+<     IF ( urban_param%wrr_gb(l) > 0.0 .AND. urban_param%wrr_gb(l) < 1.0 ) THEN
+<       urban_param%disp_gb(l) = d_h(l) * urban_param%hgt_gb(l)
+<       urban_param%ztm_gb(l)  = (cdz * (1.0 - d_h(l)) *                         &
+<                    sc_hwr(l) * urban_param%wrr_gb(l) / kappa2)**(-0.5)
+<       urban_param%ztm_gb(l)  = (1.0 - d_h(l)) * EXP(-urban_param%ztm_gb(l))
+<       urban_param%ztm_gb(l)  = urban_param%ztm_gb(l) * urban_param%hgt_gb(l)
+<       urban_param%ztm_gb(l)  = MAX(urban_param%ztm_gb(l), z0m_mat)
+<     ELSE
+<       urban_param%disp_gb(l) = 0.0
+<       urban_param%ztm_gb(l)  = 0.0
+<     END IF
+<   END DO
+---
+>   CALL calc_urban_aero_fields(land_pts, urban_param%wrr_gb,                    &
+>                               urban_param%hwr_gb, urban_param%hgt_gb,          &
+>                               urban_param%ztm_gb, urban_param%disp_gb)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_ancillaries_init_urban_props_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_ancillaries_init_urban.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

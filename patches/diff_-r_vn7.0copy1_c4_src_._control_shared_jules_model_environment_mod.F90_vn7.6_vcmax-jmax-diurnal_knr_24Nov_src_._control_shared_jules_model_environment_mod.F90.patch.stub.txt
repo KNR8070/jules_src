@@ -1,0 +1,66 @@
+Patch stub generated: 2025-11-25T12:09:12.121427 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_model_environment_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_model_environment_mod.F90
+
+SUMMARY:
+  - added lines (>): 29
+  - removed lines (<): 4
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_model_environment_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_model_environment_mod.F90
+40a41,43
+> LOGICAL, PUBLIC :: l_oasis_rivers  = .FALSE.
+>                              ! Internal switch to indicate OASIS-Rivers coupling
+> 
+73c76,77
+<   um_jules         = 1
+---
+>   um_jules         = 1,                                                        &
+>   oasis_coupler    = 2
+89a94,101
+> #elif defined(RIVER_CPL)
+> IF ( l_jules_parent /= oasis_coupler ) THEN
+>   errcode = 20
+>   WRITE(jules_message,'(A,I0)')                                                &
+>      "l_jules_parent should be 2 for OASIS coupler. l_jules_parent = ",        &
+>      l_jules_parent
+>   CALL ereport(RoutineName, errcode, jules_message )
+> END IF
+92c104
+<   errcode = 20
+---
+>   errcode = 30
+101c113
+<   errcode = 30
+---
+>   errcode = 40
+114a127,139
+>   IF ( l_jules_parent == oasis_coupler ) THEN
+>     IF ( lsm_id /= rivers ) THEN
+>       errcode = 50
+>       WRITE(jules_message,'(A)')                                               &
+>          "OASIS coupler can only be used with Rivers-only."
+>       CALL ereport(RoutineName, errcode, jules_message )
+>     ELSE IF ( .NOT. l_oasis_rivers ) THEN
+>       errcode = 60
+>       WRITE(jules_message,'(A)')                                               &
+>          "Internal switch l_oasis_rivers has been set incorrectly"
+>       CALL ereport(RoutineName, errcode, jules_message )
+>     END IF
+>   END IF
+116c141
+<   errcode = 40
+---
+>   errcode = 70
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_jules_model_environment_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_jules_model_environment_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

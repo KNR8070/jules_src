@@ -1,0 +1,158 @@
+Patch stub generated: 2025-11-25T12:09:12.245691 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/radiation/jules_ssi_albedo_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/radiation/jules_ssi_albedo_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 86
+  - removed lines (<): 21
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/radiation/jules_ssi_albedo_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/radiation/jules_ssi_albedo_jls_mod.F90
+53c53,54
+<   sea_index, ssi_index, sice_index_ncat, sice_frac_ncat,                       &
+---
+>   sea_index, ssi_index, sice_index_ncat, sice_frac_ncat, sice_pts_ncat,        &
+>   sea_pts,                                                                     &
+69d69
+< USE ancil_info, ONLY: sea_pts, sice_pts_ncat
+88c88
+<      nice_use
+---
+>      nice_use,                                                                 &
+89a90
+>      sea_pts
+219c220,221
+<   sice_index_ncat(t_i_length * t_j_length,nice)
+---
+>   sice_index_ncat(t_i_length * t_j_length,nice),                               &
+>   sice_pts_ncat(nice)
+243c245
+< INTEGER :: band, n, j, l, ll           ! Loops over points
+---
+> INTEGER :: band, n, j, l, ll, i, k      ! Loops over points
+298,303c300,314
+<   saos_bb(:,:) = 0.0
+<   DO j = 1, n_points
+<     IF (flandg(j) <  1.0) THEN
+<       saos_bb(j, 1) = 0.026 / (cosz(j)**1.7 + 0.065)                           &
+<           +0.15 * (cosz(j) - 0.1) * (cosz(j) - 0.5) * (cosz(j) - 1.0)
+<       saos_bb(j,2) = adifc
+---
+>   DO j = 1, 2
+> !$OMP PARALLEL DO SCHEDULE(STATIC) DEFAULT(NONE) PRIVATE(i)                    &
+> !$OMP SHARED(n_points, saos_bb, j)
+>     DO i = 1, n_points
+>       saos_bb(i,j) = 0.0
+>     END DO
+> !$OMP END PARALLEL DO
+>   END DO
+> !$OMP PARALLEL DO SCHEDULE(STATIC) DEFAULT(NONE) PRIVATE(i)                    &
+> !$OMP SHARED(n_points, saos_bb, flandg, cosz)
+>   DO i = 1, n_points
+>     IF (flandg(i) <  1.0) THEN
+>       saos_bb(i, 1) = 0.026 / (cosz(i)**1.7 + 0.065)                           &
+>           +0.15 * (cosz(i) - 0.1) * (cosz(i) - 0.5) * (cosz(i) - 1.0)
+>       saos_bb(i,2) = adifc
+305a317
+> !$OMP END PARALLEL DO
+307c319,328
+<   saos = 0.0
+---
+>   DO k = 1, n_band_dim
+>     DO j = 1, 2
+> !$OMP PARALLEL DO SCHEDULE(STATIC) DEFAULT(NONE) PRIVATE(i)                    &
+> !$OMP SHARED(n_points, j, k, saos)
+>       DO i = 1, n_points
+>         saos(i,j,k) = 0.0
+>       END DO
+> !$OMP END PARALLEL DO
+>     END DO
+>   END DO
+337c358,362
+<   saos_bb(:,:) = 0.0
+---
+>   DO j = 1, 2
+>     DO i = 1, n_points
+>       saos_bb(i,j) = 0.0
+>     END DO
+>   END DO
+348c373,379
+<   saos = 0.0
+---
+>   DO k = 1, n_band_dim
+>     DO j = 1, 2
+>       DO i = 1,n_points
+>         saos(i,j,k) = 0.0
+>       END DO
+>     END DO
+>   END DO
+404c435,441
+<     saos = 0.0
+---
+>     DO k = 1, n_band_dim
+>       DO j = 1, 2
+>         DO i = 1,n_points
+>           saos(i,j,k) = 0.0
+>         END DO
+>       END DO
+>     END DO
+417c454,460
+<     saos = 0.0
+---
+>     DO k = 1, n_band_dim
+>       DO j = 1, 2
+>         DO i = 1,n_points
+>           saos(i,j,k) = 0.0
+>         END DO
+>       END DO
+>     END DO
+434c477,483
+<   saos(:,:,:) = fixed_sea_albedo
+---
+>   DO k = 1, n_band_dim
+>     DO j = 1, 2
+>       DO i = 1,n_points
+>         saos(i,j,k) = fixed_sea_albedo
+>       END DO
+>     END DO
+>   END DO
+441c490,496
+<   saos(:,:,:) = fixed_sea_albedo
+---
+>   DO k = 1, n_band_dim
+>     DO j = 1, 2
+>       DO i = 1,n_points
+>         saos(i,j,k) = fixed_sea_albedo
+>       END DO
+>     END DO
+>   END DO
+496,498c551,563
+< sa_sice (:,:)   = 0.0
+< alb_sicat(:,:,:) = 0.0
+< penabs_rad_frac(:,:,:) = 0.0
+---
+> DO j = 1, 4
+>   DO i = 1, n_points
+>     sa_sice (i,j)   = 0.0
+>   END DO
+> END DO
+> DO k = 1, 4
+>   DO j = 1, nice_use
+>     DO i = 1, t_i_length * t_j_length
+>       alb_sicat(i,j,k) = 0.0
+>       penabs_rad_frac(i,j,k) = 0.0
+>     END DO
+>   END DO
+> END DO
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_radiation_jules_ssi_albedo_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_radiation_jules_ssi_albedo_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

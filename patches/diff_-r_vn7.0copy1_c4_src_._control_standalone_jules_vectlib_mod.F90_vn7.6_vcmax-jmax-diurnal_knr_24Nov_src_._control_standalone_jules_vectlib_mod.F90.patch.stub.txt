@@ -1,0 +1,142 @@
+Patch stub generated: 2025-11-25T12:09:12.148948 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/standalone/jules_vectlib_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/jules_vectlib_mod.F90
+
+SUMMARY:
+  - added lines (>): 30
+  - removed lines (<): 30
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/standalone/jules_vectlib_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/jules_vectlib_mod.F90
+34c34
+< USE um_types, ONLY: REAL64, integer32
+---
+> USE um_types, ONLY: real_64, integer_32
+39c39
+< REAL (KIND=REAL64) :: y(n), x(n)
+---
+> REAL (KIND=real_64) :: y(n), x(n)
+41c41
+< INTEGER (KIND=integer32) :: l_n
+---
+> INTEGER (KIND=integer_32) :: l_n
+77c77
+< USE um_types, ONLY: REAL64, integer32
+---
+> USE um_types, ONLY: real_64, integer_32
+82c82
+< REAL (KIND=REAL64) :: z(n), x(n), y(n), power
+---
+> REAL (KIND=real_64) :: z(n), x(n), y(n), power
+84c84
+< INTEGER (KIND=integer32) :: l_n
+---
+> INTEGER (KIND=integer_32) :: l_n
+123c123
+< USE um_types, ONLY: REAL64, integer32
+---
+> USE um_types, ONLY: real_64, integer_32
+128c128
+< REAL (KIND=REAL64) :: z(n), x(n), y(n)
+---
+> REAL (KIND=real_64) :: z(n), x(n), y(n)
+130c130
+< INTEGER (KIND=integer32) :: l_n
+---
+> INTEGER (KIND=integer_32) :: l_n
+166c166
+< USE um_types, ONLY: REAL64, integer32
+---
+> USE um_types, ONLY: real_64, integer_32
+171c171
+< REAL (KIND=REAL64) :: x(n), y(n)
+---
+> REAL (KIND=real_64) :: x(n), y(n)
+173c173
+< INTEGER (KIND=integer32) :: l_n
+---
+> INTEGER (KIND=integer_32) :: l_n
+210c210
+< USE um_types, ONLY: REAL64, integer32
+---
+> USE um_types, ONLY: real_64, integer_32
+215c215
+< REAL (KIND=REAL64) :: x(n), y(n)
+---
+> REAL (KIND=real_64) :: x(n), y(n)
+217c217
+< INTEGER (KIND=integer32) :: l_n
+---
+> INTEGER (KIND=integer_32) :: l_n
+244c244
+< USE um_types, ONLY: REAL64, integer32
+---
+> USE um_types, ONLY: real_64, integer_32
+249c249
+< REAL (KIND=REAL64) :: x(n), y(n)
+---
+> REAL (KIND=real_64) :: x(n), y(n)
+251c251
+< INTEGER (KIND=integer32) :: l_n
+---
+> INTEGER (KIND=integer_32) :: l_n
+287c287
+< USE um_types, ONLY: REAL64, integer32
+---
+> USE um_types, ONLY: real_64, integer_32
+292c292
+< REAL (KIND=REAL64) :: y(n), x(n)
+---
+> REAL (KIND=real_64) :: y(n), x(n)
+294c294
+< INTEGER (KIND=integer32) :: l_n
+---
+> INTEGER (KIND=integer_32) :: l_n
+330c330
+< USE um_types, ONLY: REAL64, integer32
+---
+> USE um_types, ONLY: real_64, integer_32
+335c335
+< REAL (KIND=REAL64) :: y(n), x(n)
+---
+> REAL (KIND=real_64) :: y(n), x(n)
+337c337
+< INTEGER (KIND=integer32) :: l_n
+---
+> INTEGER (KIND=integer_32) :: l_n
+372c372
+< USE um_types, ONLY: REAL64, integer32
+---
+> USE um_types, ONLY: real_64, integer_32
+377c377
+< REAL (KIND=REAL64) :: y(n), x(n)
+---
+> REAL (KIND=real_64) :: y(n), x(n)
+379c379
+< INTEGER (KIND=integer32) :: l_n
+---
+> INTEGER (KIND=integer_32) :: l_n
+406c406
+< USE um_types, ONLY: REAL64, integer32
+---
+> USE um_types, ONLY: real_64, integer_32
+411c411
+< REAL (KIND=REAL64) :: y(n), x(n)
+---
+> REAL (KIND=real_64) :: y(n), x(n)
+413c413
+< INTEGER (KIND=integer32) :: l_n
+---
+> INTEGER (KIND=integer_32) :: l_n
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_standalone_jules_vectlib_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_standalone_jules_vectlib_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

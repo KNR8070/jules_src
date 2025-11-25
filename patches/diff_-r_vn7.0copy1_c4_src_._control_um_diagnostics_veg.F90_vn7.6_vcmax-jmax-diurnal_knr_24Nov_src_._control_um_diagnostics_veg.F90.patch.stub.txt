@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.159303 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/um/diagnostics_veg.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/um/diagnostics_veg.F90
+
+SUMMARY:
+  - added lines (>): 525
+  - removed lines (<): 33
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/um/diagnostics_veg.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/um/diagnostics_veg.F90
+29c29
+<               land_pts,                                                        &
+---
+>               land_pts, sm_levels,                                             &
+47c47
+<     num_stash_pseudo, si_last
+---
+>     num_stash_pseudo, stash_levels, num_stash_levels, si_last
+57a58
+> USE copydiag_3d_mod, ONLY: copydiag_3d
+77a79,80
+> , sm_levels                                                                    &
+>            ! No of soil carbon levels if l_layeredc=TRUE in UM
+146c149
+< INTEGER :: i,j,l
+---
+> INTEGER :: i,j,k,l
+157c160,161
+<   interp_data(row_length,rows)
+---
+>   interp_data(row_length,rows),                                                &
+>   interp_data_3d(row_length,rows,sm_levels)
+1636c1640
+<     interp_data(i,j) = trif_vars%n_gas_gb(l,1)
+---
+>     interp_data(i,j) = SUM( trif_vars%n_gas_gb(l,:) )
+1674c1678
+<     interp_data(i,j) = trif_vars%n_loss_gb(l) + trif_vars%n_gas_gb(l,1)
+---
+>     interp_data(i,j) = trif_vars%n_loss_gb(l) + SUM(trif_vars%n_gas_gb(l,:))
+1693c1697
+<     interp_data(i,j) = trif_vars%n_loss_gb(l) + trif_vars%n_gas_gb(l,1) +      &
+---
+>     interp_data(i,j) = trif_vars%n_loss_gb(l) + SUM(trif_vars%n_gas_gb(l,:)) + &
+2169c2173
+<     interp_data(i,j) = progs%ns_pool_gb(l,1,1)
+---
+>     interp_data(i,j) = SUM(progs%ns_pool_gb(l,:,1))
+2188c2192
+<     interp_data(i,j) = progs%ns_pool_gb(l,1,2)
+---
+>     interp_data(i,j) = SUM(progs%ns_pool_gb(l,:,2))
+2207c2211
+<     interp_data(i,j) = progs%ns_pool_gb(l,1,3)
+---
+>     interp_data(i,j) = SUM(progs%ns_pool_gb(l,:,3))
+2226c2230
+<     interp_data(i,j) = progs%ns_pool_gb(l,1,4)
+---
+>     interp_data(i,j) = SUM(progs%ns_pool_gb(l,:,4))
+2245c2249
+<     interp_data(i,j) = SUM(progs%ns_pool_gb(l,1,:))
+---
+>     interp_data(i,j) = SUM(progs%ns_pool_gb(l,:,:))
+2284c2288
+<          SUM(progs%ns_pool_gb(l,1,:)) + progs%n_inorg_gb(l) +                  &
+---
+>          SUM(progs%ns_pool_gb(l,:,:)) + progs%n_inorg_gb(l) +                  &
+2547a2552,2553
+> ! If l_layeredc=FALSE, get bulk soil value
+> ! If l_layeredc=TRUE, get top layer soil value
+2559a2566
+>     ! either top soil layer (l_layeredc=true) or bulk soil (l_layeredc=false)
+2578c2585
+<     interp_data(i,j) = trif_vars%immob_n_pot_gb(l,1,1)
+---
+>     interp_data(i,j) = SUM(trif_vars%immob_n_pot_gb(l,:,1))
+2597c2604
+<     interp_data(i,j) = trif_vars%immob_n_pot_gb(l,1,2)
+---
+>     interp_data(i,j) = SUM(trif_vars%immob_n_pot_gb(l,:,2))
+2616c2623
+<     interp_data(i,j) = trif_vars%immob_n_pot_gb(l,1,3)
+---
+>     interp_data(i,j) = SUM(trif_vars%immob_n_pot_gb(l,:,3))
+2635c2642
+<     interp_data(i,j) = trif_vars%immob_n_pot_gb(l,1,4)
+---
+>     interp_data(i,j) = SUM(trif_vars%immob_n_pot_gb(l,:,4))
+2654c2661
+<     interp_data(i,j) = trif_vars%immob_n_pot_gb(l,1,5)
+---
+>     interp_data(i,j) = SUM(trif_vars%immob_n_pot_gb(l,:,5))
+2673c2680
+<     interp_data(i,j) = trif_vars%immob_n_gb(l,1,1)
+---
+>     interp_data(i,j) = SUM(trif_vars%immob_n_gb(l,:,1))
+2692c2699
+<     interp_data(i,j) = trif_vars%immob_n_gb(l,1,2)
+---
+>     interp_data(i,j) = SUM(trif_vars%immob_n_gb(l,:,2))
+2711c2718
+<     interp_data(i,j) = trif_vars%immob_n_gb(l,1,3)
+---
+>     interp_data(i,j) = SUM(trif_vars%immob_n_gb(l,:,3))
+2730c2737
+<     interp_data(i,j) = trif_vars%immob_n_gb(l,1,4)
+---
+>     interp_data(i,j) = SUM(trif_vars%immob_n_gb(l,:,4))
+2749c2756
+<     interp_data(i,j) = trif_vars%immob_n_gb(l,1,5)
+---
+>     interp_data(i,j) = SUM(trif_vars%immob_n_gb(l,:,5))
+2768c2775
+<     interp_data(i,j) = trif_vars%minl_n_pot_gb(l,1,1)
+---
+>     interp_data(i,j) = SUM(trif_vars%minl_n_pot_gb(l,:,1))
+2787c2794
+<     interp_data(i,j) = trif_vars%minl_n_pot_gb(l,1,2)
+---
+>     interp_data(i,j) = SUM(trif_vars%minl_n_pot_gb(l,:,2))
+2806c2813
+<     interp_data(i,j) = trif_vars%minl_n_pot_gb(l,1,3)
+---
+>     interp_data(i,j) = SUM(trif_vars%minl_n_pot_gb(l,:,3))
+2825c2832
+<     interp_data(i,j) = trif_vars%minl_n_pot_gb(l,1,4)
+---
+>     interp_data(i,j) = SUM(trif_vars%minl_n_pot_gb(l,:,4))
+2844c2851
+<     interp_data(i,j) = trif_vars%minl_n_pot_gb(l,1,5)
+---
+>     interp_data(i,j) = SUM(trif_vars%minl_n_pot_gb(l,:,5))
+2863c2870
+<     interp_data(i,j) = trif_vars%minl_n_gb(l,1,1)
+---
+>     interp_data(i,j) = SUM(trif_vars%minl_n_gb(l,:,1))
+2882c2889
+<     interp_data(i,j) = trif_vars%minl_n_gb(l,1,2)
+---
+>     interp_data(i,j) = SUM(trif_vars%minl_n_gb(l,:,2))
+2901c2908
+<     interp_data(i,j) = trif_vars%minl_n_gb(l,1,3)
+---
+>     interp_data(i,j) = SUM(trif_vars%minl_n_gb(l,:,3))
+2920c2927
+<     interp_data(i,j) = trif_vars%minl_n_gb(l,1,4)
+---
+>     interp_data(i,j) = SUM(trif_vars%minl_n_gb(l,:,4))
+2939c2946
+<     interp_data(i,j) = trif_vars%minl_n_gb(l,1,5)
+---
+>     interp_data(i,j) = SUM(trif_vars%minl_n_gb(l,:,5))
+3145a3153,3637
+> 
+> ! Stashcode (19,190)
+> ! Carbon loss from vegetation due to fire on PFTs (KGC/M2/YR)
+> ! Loss of Carbon from vegetation due to fire on PFTs. Assumed to be lost as CO2,
+> ! and is passed to the atmosphere when in CO2-emissions-driven mode (UKESM)
+> 
+> IF (sf(190,19)) THEN
+>   CALL set_pseudo_list(npft,len_stlist,                                        &
+>                        stlist(1,stindex(1,190,19,im_index)),                   &
+>                        pllpft,stash_pseudo_levels,num_stash_pseudo)
+>   pslevel_out = 0
+> 
+>   DO pslevel = 1,npft
+>     IF (pllpft(pslevel)) THEN
+>       pslevel_out = pslevel_out + 1
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_um_diagnostics_veg.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_um_diagnostics_veg.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

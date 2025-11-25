@@ -1,0 +1,149 @@
+Patch stub generated: 2025-11-25T12:09:12.137105 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/surf_couple_implicit_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/surf_couple_implicit_mod.F90
+
+SUMMARY:
+  - added lines (>): 66
+  - removed lines (<): 20
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/surf_couple_implicit_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/surf_couple_implicit_mod.F90
+39,40c39,40
+<   ashtf, ashtf_sea, ashtf_surft, du, dv, fraca, resfs, resft, rhokh,           &
+<   rhokh_surft, rhokh_sice, rhokh_sea,                                          &
+---
+>   ashtf, ashtf_sea, ashtf_surft, du, dv, fracaero_t, fracaero_s, resfs, resft, &
+>   rhokh, rhokh_surft, rhokh_sice, rhokh_sea,                                   &
+56c56
+<   nsurft, land_pts, surft_pts,                                                 &
+---
+>   nsurft, land_pts, ssi_pts, sice_pts, sea_pts, surft_pts,                     &
+60a61,62
+>   ! Water tracer switch (IN)
+>   l_wtrac_bl,                                                                  &
+67c69
+<   rhokh_mix, ti_gb,                                                            &
+---
+>   rhokh_mix, ti_gb, sky,                                                       &
+76a79
+>   wtrac_jls,                                                                   &
+96a100,102
+> USE jules_wtrac_type_mod, ONLY: jls_wtrac_type
+> 
+> 
+108c114,117
+< USE jules_surface_types_mod, ONLY: ntype
+---
+> USE jules_surface_types_mod,  ONLY: ntype
+> USE jules_water_tracers_mod,  ONLY: l_wtrac_imp_jls, l_wtrac_jls,              &
+>                                     n_wtrac_jls, n_evap_srce
+> 
+150c159
+<   nsurft, land_pts,                                                            &
+---
+>   nsurft, land_pts, ssi_pts, sice_pts, sea_pts,                                &
+152a162,165
+> !JULES water_tracer module
+> LOGICAL, INTENT(IN) ::                                                         &
+>   l_wtrac_bl      ! Logical to control the water tracer calculations in
+>                   ! the implicit code
+183a197,198
+>   sky(tdims%i_start:tdims%i_end,tdims%j_start:tdims%j_end),                    &
+>     ! Skyview correction factor for surface LW
+242,244c257,261
+<   fraca(land_pts,nsurft),                                                      &
+<     !Fraction of surface moisture flux with only aerodynamic resistance for
+<     !snow-free land tiles.
+---
+>   fracaero_t(land_pts,nsurft),                                                 &
+>     !Total fraction of surface moisture flux with only aerodynamic resistance
+>   fracaero_s(land_pts,nsurft),                                                 &
+>     !Fraction of surface moisture flux with only aerodynamic resistance
+>     !from the frozen portion of the tile
+247c264
+<     !(1-FRACA) of snow-free land tiles.
+---
+>     !(1-fracaero_t) of snow-free land tiles.
+249,250c266,267
+<     !Total resistance factor. FRACA+(1-FRACA)*RESFS for snow-free land, 1 for
+<     !snow.
+---
+>     !Total resistance factor. fracaero_t+(1-fracaero_t)*resfs
+>     !for snow-free land, 1 for snow.
+323a341
+> TYPE(jls_wtrac_type), INTENT(IN OUT) :: wtrac_jls
+370d387
+< 
+386a404,407
+> ! Set JULES logical to control water tracer calculations in the implicit
+> ! scheme (they only need to be done on the final dynamics loop in UMJULES)
+> l_wtrac_imp_jls = (l_wtrac_bl .AND. l_wtrac_jls)
+> 
+420a442,443
+>     !IN values defining water tracer field dimensions
+>             n_wtrac_jls, n_evap_srce,                                          &
+422c445
+<             forcing%lw_down_ij,fluxes%sw_surft,progs%t_soil_soilt,r_gamma,     &
+---
+>             forcing%lw_down_ij,fluxes%sw_surft,sky,progs%t_soil_soilt,r_gamma, &
+424c447,448
+<             jules_vars%dtrdz_charney_grid_1_ij,fraca,resfs,resft,rhokh_surft,  &
+---
+>             jules_vars%dtrdz_charney_grid_1_ij,fracaero_t,fracaero_s,          &
+>             resfs,resft, rhokh_surft,                                          &
+436c460
+<             fluxes%ext_soilt,fluxes%melt_surft,                                &
+---
+>             fluxes%ext_soilt,fluxes%melt_surft,fluxes%snowinc_surft,           &
+446a471
+>             fluxes%lake_evap,                                                  &
+454c479,491
+<             crop_vars)
+---
+>             crop_vars,                                                         &
+>             !Water tracers (IN)
+>             wtrac_jls%snow_surft, wtrac_jls%smc_soilt,                         &
+>             wtrac_jls%canopy_surft, wtrac_jls%fqw_evapsrce,                    &
+>             !Water tracers (INOUT)
+>             wtrac_jls%fqw_surft,                                               &
+>             !Water tracers (OUT)
+>             wtrac_jls%ei_surft, wtrac_jls%ei_ij,                               &
+>             wtrac_jls%esoil_surft, wtrac_jls%esoil_ij_soilt,                   &
+>             wtrac_jls%ext_soilt, wtrac_jls%ecan_surft,                         &
+>             wtrac_jls%ecan_ij, wtrac_jls%lake_evap,                            &
+>             wtrac_jls%fqw_1, wtrac_jls%dfqw_imp)
+> 
+459a497,498
+>   !IN values defining water tracer field dimensions
+>             n_wtrac_jls,                                                       &
+482c521,522
+<           ainfo%ocn_cpl_point,                                                 &
+---
+>           ainfo%ocn_cpl_point, ainfo%sice_pts_ncat, ainfo%sea_index,           &
+>           ssi_pts, sice_pts, sea_pts,                                          &
+484c524,530
+<           fluxes%sw_sicat)
+---
+>           fluxes%sw_sicat,                                                     &
+>   ! water tracers (IN)
+>           wtrac_jls%fqw_sea, wtrac_jls%fqw_sicat,                              &
+>   ! water tracers (INOUT)
+>           wtrac_jls%fqw_1, wtrac_jls%dfqw_imp,                                 &
+>   ! water tracers (OUT)
+>           wtrac_jls%e_sea_ij, wtrac_jls%ei_sice_ij)
+519d564
+< 
+537a583
+>   fluxes%snowinc_surft(:,:) = 0.0
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_surf_couple_implicit_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_surf_couple_implicit_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

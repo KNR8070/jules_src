@@ -1,0 +1,74 @@
+Patch stub generated: 2025-11-25T12:09:12.111362 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/imogen/radf_non_co2.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/radf_non_co2.F90
+
+SUMMARY:
+  - added lines (>): 8
+  - removed lines (<): 33
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/imogen/radf_non_co2.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/radf_non_co2.F90
+13,14c13
+<   year,q,nyr_non_co2,file_non_co2,file_non_co2_vals                            &
+< )
+---
+>   year,q,nyr_non_co2,file_non_co2_radf)
+46c45
+<            ! IN Number of years for which NON_CO2
+---
+>            ! IN Number of years for which non_co2
+50,54c49
+<   file_non_co2_vals   ! IN File of non-co2 radiative forcings
+< 
+< LOGICAL ::                                                                     &
+<   file_non_co2        ! .T. if non_co2 forcings are read in from
+<                       ! a data file
+---
+>   file_non_co2_radf   ! IN File of non-co2 radiative forcings
+73,90d67
+< DATA years   / 1859,  1875,  1890,  1900,  1917,                               &
+<                1935,  1950,  1960,  1970,  1980,                               &
+<                1990,  2005,  2020,  2030,  2040,                               &
+<                2050,  2060,  2070,  2080,  2090,                               &
+<                2100,  679 * 2100 /
+< 
+< DATA q_non_co2 / 0.0344,0.0557,0.0754,0.0912,0.1176,                           &
+<                 0.1483,0.1831,0.2387,0.3480,0.4987,                            &
+<                 0.6627,0.8430,0.9225,0.9763,1.0575,                            &
+<                 1.1486,1.2316,1.3025,1.3604,1.4102,                            &
+<                 1.4602,679 * 1.4602 /
+< 
+< 
+< 
+< 
+< IF ( .NOT. file_non_co2 .AND. nyr_non_co2 /= 21) THEN
+<   CALL log_fatal("RADF_NON_CO2", 'Reset value of nyr_non_co2')
+< END IF
+100,101c77
+< IF (file_non_co2) THEN
+<   OPEN(imogen_unit, FILE=file_non_co2_vals,                                    &
+---
+> OPEN(imogen_unit, FILE=file_non_co2_radf,                                      &
+103,107c79,82
+<   DO i = 1,nyr_non_co2
+<     READ(imogen_unit,*) years(i),q_non_co2(i)
+<   END DO
+<   CLOSE(imogen_unit)
+< END IF
+---
+> DO i = 1,nyr_non_co2
+>   READ(imogen_unit,*) years(i),q_non_co2(i)
+> END DO
+> CLOSE(imogen_unit)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_imogen_radf_non_co2.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_imogen_radf_non_co2.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

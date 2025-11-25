@@ -1,0 +1,119 @@
+Patch stub generated: 2025-11-25T12:09:12.288776 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/sf_melt_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/sf_melt_jls.F90
+
+SUMMARY:
+  - added lines (>): 45
+  - removed lines (<): 22
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/sf_melt_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/sf_melt_jls.F90
+25c25
+< ,resft,rhokh_1,tile_frac,timestep,r_gamma                                      &
+---
+> ,fracs,resft,rhokh_1,tile_frac,timestep,r_gamma                                &
+28c28
+< ,melt_surft                                                                    &
+---
+> ,melt_surft,snowinc_surft                                                      &
+39c39
+< USE jules_science_fixes_mod, ONLY: l_fix_snow_frac
+---
+> USE jules_science_fixes_mod, ONLY: l_fix_snow_frac, l_fix_neg_snow
+68a69,70
+> ,fracs(points)                                                                 &
+>                             ! IN Fraction subject to sublimation or deposition
+70c72
+<                        !IN Resistance factor.
+---
+>                             ! IN Resistance factor.
+98c100
+<  melt_surft(points)
+---
+>  melt_surft(points)                                                            &
+99a102,105
+> ,snowinc_surft(points)
+> !                           ! OUT Total snow increment on tiles (kg/m2/TS)
+> !                           !     used to avoid rounding errors in the
+> !                           !     snow mass budget
+115c121
+< ,snow_max                                                                      &
+---
+> ,snow_new                                                                      &
+144c150
+< !$OMP PRIVATE(k,j,i,l,snow_density,snow_max,rhokh1_prime,lcmelt,lsmelt,dtstar, &
+---
+> !$OMP PRIVATE(k,j,i,l,snow_density,snow_new,rhokh1_prime,lcmelt,lsmelt,dtstar, &
+169,170c175,177
+<   snow_max = MAX( 0.0, snow_surft(l) - ei_surft(l) * timestep )
+<   IF ( snow_max >  0.0 .AND. tstar_surft(l) >  tm ) THEN
+---
+>   snowinc_surft(l) = - MIN(snow_surft(l), ei_surft(l) * timestep )
+>   snow_new = MAX( 0.0, snow_surft(l) + snowinc_surft(l))
+>   IF ( snow_new >  0.0 .AND. tstar_surft(l) >  tm ) THEN
+173,175c180,195
+<     lcmelt = (cp + lc * alpha1(l) * resft(l)) * rhokh1_prime                   &
+<              + ashtf_prime(l)
+<     lsmelt = lcmelt + lf * alpha1(l) * rhokh1_prime
+---
+>     IF (l_fix_neg_snow) THEN
+>       ! This fix renders lcmelt superfluous, but to avoid more complicated
+>       ! logic it is clearest to retain it for now and remove it once the old
+>       ! functionality is no longer needed.
+>       lsmelt = (cp + (lf * fracs(l) + lc * resft(l)) * alpha1(l)) *            &
+>                rhokh1_prime + ashtf_prime(l)
+>       lcmelt = lsmelt
+>     ELSE
+>       lcmelt = (cp + lc * alpha1(l) * resft(l)) * rhokh1_prime                 &
+>                + ashtf_prime(l)
+>       lsmelt = lcmelt + lf * alpha1(l) * rhokh1_prime
+>     END IF
+>     !   Note the use of lcmelt in the following IF-block. In line with the
+>     !   preceeding comment, this should be lsmelt, but lcmelt is used to
+>     !   maintain existing behaviour, aside from the loss of bit-comparison
+>     !   by moving to increments.
+178c198
+<           snow_max / snow_density  <=  SQRT(2.0*EPSILON(snow_max))/maskd) THEN
+---
+>           snow_new / snow_density  <=  SQRT(2.0*EPSILON(snow_new))/maskd) THEN
+181,183c201,204
+<         dtstar = - MIN( (tstar_surft(l) - tm) *                                &
+<                        maskd * snow_max / snow_density,                        &
+<                        lf * snow_max / (lcmelt * timestep) )
+---
+>         snowinc_surft(l) = - MIN(snow_surft(l),                                &
+>           (lcmelt * (tstar_surft(l) - tm) *                                    &
+>           maskd * snow_new / snow_density / lf +                               &
+>           ei_surft(l)) * timestep)
+185,187c206,209
+<         dtstar = - MIN( (tstar_surft(l) - tm) *                                &
+<                  (1.0 - EXP(-maskd * snow_max / snow_density)),                &
+<                  lf * snow_max / (lcmelt * timestep) )
+---
+>         snowinc_surft(l) = - MIN(snow_surft(l),                                &
+>           (lcmelt * (tstar_surft(l) - tm) *                                    &
+>           (1.0 - EXP(-maskd * snow_new / snow_density)) / lf +                 &
+>           ei_surft(l)) * timestep)
+190,191c212,213
+<       dtstar = - MIN( tstar_surft(l) - tm ,                                    &
+<                       lf * snow_max / (lcmelt * timestep) )
+---
+>       snowinc_surft(l) = - MIN(snow_surft(l),                                  &
+>         (lcmelt * (tstar_surft(l) - tm) / lf + ei_surft(l)) * timestep)
+192a215,216
+>     melt_surft(l) = - snowinc_surft(l) / timestep - ei_surft(l)
+>     dtstar = - lf * melt_surft(l) / lsmelt
+194d217
+<     melt_surft(l) = - lsmelt * dtstar / lf
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_sf_melt_jls.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_sf_melt_jls.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

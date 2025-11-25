@@ -1,0 +1,44 @@
+Patch stub generated: 2025-11-25T12:09:12.125814 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_snow_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_snow_mod.F90
+
+SUMMARY:
+  - added lines (>): 17
+  - removed lines (<): 1
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_snow_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_snow_mod.F90
+354a355
+> CHARACTER(LEN=*), PARAMETER :: RoutineName='CHECK_JULES_SNOW'
+362c363
+<   CALL ereport("check_jules_snow", errorstatus,                                &
+---
+>   CALL ereport(RoutineName, errorstatus,                                       &
+373a375,389
+> 
+> ! If variables are set check that they are in the correct range
+> IF ( ANY( ABS( aicemax(:) - rmdi ) > EPSILON(1.0) ) ) THEN
+>   IF ( ANY( aicemax(:) < 0.01 ) .OR. ANY( aicemax(:) > 0.99 ) ) THEN
+>     CALL ereport(RoutineName, errorstatus,                                     &
+>        'aicemax must lie in the range 0.01 to 0.99')
+>   END IF
+> END IF
+> 
+> IF ( ABS( rho_firn_albedo - rmdi ) > EPSILON(1.0) ) THEN
+>   IF ( rho_firn_albedo < 0.01 .OR. rho_firn_albedo > 1000.0 ) THEN
+>     CALL ereport(RoutineName, errorstatus,                                     &
+>        'rho_firn_albedo must lie in the range 0.01 to 1000.0')
+>   END IF
+> END IF
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_jules_snow_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_jules_snow_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

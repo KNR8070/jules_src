@@ -1,0 +1,70 @@
+Patch stub generated: 2025-11-25T12:09:12.227529 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./params/cable/cable_maths_constants_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./params/cable/cable_maths_constants_mod.F90
+
+SUMMARY:
+  - added lines (>): 28
+  - removed lines (<): 10
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./params/cable/cable_maths_constants_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./params/cable/cable_maths_constants_mod.F90
+1c1,9
+< MODULE cable_maths_constants_mod
+---
+> !******************************************************************************
+> ! This source code is part of the Community Atmosphere Biosphere Land Exchange
+> ! (CABLE) model. This work is licensed under the CSIRO Open Source Software
+> ! License Agreement (variation of the BSD / MIT License).You may not use this
+> ! this file except in compliance with this License.
+> ! A copy of the License (CSIRO_BSD_MIT_License_v2.0_CABLE.txt) can be found
+> ! at https://github.com/CABLE-LSM/CABLE/blob/main/
+> !******************************************************************************
+> MODULE cable_math_constants_mod
+3,7c11
+< IMPLICIT NONE
+< 
+< PUBLIC
+< 
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+9c13
+< !   CABLE mathematical constants
+---
+> !   Mathematical constants used in CABLE.
+11,13c15,28
+< ! Code Owner: Please refer to ModuleLeaders.txt
+< ! This file belongs in CABLE SCIENCE
+< !-----------------------------------------------------------------------------
+---
+> ! This MODULE is USEd in:
+> !     surf_couple_radiation_mod.F90 (JULES),
+> !     cable_cbm.F90 (ESM1.5),
+> !     cable_rad_driver.F90 (ESM1.5),
+> !     cbl_model_driver_offline.F90 (CABLE),
+> !     cable_canopy.F90 (CABLE),
+> !     cable_gw_hydro.F90 (CABLE),
+> !     cbl_sinbet.F90 (CABLE)
+> !
+> ! Module specific documentation:https://trac.nci.org.au/trac/cable/wiki/TBC
+> ! Where it fits in the model flow:https://trac.nci.org.au/trac/cable/wiki/TBC
+> !------------------------------------------------------------------------------
+> 
+> IMPLICIT NONE
+14a30
+> PUBLIC
+15a32,33
+> REAL, PARAMETER :: pi    = 3.1415927
+> REAL, PARAMETER :: pi180 = pi / 180.0 ! radians / degree
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._params_cable_cable_maths_constants_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._params_cable_cable_maths_constants_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

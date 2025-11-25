@@ -1,0 +1,162 @@
+Patch stub generated: 2025-11-25T12:09:12.137832 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/surf_couple_radiation_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/surf_couple_radiation_mod.F90
+
+SUMMARY:
+  - added lines (>): 70
+  - removed lines (<): 56
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/surf_couple_radiation_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/surf_couple_radiation_mod.F90
+34c34
+<   nsurft, land_pts, surft_pts, row_length, rows,                               &
+---
+>   nsurft, land_pts, sea_pts, surft_pts, row_length, rows,                      &
+72a73
+> USE cable_land_albedo_mod,    ONLY: cable_land_albedo
+99a101,110
+> USE cable_fields_mod,   ONLY: pars_io_cbl         ! and veg/soil parameters
+> !data: constants
+> USE cable_other_constants_mod,  ONLY: z0surf_min, lai_thresh, coszen_tols,     &
+>                                       gauss_w
+> USE cable_math_constants_mod,   ONLY: pi, pi180
+> USE grid_constants_mod_cbl,     ONLY: nsl, nsnl, mp, ICE_SoilType, nrb, nrs
+> USE cable_surface_types_mod,    ONLY: ICE_cable, lakes_cable
+> 
+> USE jules_surface_types_mod,    ONLY: npft
+> 
+143c154
+<   nsurft, land_pts, surft_pts(nsurft), row_length, rows
+---
+>   nsurft, land_pts, sea_pts, surft_pts(nsurft), row_length, rows
+194,195c205,206
+< !CABLE TYPES containing field data (IN OUT)
+< TYPE(progs_cbl_vars_type), INTENT(IN OUT) :: progs_cbl
+---
+> !CABLE TYPES containing field data
+> TYPE(progs_cbl_vars_type), INTENT(IN) :: progs_cbl
+255c266
+<     ainfo%l_lice_point,                                                        &
+---
+>     ainfo%l_lice_point, ainfo%l_lice_surft,                                    &
+260,290d270
+<   CALL jules_ssi_albedo (                                                      &
+<     !INTENT(IN)
+<     !input fields
+<     flandg, ainfo%ice_fract_ij, fluxes%tstar_ij, coast%tstar_sice_sicat,       &
+<     psparms%cosz_ij, ws10m, chloro,                                            &
+<     progs%snow_mass_sea_sicat, progs%di_ncat_sicat,                            &
+<     ainfo%pond_frac_cat_sicat, ainfo%pond_depth_cat_sicat,                     &
+<     !max and min sea ice albedo specifications
+<     alpham, alphac, alphab, dtice,                                             &
+<     dt_bare, dalb_bare_wet, pen_rad_frac, sw_beta,                             &
+<     ! parameters for CICE multi-band albedo scheme:
+<     albicev_cice, albicei_cice, albsnowv_cice, albsnowi_cice,                  &
+<     albpondv_cice, albpondi_cice,                                              &
+<     ahmax, dalb_mlt_cice, dalb_mlts_v_cice, dalb_mlts_i_cice,                  &
+<     dt_bare_cice, dt_snow_cice,                                                &
+<     pen_rad_frac_cice, sw_beta_cice, snowpatch,                                &
+<     !size and control variables
+<     row_length * rows, max_n_swbands,                                          &
+<     n_band, nice, nice_use,                                                    &
+<     !spectral boundaries
+<     wavelength_short,                                                          &
+<     wavelength_long,                                                           &
+<     !INTENT(OUT)
+<     !output arguments
+<     sea_ice_albedo,                                                            &
+<     open_sea_albedo,                                                           &
+<     !ancil_info (IN)
+<     ainfo%sea_index, ainfo%ssi_index, ainfo%sice_index_ncat,                   &
+<     ainfo%sice_frac_ncat,                                                      &
+<     !Fluxes (OUT)
+<     fluxes%alb_sicat, fluxes%penabs_rad_frac)
+293,312d272
+<   ! for testing LSM
+<   WRITE(jules_message,'(A)') "CABLE not yet implemented"
+<   CALL jules_print(RoutineName, jules_message)
+< 
+<   ! initialise all INTENT(OUT) fields for now until CABLE is implemented
+<   sea_ice_albedo(:,:,:) = 0.0
+<   fluxes%alb_surft(:,:,:) = 0.0
+<   fluxes%land_albedo_ij(:,:,:) = 0.0
+< 
+<   progs_cbl%SoilTemp_CABLE(:,:,:) = 0.0
+<   progs_cbl%SoilMoisture_CABLE(:,:,:) = 0.0
+<   progs_cbl%FrozenSoilFrac_CABLE(:,:,:) = 0.0
+<   progs_cbl%SnowDepth_CABLE(:,:,:) = 0.0
+<   progs_cbl%SnowMass_CABLE(:,:,:) = 0.0
+<   progs_cbl%SnowTemp_CABLE(:,:,:) = 0.0
+<   progs_cbl%SnowDensity_CABLE(:,:,:) = 0.0
+<   progs_cbl%ThreeLayerSnowFlag_CABLE(:,:) = 0.0
+<   progs_cbl%OneLyrSnowDensity_CABLE(:,:) = 0.0
+<   progs_cbl%SnowAge_CABLE(:,:) = 0.0
+<   progs_cbl%snowOsurft(:,:) = 0.0
+313a274,295
+>   CALL cable_land_albedo (                                                     &
+>     !OUT: (per rad band) albedos [GridBoxMean & per tile albedo]
+>     fluxes%land_albedo_ij, fluxes%alb_surft,                                   &
+>     !IN: JULES dimensions and associated
+>     row_length, rows, land_pts, nsurft, npft,                                  &
+>     surft_pts, ainfo%surft_index, ainfo%land_index,                            &
+>     !IN: JULES Surface descriptions generally parametrized
+>     ainfo%frac_surft, progs%LAI_pft, progs%canht_pft,                          &
+>     psparms%albsoil_soilt(:,1),                                                &
+>     !IN: JULES  timestep varying fields
+>     psparms%cosz_ij, snow_surft,                                               &
+>     !IN:CABLE dimensions from grid_constants_cbl (mp NOT constant)
+>     nrb, nrs, mp,                                                              &
+>     !IN: CABLE specific surface_type indexes
+>     ICE_cable, lakes_cable, ICE_SoilType,                                      &
+>     !IN: CABLE constants
+>     z0surf_min, lai_thresh, coszen_tols, gauss_w, pi, pi180,                   &
+>     !IN: CABLE Veg parameters. ICE surface_type index
+>     pars_io_cbl%vegin_xfang, pars_io_cbl%vegin_taul, pars_io_cbl%vegin_refl,   &
+>     !IN: CABLE prognostics. decl in progs_cbl_vars_mod.F90 [(:,:,1)= top layer]
+>     progs_cbl%SoilTemp_CABLE(:,:,1), progs_cbl%OneLyrSnowDensity_CABLE,        &
+>     progs_cbl%SnowAge_CABLE )
+322a305,336
+> 
+> CALL jules_ssi_albedo (                                                        &
+>   !INTENT(IN)
+>   !input fields
+>   flandg, ainfo%ice_fract_ij, fluxes%tstar_ij, coast%tstar_sice_sicat,         &
+>   psparms%cosz_ij, ws10m, chloro,                                              &
+>   progs%snow_mass_sea_sicat, progs%di_ncat_sicat,                              &
+>   ainfo%pond_frac_cat_sicat, ainfo%pond_depth_cat_sicat,                       &
+>   !max and min sea ice albedo specifications
+>   alpham, alphac, alphab, dtice,                                               &
+>   dt_bare, dalb_bare_wet, pen_rad_frac, sw_beta,                               &
+>   ! parameters for CICE multi-band albedo scheme:
+>   albicev_cice, albicei_cice, albsnowv_cice, albsnowi_cice,                    &
+>   albpondv_cice, albpondi_cice,                                                &
+>   ahmax, dalb_mlt_cice, dalb_mlts_v_cice, dalb_mlts_i_cice,                    &
+>   dt_bare_cice, dt_snow_cice,                                                  &
+>   pen_rad_frac_cice, sw_beta_cice, snowpatch,                                  &
+>   !size and control variables
+>   row_length * rows, max_n_swbands,                                            &
+>   n_band, nice, nice_use,                                                      &
+>   !spectral boundaries
+>   wavelength_short,                                                            &
+>   wavelength_long,                                                             &
+>   !INTENT(OUT)
+>   !output arguments
+>   sea_ice_albedo,                                                              &
+>   open_sea_albedo,                                                             &
+>   !ancil_info (IN)
+>   ainfo%sea_index, ainfo%ssi_index, ainfo%sice_index_ncat,                     &
+>   ainfo%sice_frac_ncat, ainfo%sice_pts_ncat, sea_pts,                          &
+>   !Fluxes (OUT)
+>   fluxes%alb_sicat, fluxes%penabs_rad_frac)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_surf_couple_radiation_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_surf_couple_radiation_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

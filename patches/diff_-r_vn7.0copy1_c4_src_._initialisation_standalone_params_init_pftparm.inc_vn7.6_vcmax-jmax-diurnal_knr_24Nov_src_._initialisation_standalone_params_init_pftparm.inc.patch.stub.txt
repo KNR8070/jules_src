@@ -1,0 +1,144 @@
+Patch stub generated: 2025-11-25T12:09:12.201113 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/params/init_pftparm.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/params/init_pftparm.inc
+
+SUMMARY:
+  - added lines (>): 81
+  - removed lines (<): 24
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/params/init_pftparm.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/params/init_pftparm.inc
+20c20
+<                                       soil_model_rothc
+---
+>                                       soil_model_4pool
+49,62c49,65
+<   g1_stomata,   g_leaf_0,      glmin,                                          &
+<   gpp_st,       gsoil_f,       hw_sw,                                          &
+<   ief,          infil_f,       jv25_ratio,                                     &
+<   kext,         kn,            knl,                                            &
+<   kpar,         lai_alb_lim,   lma,                                            &
+<   mef,          neff,          nl0,                                            &
+<   nmass,        nr,            nr_nl,                                          &
+<   ns_nl,        nsw,           omega,                                          &
+<   omegal,       omegau,        omnir,                                          &
+<   omnirl,       omniru,        orient,                                         &
+<   q10_leaf,     r_grow,        rootd_ft,                                       &
+<   sigl,         tef,           tleaf_of,                                       &
+<   tlow,         tupp,          vint,                                           &
+<   vsl,          z0v
+---
+>   sug_g0,       g1_stomata,    g_leaf_0,                                       &
+>   glmin,        gpp_st,        sug_grec,                                       &
+>   gsoil_f,      hw_sw,         ief,                                            &
+>   infil_f,      jv25_ratio,    kext,                                           &
+>   kn,           knl,           kpar,                                           &
+>   lai_alb_lim,  lma,           mef,                                            &
+>   neff,         nl0,           nmass,                                          &
+>   nr,           nr_nl,         ns_nl,                                          &
+>   nsw,          omega,         omegal,                                         &
+>   omegau,       omnir,         omnirl,                                         &
+>   omniru,       orient,        q10_leaf,                                       &
+>   r_grow,       rootd_ft,      sigl,                                           &
+>   tef,          tleaf_of,      tlow,                                           &
+>   tupp,         vint,          vsl,                                            &
+>   sug_yg,       z0v,           sox_a,                                          &
+>   sox_p50,      sox_rp_min
+> 
+70,72c73,76
+<                                  photo_farquhar, photo_model, photo_pmodel,    &
+<                                  stomata_jacobs, stomata_medlyn,               &
+<                                  stomata_model, l_spec_veg_z0
+---
+>                                  photo_farquhar, photo_model,                  &
+>                                  stomata_jacobs, stomata_medlyn, stomata_sox,  &
+>                                  stomata_model, l_spec_veg_z0, l_sugar,        &
+>                                  l_scale_resp_pm
+273,274c277
+< CASE (photo_pmodel)
+<    ! no check for now 
+---
+> 
+291a295,307
+> CASE ( stomata_sox )
+>   IF ( ANY( ABS( sox_p50(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+>     ERROR = 1
+>     CALL log_error(routinename, "No value for sox_p50")
+>   END IF
+>   IF ( ANY( ABS( sox_rp_min(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+>     ERROR = 1
+>     CALL log_error(routinename, "No value for sox_rp_min")
+>   END IF
+>   IF ( ANY( ABS( sox_a(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+>     ERROR = 1
+>     CALL log_error(routinename, "No value for sox_a")
+>   END IF
+592a609,623
+> IF ( l_sugar ) THEN
+>   IF ( ANY( ABS( sug_g0(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+>     ERROR = 1
+>     CALL log_error(routinename, "No value for sug_g0")
+>   END IF
+>   IF ( ANY( ABS( sug_grec(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+>     ERROR = 1
+>     CALL log_error(routinename, "No value for sug_grec")
+>   END IF
+>   IF ( ANY( ABS( sug_yg(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+>     ERROR = 1
+>     CALL log_error(routinename, "No value for sug_yg")
+>   END IF
+> END IF
+> 
+654c685
+< ! fsmc_mod=1 should not be allowed with a layered RothC  model until this has
+---
+> ! fsmc_mod=1 should not be allowed with a layered 4-pool C model until this has
+657d687
+< ! Note that l_layeredC=T is not currently allowed with the UM.
+659c689
+< IF ( l_layeredC .AND. ( soil_bgc_model == soil_model_rothc ) .AND.             &
+---
+> IF ( l_layeredC .AND. ( soil_bgc_model == soil_model_4pool ) .AND.             &
+662c692,719
+<                  "fsmc_mod=1 is not allowed with l_layeredC and RothC")
+---
+>                  "fsmc_mod=1 is not allowed with l_layeredC and 4-pool C model")
+> END IF
+> 
+> !-----------------------------------------------------------------------------
+> ! stomata_model = stomata_sox must be used with fsmc_mod = 1
+> ! Cannot be run with l_scale_resp_pm
+> ! Must be run with can_rad_mod = 1 (implementation for can_rad_mod = 6 ongoing)
+> !-----------------------------------------------------------------------------
+> IF ( stomata_model == stomata_sox ) THEN ! SOX
+>   IF ( l_scale_resp_pm ) THEN
+>     CALL log_fatal(routinename,                                                &
+>     'l_scale_resp_pm=T is incompatible with SOX (stomata_model=3)')
+>   END IF
+> 
+>   IF ( .NOT. ANY ( fsmc_mod(:) == 1 ) ) THEN
+>     CALL log_fatal(routinename,                                                &
+>     'SOX (stomata_model=3) must be used with fsmc_mod = 1')
+>   END IF
+> 
+>   IF ( .NOT. ( can_rad_mod == 1 ) ) THEN
+>     CALL log_fatal(routinename,                                                &
+>     'SOX (stomata_model=3) must be used with can_rad_mod = 1')
+>   END IF
+> 
+>   IF ( .NOT. ( photo_model == 3 ) ) THEN
+>     CALL log_fatal(routinename,                                                &
+>     'SOX (stomata_model=3) uses the SOX derivation of Collatz (photo_model=3)')
+>   END IF
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_params_init_pftparm.inc_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_params_init_pftparm.inc.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

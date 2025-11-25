@@ -1,0 +1,61 @@
+Patch stub generated: 2025-11-25T12:09:12.304391 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./util/shared/metstats/metstats_timestep.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./util/shared/metstats/metstats_timestep.F90
+
+SUMMARY:
+  - added lines (>): 13
+  - removed lines (<): 8
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Signature rename: unify timestep_len/timestep or provide wrapper.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./util/shared/metstats/metstats_timestep.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./util/shared/metstats/metstats_timestep.F90
+9c9
+<                              current_time, timestep_len,land_pts)
+---
+>                              current_time, timestep, land_pts)
+17c17
+<                               secs_in_day => isec_per_day,                     &
+---
+>                               secs_in_day => rsec_per_day,                     &
+20c20
+< USE jules_vegetation_mod, ONLY: alpha_acclim
+---
+> USE jules_vegetation_mod, ONLY: n_day_photo_acclim
+62c62
+< REAL, INTENT(IN)    :: timestep_len
+---
+> REAL, INTENT(IN)    :: timestep
+99a100,102
+> ! Smoothing factor of exponential filter used with temp_ave_nday.
+> REAL :: alpha_acclim
+> 
+109c112
+< n_daily_ave = secs_in_day / timestep_len
+---
+> n_daily_ave = secs_in_day / timestep
+125c128
+<   precip_ext(:) = timestep_len * (ls_rain_gb(:) + con_rain_gb(:) +             &
+---
+>   precip_ext(:) = timestep * (ls_rain_gb(:) + con_rain_gb(:) +                 &
+164c167
+< WHERE (local_time >= midnight .AND. local_time < (midnight + timestep_len))
+---
+> WHERE (local_time >= midnight .AND. local_time < (midnight + timestep))
+169c172
+< WHERE (local_time >= noon     .AND. local_time < (noon + timestep_len))
+---
+> WHERE (local_time >= noon     .AND. local_time < (noon + timestep))
+199a203,204
+>   alpha_acclim = 1.0 - EXP( -1.0 * timestep                                    &
+>                           / ( n_day_photo_acclim * secs_in_day ) )
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._util_shared_metstats_metstats_timestep.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._util_shared_metstats_metstats_timestep.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

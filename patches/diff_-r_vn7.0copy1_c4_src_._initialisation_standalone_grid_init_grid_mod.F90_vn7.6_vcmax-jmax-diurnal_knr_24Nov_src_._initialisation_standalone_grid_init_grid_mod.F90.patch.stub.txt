@@ -1,0 +1,44 @@
+Patch stub generated: 2025-11-25T12:09:12.183548 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/grid/init_grid_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/grid/init_grid_mod.F90
+
+SUMMARY:
+  - added lines (>): 11
+  - removed lines (<): 2
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/grid/init_grid_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/grid/init_grid_mod.F90
+21a22
+>                               imgn_vars_data,                                  &
+25c26,27
+<                               chemvars_data                                    &
+---
+>                               chemvars_data, water_resources_data,             &
+>                               wtrac_jls_data                                   &
+63a66
+> USE imgn_vars_mod, ONLY: imgn_vars_data_type
+67a71,72
+> USE water_resources_vars_mod, ONLY: water_resources_data_type
+> USE jules_wtrac_type_mod, ONLY: jls_wtrac_data_type
+102a108
+> TYPE(imgn_vars_data_type), INTENT(IN OUT) :: imgn_vars_data
+106a113,114
+> TYPE(water_resources_data_type), INTENT(IN OUT) :: water_resources_data
+> TYPE(jls_wtrac_data_type), INTENT(IN OUT) :: wtrac_jls_data
+144c152,153
+<                             rivers_data, chemvars_data)
+---
+>                             imgn_vars_data, rivers_data, chemvars_data,        &
+>                             water_resources_data, wtrac_jls_data)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_grid_init_grid_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_grid_init_grid_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

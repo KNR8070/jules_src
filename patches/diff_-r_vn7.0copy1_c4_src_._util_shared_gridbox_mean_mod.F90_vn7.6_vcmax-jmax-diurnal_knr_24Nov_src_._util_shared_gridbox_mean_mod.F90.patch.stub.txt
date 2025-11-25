@@ -1,0 +1,56 @@
+Patch stub generated: 2025-11-25T12:09:12.303929 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./util/shared/gridbox_mean_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./util/shared/gridbox_mean_mod.F90
+
+SUMMARY:
+  - added lines (>): 8
+  - removed lines (<): 10
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./util/shared/gridbox_mean_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./util/shared/gridbox_mean_mod.F90
+17,18c17
+< USE ancil_info, ONLY: land_pts, nsurft, surft_pts,                             &
+<                       ainfo_type
+---
+> USE ancil_info, ONLY: land_pts, nsurft, ainfo_type
+71c70
+<       DO i = 1,surft_pts(t)
+---
+>       DO i = 1,ainfo%surft_pts(t)
+87,88c86
+< USE ancil_info, ONLY: land_pts, nsoilt, soilt_pts,                             &
+<                       ainfo_type
+---
+> USE ancil_info, ONLY: land_pts, nsoilt, ainfo_type
+138c136
+<       DO i = 1,soilt_pts(t)
+---
+>       DO i = 1,ainfo%soilt_pts(t)
+153c151
+< USE ancil_info, ONLY: land_pts, surft_pts, ainfo_type
+---
+> USE ancil_info, ONLY: land_pts, ainfo_type
+215c213
+<       DO i = 1,surft_pts(t)
+---
+>       DO i = 1,ainfo%surft_pts(t)
+232c230
+< USE ancil_info,              ONLY: land_pts, nmasst, surft_pts, ainfo_type
+---
+> USE ancil_info,              ONLY: land_pts, nmasst, ainfo_type
+286c284
+<       DO l = 1, surft_pts(n)
+---
+>       DO l = 1, ainfo%surft_pts(n)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._util_shared_gridbox_mean_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._util_shared_gridbox_mean_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

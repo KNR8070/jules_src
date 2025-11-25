@@ -1,0 +1,46 @@
+Patch stub generated: 2025-11-25T12:09:12.110726 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/imogen/radf_co2.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/radf_co2.F90
+
+SUMMARY:
+  - added lines (>): 9
+  - removed lines (<): 7
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/imogen/radf_co2.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/radf_co2.F90
+12c12
+< SUBROUTINE radf_co2(co2,co2ref,q2co2,q_co2)
+---
+> SUBROUTINE radf_co2(co2, co2ref, q2co2, q_co2)
+29c29
+< REAL ::                                                                        &
+---
+> REAL, INTENT (IN) ::                                                           &
+31c31
+<             ! IN CO2 concentration (ppmv).
+---
+>             ! CO2 concentration (ppmv).
+33,36c33,38
+<             ! IN Reference CO2 concentration (ppmv).
+<   q2co2,                                                                       &
+<             ! IN Radiative forcing due to doubling CO2 (W/m2).
+<   q_co2     ! OUT Radiative forcing due to CO2 (W/m2).
+---
+>             ! Reference CO2 concentration (ppmv).
+>   q2co2
+>             ! Radiative forcing due to doubling CO2 (W/m2).
+> 
+> REAL, INTENT (OUT) ::                                                          &
+>   q_co2     ! Radiative forcing due to CO2 (W/m2).
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_imogen_radf_co2.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_imogen_radf_co2.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

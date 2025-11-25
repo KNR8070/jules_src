@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.251625 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/river_routing/um/riv_intctl-riv_ic1a_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/um/riv_intctl-riv_ic1a_mod.F90
+
+SUMMARY:
+  - added lines (>): 326
+  - removed lines (<): 238
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/river_routing/um/riv_intctl-riv_ic1a_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/um/riv_intctl-riv_ic1a_mod.F90
+24,28c24
+< USE riv_rout_mod_1A, ONLY: riv_rout_1A
+< 
+< USE umPrintMgr, ONLY:                                                          &
+<     umPrint,                                                                   &
+<     umMessage
+---
+> USE riv_rout_1a_wrapper_mod, ONLY: riv_rout_1a_wrapper
+43,44c39,40
+< g_p_field, g_r_field, n_proc,                                                  &
+< gather_pe_trip,land_points,land_index,                                         &
+---
+> g_p_field, g_r_field,                                                          &
+> land_points, n_wtrac_jls, land_index,                                          &
+49c45
+< flandg, riv_step, riv_vel, riv_mcoef,                                          &
+---
+> flandg, riv_step,                                                              &
+51c47,49
+< delta_phi, first_entry,                                                        &
+---
+> twatstor_wtrac,                                                                &
+> ! Used for UM-RFM implementation
+> delta_phi,                                                                     &
+54c52
+< ! IN/OUT accumulated runoff
+---
+> ! IN accumulated runoff
+55a54
+> tot_surf_runoff_gb_wtrac, tot_sub_runoff_gb_wtrac,                             &
+60c59
+< inlandout_atmos,inlandout_riv,                                                 &
+---
+> inlandout_atmos,inlandout_riv, inlandout_atmos_wtrac,                          &
+62c61,62
+< dsm_levels,acc_lake_evap,smvcst,smvcwt,smcl,sthu)
+---
+> dsm_levels, acc_lake_evap, smvcst, smvcwt, smcl, sthu,                         &
+> acc_lake_evap_wtrac, smcl_wtrac, sthu_wtrac)
+74d73
+< USE water_constants_mod, ONLY: rho_water
+77d75
+< USE global_2d_sums_mod, ONLY: global_2d_sums
+83,84c81,82
+< USE jules_soil_mod, ONLY: dzsoil
+< IMPLICIT NONE
+---
+> USE water_constants_mod, ONLY: rho_water
+> USE jules_soil_mod,      ONLY: dzsoil
+85a84,86
+> USE jules_water_tracers_mod,  ONLY: l_wtrac_jls
+> USE lake_evap_global_avg_mod, ONLY: lake_evap_global_avg
+> USE lake_evap_apply_soil_mod, ONLY: lake_evap_apply_soil
+86a88
+> IMPLICIT NONE
+89,90c91,92
+<  row_length                                                                    &
+<                            ! NO. OF COLUMNS IN ATMOSPHERE
+---
+>   row_length                                                                   &
+>                             ! No. of columns in atmosphere
+92c94
+<                            ! NO. OF ROWS IN ATMOSPHERE
+---
+>                             ! No. of rows in atmosphere
+94c96
+<                            ! number of points on a row
+---
+>                             ! No. of points on a global row
+96c98
+<                            ! NUMBER OF global rows
+---
+>                             ! No. of global rows
+98c100
+<                            ! number of landpoints
+---
+>                             ! No. of landpoints
+100c102
+<                            ! no. of columns in river grid
+---
+>                             ! No. of columns in river grid
+102c104
+<                            ! no. of rows in river grid
+---
+>                             ! No. of rows in river grid
+104c106
+<                            ! global river row length
+---
+>                             ! No. of global river row length
+106,111c108,112
+<                            ! GLOBAL river rows
+< , gather_pe_trip                                                               &
+<                            ! pe River routing to be run on
+< , n_proc                                                                       &
+<                            ! Total number of processors
+< , dsm_levels               ! no. of deep soil moisture levels
+---
+>                             ! No. of global river rows
+> , dsm_levels                                                                   &
+>                             ! No. of deep soil moisture levels
+> , n_wtrac_jls
+>                             ! No. of water tracers used in JULES
+114,115c115,116
+<  g_p_field                                                                     &
+<                             ! IN size of global ATMOS field
+---
+>   g_p_field                                                                    &
+>                             ! IN Size of global ATMOS field
+118c119,120
+< , land_index (land_points)  ! IN index of land to global points
+---
+> , land_index (land_points)
+>                             ! IN Index of land to global points
+122c124
+<                              !IN Surf RUNOFF on land pts(KG/M2/S)
+---
+>                             ! IN Surf RUNOFF on land pts(KG/M2/S)
+124c126,148
+<                              ! IN Subsurf.RUNOFF (KG/M2/S)
+---
+>                             ! IN Subsurf.RUNOFF (KG/M2/S)
+> ,smvcwt(land_points)                                                           &
+>                             ! IN Volumetric wilting point (used to remove
+>                             ! global lake evap from soil moisture store)
+> ,smvcst(land_points)                                                           &
+>                             ! IN Volumetric saturation point(used to remove
+>                             ! global lake evap from soil moisture store)
+> ,xua(0:global_row_length)                                                      &
+>                             ! IN Atmosphere UV longitude coords
+> ,yua(global_rows)                                                              &
+>                             ! IN Atmosphere latitude coords
+> ,xpa(global_row_length+1)                                                      &
+>                             ! IN Atmosphere longitude coords
+> ,ypa(global_rows)                                                              &
+>                             ! IN Atmosphere latitude coords
+> ,xva(global_row_length+1)                                                      &
+>                             ! IN Atmosphere longitude coords
+> ,yva(0:global_rows)                                                            &
+>                             ! IN Atmosphere latitude coords
+> ,a_boxareas(row_length, rows)                                                  &
+>                             ! IN ATMOS gridbox areas
+> ,flandg(row_length, rows)
+>                             ! IN Land fraction on global field.
+126,150c150
+< ! Water conservation
+< ! Remove global lake evaporation from soil moisture store
+<      , smvcwt(land_points)                                                     &
+< !                            ! IN Volumetric wilting point
+< 
+<      , smvcst(land_points)                                                     &
+< !                            ! IN Volumetric saturation point
+<      ,xua(0:global_row_length)                                                 &
+<                                   ! IN Atmosphere UV longitude coords
+<      ,yua(global_rows)                                                         &
+<                                   ! IN Atmosphere latitude coords
+<      ,xpa(global_row_length+1)                                                 &
+<                                   ! IN Atmosphere longitude coords
+<      ,ypa(global_rows)                                                         &
+<                                   ! IN Atmosphere latitude coords
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_river_routing_um_riv_intctl-riv_ic1a_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_river_routing_um_riv_intctl-riv_ic1a_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

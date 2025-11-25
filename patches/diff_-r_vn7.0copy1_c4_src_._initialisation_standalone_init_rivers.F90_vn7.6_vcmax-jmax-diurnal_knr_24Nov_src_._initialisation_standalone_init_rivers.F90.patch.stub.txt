@@ -1,0 +1,109 @@
+Patch stub generated: 2025-11-25T12:09:12.195520 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_rivers.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_rivers.F90
+
+SUMMARY:
+  - added lines (>): 11
+  - removed lines (<): 67
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_rivers.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_rivers.F90
+26d25
+< USE io_constants, ONLY: namelist_unit
+28c27,28
+< USE string_utils_mod, ONLY: to_string
+---
+> USE jules_rivers_mod, ONLY: read_nml_jules_rivers, print_nlist_jules_rivers,   &
+>                             check_jules_rivers, l_riv_overbank
+30,34c30,32
+< USE jules_rivers_mod, ONLY: jules_rivers, check_jules_rivers,                  &
+<                             l_rivers, i_river_vn, nstep_rivers
+< USE logging_mod, ONLY: log_info, log_fatal
+< USE overbank_inundation_mod, ONLY: check_jules_overbank, jules_overbank,       &
+<                                    l_riv_overbank
+---
+> USE overbank_inundation_mod, ONLY: read_nml_jules_overbank,                    &
+>                                    print_nlist_jules_overbank,                 &
+>                                    check_jules_overbank
+43,86c41,42
+< ! Work variables
+< INTEGER :: ERROR  ! Error indicator
+< 
+< !-----------------------------------------------------------------------------
+< ! Read river routing namelist
+< !----------------------------------------------------------------------------
+< CALL log_info("init_rivers", "Reading JULES_RIVERS namelist...")
+< 
+< ! Open the river routing parameters namelist file
+< OPEN(namelist_unit, FILE=(TRIM(nml_dir) // '/' // 'jules_rivers.nml'),         &
+<                STATUS='old', POSITION='rewind', ACTION='read', IOSTAT = ERROR)
+< IF ( ERROR /= 0 ) THEN
+<   CALL log_fatal("init_rivers",                                                &
+<                  "Error opening namelist file jules_rivers.nml " //            &
+<                  "(IOSTAT=" // TRIM(to_string(ERROR)) // ")")
+< END IF
+< 
+< READ(namelist_unit, NML = jules_rivers, IOSTAT = ERROR)
+< IF ( ERROR /= 0 ) THEN
+<   CALL log_fatal("init_rivers",                                                &
+<                  "Error reading namelist JULES_RIVERS " //                     &
+<                  "(IOSTAT=" // TRIM(to_string(ERROR)) // ")")
+< END IF
+< 
+< IF (l_rivers) THEN
+<   ! Read the jules_overbank namelist.
+<   CALL log_info("init_rivers", "Reading JULES_OVERBANK namelist...")
+<   READ(namelist_unit, NML = jules_overbank, IOSTAT = ERROR)
+<   IF ( ERROR /= 0 ) THEN
+<     CALL log_fatal("init_overbank",                                            &
+<                    "Error reading namelist JULES_OVERBANK " //                 &
+<                    "(IOSTAT=" // TRIM(to_string(ERROR)) // ")")
+<   END IF
+< END IF
+< 
+< ! Close the namelist file
+< CLOSE(namelist_unit, IOSTAT = ERROR)
+< IF ( ERROR /= 0 ) THEN
+<   CALL log_fatal("init_rivers",                                                &
+<                  "Error closing namelist file jules_rivers.nml " //            &
+<                  "(IOSTAT=" // TRIM(to_string(ERROR)) // ")")
+< END IF
+< 
+< ! Check namelist values.
+---
+> CALL read_nml_jules_rivers(nml_dir)
+> CALL print_nlist_jules_rivers()
+88,103c44,47
+< CALL check_jules_overbank()
+< 
+< ! Print some information.
+< IF (l_rivers) THEN
+<   CALL log_info("init_rivers",                                                 &
+<                 "river routing model #" // TRIM(to_string(i_river_vn)) //      &
+<                 "has been selected")
+<   CALL log_info("init_rivers",                                                 &
+<                 "Integer river routing timestep = " //                         &
+<                  TRIM(to_string(nstep_rivers)))
+< ELSE
+<   CALL log_info("init_rivers", "No river routing selected")
+< END IF
+< 
+< IF (l_riv_overbank) THEN
+<   CALL log_info("init_rivers", "overbank inundation is selected")
+---
+> IF ( l_riv_overbank ) THEN
+>   CALL read_nml_jules_overbank(nml_dir)
+>   CALL print_nlist_jules_overbank()
+>   CALL check_jules_overbank()
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_init_rivers.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_init_rivers.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

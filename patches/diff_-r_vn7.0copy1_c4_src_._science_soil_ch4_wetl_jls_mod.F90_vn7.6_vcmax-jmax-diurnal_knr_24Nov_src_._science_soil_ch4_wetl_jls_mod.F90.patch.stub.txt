@@ -1,0 +1,46 @@
+Patch stub generated: 2025-11-25T12:09:12.260534 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil/ch4_wetl_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/ch4_wetl_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 6
+  - removed lines (<): 6
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil/ch4_wetl_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/ch4_wetl_jls_mod.F90
+27c27
+<   kaps_roth, ch4_substrate,                                                    &
+---
+>   kaps_4pool, ch4_substrate,                                                   &
+102c102
+<     ! Dissolved substrate that methaogens consume (kg C/m2)
+---
+>     ! Dissolved substrate that methanogens consume (kg C/m2)
+111c111
+<     ! For RothC (dim_cs1=4), the pools are DPM, RPM, biomass and humus
+---
+>     ! For 4-pool C model (dim_cs1=4), the pools are DPM, RPM, biomass and humus
+128c128
+<     ! Sum of kaps_roth values.
+---
+>     ! Sum of kaps_4pool values.
+197c197
+<     sumkaps = sumkaps + kaps_roth(k)
+---
+>     sumkaps = sumkaps + kaps_4pool(k)
+201c201
+<     kaps_weight(k) = kaps_roth(k) / sumkaps
+---
+>     kaps_weight(k) = kaps_4pool(k) / sumkaps
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_ch4_wetl_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_ch4_wetl_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

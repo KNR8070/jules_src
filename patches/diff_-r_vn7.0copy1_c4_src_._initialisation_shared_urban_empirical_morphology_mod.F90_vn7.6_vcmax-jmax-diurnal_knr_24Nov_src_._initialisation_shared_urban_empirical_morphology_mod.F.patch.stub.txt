@@ -1,0 +1,43 @@
+Patch stub generated: 2025-11-25T12:09:12.171134 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/shared/urban_empirical_morphology_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/shared/urban_empirical_morphology_mod.F90
+
+SUMMARY:
+  - added lines (>): 7
+  - removed lines (<): 6
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/shared/urban_empirical_morphology_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/shared/urban_empirical_morphology_mod.F90
+10,12c10,12
+< !     wrr 	Repeating width ratio (or canyon fraction, W/R)
+< !     hwr 	Height-to-width ratio (H/W)
+< !     hgt 	Building height (H)
+---
+> !     wrr   Repeating width ratio (or canyon fraction, W/R)
+> !     hwr   Height-to-width ratio (H/W)
+> !     hgt   Building height (H)
+43c43,44
+< SUBROUTINE urban_empirical_morphology(frac_surft, surft_index, urban_param)
+---
+> SUBROUTINE urban_empirical_morphology(frac_surft, surft_index, surft_pts,      &
+>                                       urban_param)
+45c46
+< USE ancil_info, ONLY: land_pts, surft_pts
+---
+> USE ancil_info, ONLY: land_pts
+61c62
+< 
+---
+> INTEGER, INTENT(IN) :: surft_pts(ntype)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_shared_urban_empirical_morphology_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_shared_urban_empirical_morphology_mod.F.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

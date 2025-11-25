@@ -1,0 +1,74 @@
+Patch stub generated: 2025-11-25T12:09:12.285421 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/sf_diags_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/sf_diags_mod.F90
+
+SUMMARY:
+  - added lines (>): 31
+  - removed lines (<): 7
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/sf_diags_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/sf_diags_mod.F90
+191c191
+<   !                    resistance factor for fraction 1-FRACA.
+---
+>   !                    resistance factor for fraction 1-fracaero.
+244c244
+< SUBROUTINE alloc_sf_expl(sf_diag, l_apply_diag)
+---
+> SUBROUTINE alloc_sf_expl(sf_diag, l_apply_diag, land_points)
+249,250c249,250
+< USE model_domain_mod, ONLY: model_type, mt_single_column
+< USE nlsizes_namelist_mod, ONLY: land_points => land_field, ntiles
+---
+> USE model_domain_mod, ONLY: model_type, mt_single_column, mt_lfric
+> USE nlsizes_namelist_mod, ONLY: ntiles
+258a259
+> INTEGER, INTENT(IN) :: land_points
+343a345,354
+> CASE (mt_lfric)
+>   sf_diag%l_z0h_eff_gb = .TRUE.
+>   sf_diag%l_z0m_gb  = .TRUE.
+>   sf_diag%su10    = .TRUE.
+>   sf_diag%sv10    = .TRUE.
+>   sf_diag%l_gpp   = .TRUE.
+>   sf_diag%st1p5   = .TRUE.
+>   sf_diag%sq1p5   = .TRUE.
+>   sf_diag%l_resp_p = .TRUE.
+> 
+603c614
+< SUBROUTINE alloc_sf_imp(sf_diag, l_apply_diag)
+---
+> SUBROUTINE alloc_sf_imp(sf_diag, l_apply_diag, land_points)
+608,609c619,620
+< USE model_domain_mod, ONLY: model_type, mt_single_column
+< USE nlsizes_namelist_mod, ONLY: land_points => land_field, ntiles
+---
+> USE model_domain_mod, ONLY: model_type, mt_single_column, mt_lfric
+> USE nlsizes_namelist_mod, ONLY: ntiles
+617a629
+> INTEGER, INTENT(IN) :: land_points
+672a685,696
+> 
+>   sf_diag%su10    = .TRUE.        ! Calculate u10m
+>   sf_diag%sv10    = .TRUE.        !    "      v10m
+>   sf_diag%slh     = .TRUE.        !    "      latent_heat
+>   sf_diag%sq1p5   = .TRUE.        !    "      q1p5m
+>   sf_diag%st1p5   = .TRUE.        !    "      t1p5m
+>   sf_diag%simlt   = .TRUE.        !    "      sice_mlt_htf
+>   sf_diag%smlt    = .TRUE.        !    "      snomlt_surf_htf
+>   sf_diag%l_lw_surft = .TRUE.     !    "      lw_up_surft & lw_down_surft
+>   sf_diag%l_lw_up_sice_weighted_cat = .TRUE.  ! " lw_up_sice_weighted_cat
+> 
+> CASE (mt_lfric)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_sf_diags_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_sf_diags_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

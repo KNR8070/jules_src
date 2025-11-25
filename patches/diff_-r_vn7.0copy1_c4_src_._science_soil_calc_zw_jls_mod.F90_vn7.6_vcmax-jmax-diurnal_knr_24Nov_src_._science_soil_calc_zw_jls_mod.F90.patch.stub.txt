@@ -1,0 +1,97 @@
+Patch stub generated: 2025-11-25T12:09:12.259234 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil/calc_zw_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/calc_zw_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 37
+  - removed lines (<): 17
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil/calc_zw_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/calc_zw_jls_mod.F90
+24a25
+> USE jules_soil_mod,       ONLY: dzsoil
+53,55c54,56
+<   bexp(npnts),                                                                 &
+<     ! Brooks & Corey exponent.
+<   sathh(npnts),                                                                &
+---
+>   bexp(npnts,nshyd),                                                           &
+>     ! Clapp-Hornberger exponent.
+>   sathh(npnts,nshyd),                                                          &
+62c63
+<     ! Moisture content in deep layer.
+---
+>     ! Moisture content in deep layer (kg/m2).
+64,66c65,67
+<     ! Moisture content in deep layer at saturation.
+<   v_sat(npnts)
+<     ! Volumetric soil moisture.
+---
+>     ! Moisture content in deep layer at saturation (kg/m2).
+>   v_sat(npnts,nshyd)
+>     ! Volumetric soil moisture concentration at saturation (m3 H2O/m3 soil).
+85c86
+<   i, j, n, it
+---
+>   i, j, n, it, nn, nzw
+98c99,101
+<   psisat
+---
+>   zdepth(0:nshyd+1),                                                           &
+>     ! Lower soil layer boundary depth (m).
+>   psisat(nshyd)
+108a112,117
+> zdepth(:) = 0.0
+> DO n=1,nshyd
+>   zdepth(n) = zdepth(n-1) + dzsoil(n)
+> END DO
+> zdepth(nshyd+1) = zw_max
+> 
+113c122
+< !$OMP PRIVATE(j,i,zw_old,smd,psisat,zwest,it,fn,dfn)                           &
+---
+> !$OMP PRIVATE(j,i,zw_old,smd,psisat,zwest,it,fn,dfn,n,nn,nzw)                  &
+115c124
+< !$OMP        v_sat,nshyd,zw_max)
+---
+> !$OMP        v_sat,nshyd,zw_max,zdepth)
+134c143
+<   psisat = -sathh(i)
+---
+>   psisat(:) = -sathh(i,:)
+148a158,167
+>     nzw = nshyd+1
+>     DO nn = nshyd+1,1,-1
+>       IF (zwest <= zdepth(nn) .AND. nn < nzw) THEN
+>         nzw = nn
+>       END IF
+>     END DO
+> 
+>     ! soil properties have values defined in layers 1-nshyd
+>     !    nzw = MAX(1,nzw)
+>     nzw = MIN(nshyd,nzw)
+150,154c169,174
+<     fn = zwest * v_sat(i) - smd                                                &
+<          - v_sat(i) * bexp(i) / (bexp(i) - 1.0) * psisat                       &
+<          * ( 1.0 - ( 1.0 - zwest / psisat )**                                  &
+<            ( 1.0 - 1.0 / bexp(i) ) )       !   f(zw)
+<     dfn =  v_sat(i) + v_sat(i) * ( 1.0 - zwest / psisat )** (-1.0 / bexp(i))
+---
+>     fn = zwest * v_sat(i,nzw) - smd                                            &
+>          - v_sat(i,nzw) * bexp(i,nzw) / (bexp(i,nzw) - 1.0) * psisat(nzw)      &
+>          * ( 1.0 - ( 1.0 - zwest / psisat(nzw) )**                             &
+>            ( 1.0 - 1.0 / bexp(i,nzw) ) )       !   f(zw)
+>     dfn =  v_sat(i,nzw) + v_sat(i,nzw) * ( 1.0 - zwest / psisat(nzw) )**       &
+>            (-1.0 / bexp(i,nzw))
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_calc_zw_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_calc_zw_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

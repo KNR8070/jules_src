@@ -1,0 +1,36 @@
+Patch stub generated: 2025-11-25T12:09:12.216021 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/file_handling/timeseries/file_ts_internal_open_file.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/file_handling/timeseries/file_ts_internal_open_file.inc
+
+SUMMARY:
+  - added lines (>): 10
+  - removed lines (<): 1
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/file_handling/timeseries/file_ts_internal_open_file.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/file_handling/timeseries/file_ts_internal_open_file.inc
+13c13
+< USE datetime_mod, ONLY: l_360, l_leap, datetime_to_string
+---
+> USE datetime_mod, ONLY: l_360, l_leap, datetime_to_string, l_local_solar_time
+241a242,250
+> 
+>   ! Add the attribute of local solar time
+>   IF ( l_local_solar_time ) THEN
+>     CALL file_def_attr(                                                        &
+>       FILE%open_file%fh, FILE%time_index_var_id, "Time Convention",            &
+>         "Local Solar Time"                                                     &
+>     )
+>   END IF
+>
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_file_handling_timeseries_file_ts_internal_open_file.inc_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_file_handling_timeseries_file_ts_internal_open_fi.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

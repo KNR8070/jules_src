@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.274763 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/jules_land_sf_explicit_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/jules_land_sf_explicit_jls.F90
+
+SUMMARY:
+  - added lines (>): 438
+  - removed lines (<): 259
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/jules_land_sf_explicit_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/jules_land_sf_explicit_jls.F90
+33a34,35
+> ! IN values defining water tracer field dimensions
+>  n_wtrac_jls, n_evap_srce,                                                     &
+46c48
+<  pstar,lw_down,sw_surft,zh,ddmfx,                                              &
+---
+>  pstar,lw_down,sw_surft,sky,zh,ddmfx,                                          &
+52c54
+<  clay_soilt,o3,                                                                &
+---
+>  clay_soilt,o3, l_emis_surft_set,                                              &
+56c58
+<  gs,g_leaf_acc,npp_pft_acc,resp_w_pft_acc,resp_s_acc_soilt,                    &
+---
+>  emis_surft,gs,gc_corr,g_leaf_acc,npp_pft_acc,resp_w_pft_acc,resp_s_acc_soilt, &
+65c67
+<  alpha1,ashtf_prime_surft,fqw_surft,epot_surft,fraca,                          &
+---
+>  alpha1,ashtf_prime_surft,fqw_surft,epot_surft,fracaero_t,fracaero_s,          &
+67,69c69
+<  chr1p5m,smc_soilt,hcons_soilt,gpp,npp,resp_p,g_leaf,gpp_pft,gpp_pft_lay,      & 
+<  apar_pft_lay, cmpf_pft_lay, vcmax_pft_lay, vcmax25_pft_lay,                   &
+<  wlite_pft_lay, wcarb_pft_lay, wmin_pft_lay, ej_pft_lay, npp_pft,              &
+---
+>  chr1p5m,smc_soilt,hcons_soilt,gpp,npp,resp_p,g_leaf,gpp_pft,npp_pft,          &
+72c72,73
+<  flake,surft_index,surft_pts,tile_frac,fsmc_pft,emis_surft,emis_soil,          &
+---
+>  flake,surft_index,surft_pts,tile_frac,fsmc_pft,emis_soil,                     &
+>  growth_sug_pft,growth_sug_gb,f_nsc_pft,lwp_c_pft,psi_root_zone_pft,           &
+79,81c80
+<  t_home_gb,t_growth_gb, l_growth_gb, vpd_growth_gb, co2_growth_gb,             &
+<  pstar_growth_gb,xipam_opt,vcmax_opt,jmax_opt,t_sum,l_sum,                     &
+<  t_night,nt_sum,vpd_sum,co2_sum, pstar_sum,                                    &
+---
+>  t_home_gb, t_growth_gb,                                                       &
+118c117
+<  l_lice_point, l_soil_point,                                                   &
+---
+>  l_lice_point, l_soil_point, l_lice_surft,                                     &
+122c121,125
+<  flux_o3_pft, fo3_pft                                                          &
+---
+>  flux_o3_pft, fo3_pft,                                                         &
+>  !Water tracers (IN)
+>  snow_surft_wtrac, canopy_wtrac, sthu_soilt_wtrac, qw_1_wtrac,                 &
+>  ! Water tracers (OUT)
+>  fqw_1_wtrac, fqw_surft_wtrac, fqw_evapsrce_wtrac, smc_soilt_wtrac             &
+125,148c128,162
+< USE sf_flux_mod, ONLY: sf_flux
+< USE sfl_int_mod, ONLY: sfl_int
+< USE fcdch_mod, ONLY: fcdch
+< USE stdev1_mod, ONLY: stdev1
+< USE sf_rib_mod, ONLY: sf_rib
+< USE sf_resist_mod, ONLY: sf_resist
+< USE snowtherm_mod,         ONLY: snowtherm
+< USE gen_anthrop_heat_mod,  ONLY: generate_anthropogenic_heat
+< USE tilepts_mod,           ONLY: tilepts
+< USE heat_con_mod,          ONLY: heat_con
+< USE physiol_mod,           ONLY: physiol
+< USE qsat_mod, ONLY: qsat, qsat_mix
+< USE elevate_mod, ONLY: elevate
+< USE urbanz0_mod, ONLY: urbanz0
+< USE sf_orog_mod, ONLY: sf_orog
+< USE can_drag_mod, ONLY: can_drag_z0, can_drag_phi_m_h
+< USE calc_air_dens_mod, ONLY: calc_air_dens
+< 
+< !Use in relevant variables
+< USE theta_field_sizes, ONLY: t_i_length,t_j_length
+< 
+< USE dust_param, ONLY: z0_soil
+< USE planet_constants_mod, ONLY: cp, vkman, r, c_virtual,epsil=>repsilon
+< USE csigma, ONLY: sbcon
+---
+> USE ancil_info,              ONLY: dim_cslayer, nsoilt, rad_nband
+> USE atm_fields_bounds_mod,      ONLY: pdims_s, pdims, tdims
+> USE bl_option_mod,              ONLY: l_quick_ap2
+> USE c_elevate,                  ONLY: l_elev_absolute_height
+> USE c_z0h_z0m,                  ONLY: z0h_z0m, z0h_z0m_classic
+> USE calc_air_dens_mod,          ONLY: calc_air_dens
+> USE can_drag_mod,               ONLY: can_drag_z0, can_drag_phi_m_h
+> USE csigma,                     ONLY: sbcon
+> USE dust_param,                 ONLY: z0_soil
+> USE elevate_mod,                ONLY: elevate
+> USE fcdch_mod,                  ONLY: fcdch
+> USE gen_anthrop_heat_mod,       ONLY: generate_anthropogenic_heat
+> USE heat_con_mod,               ONLY: heat_con
+> USE physiol_mod,                ONLY: physiol
+> USE planet_constants_mod,       ONLY: cp, vkman, r, c_virtual,epsil=>repsilon
+> USE qsat_mod,                   ONLY: qsat, qsat_mix
+> USE sf_diags_mod,               ONLY: strnewsfdiag
+> USE sf_flux_mod,                ONLY: sf_flux
+> USE sf_orog_mod,                ONLY: sf_orog
+> USE sf_resist_mod,              ONLY: sf_resist
+> USE sf_rib_mod,                 ONLY: sf_rib
+> USE sfl_int_mod,                ONLY: sfl_int
+> USE snowtherm_mod,              ONLY: snowtherm
+> USE solinc_data,                ONLY: l_skyview
+> USE stdev1_mod,                 ONLY: stdev1
+> USE stochastic_physics_run_mod, ONLY: l_rp2, i_rp_scheme, i_rp2b, z0hm_pft_rp
+> USE theta_field_sizes,          ONLY: t_i_length,t_j_length
+> USE tilepts_mod,                ONLY: tilepts
+> USE timestep_mod,               ONLY: timestep
+> USE urban_param_mod,            ONLY: z0m_mat
+> USE urbanz0_mod,                ONLY: urbanz0
+> USE veg_param,                  ONLY: secs_per_360days
+> USE veg3_field_mod,             ONLY: veg_state_type
+> USE water_constants_mod,        ONLY: lc, rho_ice, tm
+> 
+151c165
+<    soil_model_rothc,                                                           &
+---
+>    soil_model_4pool,                                                           &
+160,164d173
+< USE veg_param, ONLY: secs_per_360days
+< 
+< USE sf_diags_mod, ONLY: strnewsfdiag
+< USE timestep_mod, ONLY: timestep
+< 
+166,167c175
+< USE atm_step_local, ONLY:  dim_cs1, dim_cs2,                                   &
+<      co2_dim_len,co2_dim_row
+---
+> USE atm_step_local, ONLY:  dim_cs1, co2_dim_len,co2_dim_row
+169,170c177
+< USE ancil_info, ONLY:  dim_cs1, dim_cs2,                                       &
+<      co2_dim_len,co2_dim_row
+---
+> USE ancil_info, ONLY:  dim_cs1, co2_dim_len, co2_dim_row
+173,183d179
+< USE ancil_info, ONLY: dim_cslayer, l_lice_surft, nsoilt, rad_nband
+< 
+< USE bl_option_mod, ONLY: l_quick_ap2
+< USE solinc_data, ONLY: sky, l_skyview
+< 
+< USE atm_fields_bounds_mod, ONLY:                                               &
+<    pdims_s, pdims, tdims
+< 
+< USE c_z0h_z0m, ONLY: z0h_z0m, z0h_z0m_classic
+< USE water_constants_mod, ONLY: lc, rho_ice, tm
+< 
+192d187
+< 
+208,209d202
+< USE c_elevate, ONLY: l_elev_absolute_height
+< 
+216,218c209,212
+< USE stochastic_physics_run_mod, ONLY: l_rp2, i_rp_scheme, i_rp2b, z0hm_pft_rp
+< 
+< USE urban_param_mod, ONLY: z0m_mat
+---
+> USE jules_water_tracers_mod, ONLY: l_wtrac_jls
+> USE sf_resist_wtrac_mod,     ONLY: sf_resist_wtrac
+> USE sf_evap_srce_frac_mod,   ONLY: sf_evap_srce_frac
+> USE sf_flux_land_wtrac_mod,  ONLY: sf_flux_land_wtrac, sf_flux_land_check_wtrac
+223,225d216
+< !Use in TYPE definitions
+< USE veg3_field_mod, ONLY: veg_state_type
+< 
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_jules_land_sf_explicit_jls.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_jules_land_sf_explicit_jls.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

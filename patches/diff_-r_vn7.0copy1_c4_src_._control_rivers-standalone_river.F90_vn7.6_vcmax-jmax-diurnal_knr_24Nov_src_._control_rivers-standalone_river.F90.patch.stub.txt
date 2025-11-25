@@ -1,0 +1,104 @@
+Patch stub generated: 2025-11-25T12:09:12.116381 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/rivers-standalone/river.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/rivers-standalone/river.F90
+
+SUMMARY:
+  - added lines (>): 42
+  - removed lines (<): 20
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/rivers-standalone/river.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/rivers-standalone/river.F90
+1d0
+< #if !defined(UM_JULES)
+18a18,24
+> USE jules_vars_mod, ONLY: mpi_local_comm
+> USE mpi, ONLY: mpi_comm_world
+> 
+> USE jules_model_environment_mod, ONLY: l_oasis_rivers
+> USE oasis_rivers_control_mod, ONLY: oasis_init, oasis_finalise,                &
+>                                     oasis_send, oasis_receive
+> USE oasis_rivers_mod, ONLY: cpl_freq
+26c32
+< USE model_time_mod, ONLY: timestep, end_of_run
+---
+> USE model_time_mod, ONLY: end_of_run, oasis_time
+39c45,46
+<                             rivers_data, rivers
+---
+>                             rivers_data, rivers,                               &
+>                             wtrac_jls_data, wtrac_jls
+66,68c73,79
+< ! We don't check the error since most (all?) MPI implementations will just
+< ! fail if a call is unsuccessful
+< CALL mpi_init(ERROR)
+---
+> CALL oasis_init()
+> IF (.NOT. l_oasis_rivers) THEN
+>   ! We don't check the error since most (all?) MPI implementations will just
+>   ! fail if a call is unsuccessful
+>   CALL mpi_init(ERROR)
+>   mpi_local_comm = mpi_comm_world
+> END IF
+98,99c109,111
+<           rivers_data, rivers                                                  &
+<           )
+---
+>           rivers_data, rivers,                                                 &
+>           wtrac_jls_data, wtrac_jls                                            &
+> )
+108,112c120,134
+<   !-----------------------------------------------------------------------------
+<   ! The update of prescribed data is done in two phases
+<   !  - Update variables provided by files
+<   !-----------------------------------------------------------------------------
+<   CALL update_prescribed_variables()
+---
+>   ! Drive the river model either via forcing files or via coupling exchanges
+>   IF (l_oasis_rivers) THEN
+>     !  - Update variables by OASIS coupling
+>     IF (MOD(oasis_time, cpl_freq) == 0) THEN
+>       ! Call first OASIS send and then receive to try to avoid deadlocks
+>       CALL oasis_send(rivers,oasis_time)
+>       CALL oasis_receive(rivers,oasis_time)
+>     END IF
+>   ELSE
+>     !---------------------------------------------------------------------------
+>     ! The update of prescribed data is done in two phases
+>     !  - Update variables provided by files
+>     !---------------------------------------------------------------------------
+>     CALL update_prescribed_variables()
+>   END IF
+125,126d146
+<   !   Scalar arguments (INTENT IN)
+<      timestep,                                                                 &
+128c148
+<      psparms, ainfo, progs, fluxes, rivers )
+---
+>      psparms, ainfo, progs, fluxes, rivers, wtrac_jls )
+152c172
+< CALL input_close_all()
+---
+> IF (.NOT. l_oasis_rivers) CALL input_close_all()
+158,159c178,182
+< CALL mpi_finalize(ERROR)
+< 
+---
+> IF (l_oasis_rivers) THEN
+>   CALL oasis_finalise()
+> ELSE
+>   CALL mpi_finalize(ERROR)
+> END IF
+162d184
+< #endif
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_rivers-standalone_river.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_rivers-standalone_river.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,46 @@
+Patch stub generated: 2025-11-25T12:09:12.237244 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/params/ecosse_param_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/ecosse_param_mod.F90
+
+SUMMARY:
+  - added lines (>): 7
+  - removed lines (<): 7
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/params/ecosse_param_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/ecosse_param_mod.F90
+79c79
+<     decomp_wrate_min_rothc  = 0.2,                                             &
+---
+>     decomp_wrate_min_smith  = 0.2,                                             &
+81,82c81,82
+<       ! when RothC form is used.
+<     decomp_wrate_min_jules = 0.2
+---
+>       ! when Smith et al., 2010 form is used.
+>     decomp_wrate_min_clark = 0.2
+89,90c89,90
+<   decomp_temp_coeff_rothc(3) =  [ 47.9, 106.0, 18.3 ]
+<     ! Constants in RothC decomposition rate temperature modifier.
+---
+>   decomp_temp_coeff_smith(3) =  [ 47.9, 106.0, 18.3 ]
+>     ! Constants in Smith et al., 2010 C decomposition rate temperature modifier.
+103c103
+<     ! when RothC form is used.
+---
+>     ! when Smith et al., 2010 form is used.
+169c169
+<     ! Note that the RothC code calls this lit_cn.
+---
+>     ! Note that the 4-pool soil C code calls this lit_cn.
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_params_ecosse_param_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_params_ecosse_param_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

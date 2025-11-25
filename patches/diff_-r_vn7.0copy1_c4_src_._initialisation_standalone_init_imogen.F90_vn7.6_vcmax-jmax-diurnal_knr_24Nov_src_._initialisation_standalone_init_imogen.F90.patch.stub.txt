@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.192486 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_imogen.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_imogen.F90
+
+SUMMARY:
+  - added lines (>): 160
+  - removed lines (<): 183
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_imogen.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_imogen.F90
+9c9,10
+< SUBROUTINE init_imogen(nml_dir,progs_data, trifctltype, imgn_drive, ainfo)
+---
+> SUBROUTINE init_imogen(nml_dir, progs_data, trifctltype, imgn_drive,           &
+>                        imgn_vars, ainfo)
+20a22,23
+> USE fill_variables_from_file_mod, ONLY: fill_variables_from_file
+> 
+25,29c28
+< USE imogen_constants, ONLY: drive_month, n_imogen_land
+< 
+< USE imogen_map, ONLY: sgindinv, get_imogen_map
+< 
+< USE imogen_time, ONLY: step_day, nsdmax, mm, md
+---
+> USE imogen_time, ONLY: nsdmax
+31,32c30,31
+< USE imogen_run, ONLY: imogen_run_list, file_points_order, wgen, c_emissions,   &
+<                       include_co2, include_non_co2, land_feed_co2,             &
+---
+> USE imogen_run, ONLY: imogen_run_list, c_emissions,                            &
+>                       include_co2, include_non_co2_radf, land_feed_co2,        &
+35c34,36
+<                       initialise_from_dump, dump_file
+---
+>                       initialise_from_dump, dump_file,                         &
+>                       l_drive_with_global_temps, initial_co2_ch4_year,         &
+>                       fch4_ref, yr_fch4_ref, tau_ch4_ref, ch4_ppbv_ref
+37c38
+< USE imogen_anlg_vals, ONLY: imogen_anlg_vals_list, dir_clim,                   &
+---
+> USE imogen_anlg_vals, ONLY: imogen_anlg_vals_list, file_clim, file_patt,       &
+40,49d40
+< USE imogen_clim, ONLY: t_clim, rainfall_clim, snowfall_clim, rh15m_clim,       &
+<                        uwind_clim, vwind_clim, dtemp_clim, pstar_ha_clim,      &
+<                      sw_clim, lw_clim, f_wet_clim, lat, dctot_co2, dctot_ch4,  &
+<                        longmin_clim, latmin_clim, longmax_clim, latmax_clim,   &
+<                        LONG
+< 
+< USE imogen_drive_vars, ONLY: t_out, conv_rain_out, conv_snow_out, ls_rain_out, &
+<                              ls_snow_out, qhum_out, wind_out, pstar_out,       &
+<                              sw_out, lw_out
+< 
+52,54d42
+< USE imogen_progs, ONLY: ch4_ppbv, co2_ppmv, co2_change_ppmv, dtemp_o,          &
+<                         fa_ocean, seed_wg
+< 
+57a46,47
+> USE ereport_mod, ONLY: ereport
+> USE jules_print_mgr, ONLY: jules_message
+58a49
+> USE missing_data_mod,   ONLY: rmdi, imdi
+64a56
+> USE imgn_vars_mod, ONLY: imgn_vars_type
+67,69d58
+< USE theta_field_sizes, ONLY: t_i_length
+< 
+< 
+90a80
+> TYPE(imgn_vars_type), INTENT(IN OUT)   :: imgn_vars
+93,95c83,121
+< ! Work variables
+< CHARACTER(LEN=max_file_name_len) :: file_clim  ! File to read IMOGEN
+<                                                ! climatology from
+---
+> CHARACTER(LEN=24), DIMENSION(8) ::                                             &
+>   imgn_name_clim = ['tl1_ij_clim_imgn        ',                                &
+>                     'ql1_ij_clim_imgn        ',                                &
+>                     'wind_ij_clim_imgn       ',                                &
+>                     'lwdown_ij_clim_imgn     ',                                &
+>                     'swdown_ij_clim_imgn     ',                                &
+>                     'precip_ij_clim_imgn     ',                                &
+>                     'pstar_ij_clim_imgn      ',                                &
+>                     'diurnal_tl1_ij_clim_imgn']
+> 
+> CHARACTER(LEN=24), DIMENSION(8) ::                                             &
+>   imgn_name_patt = ['tl1_ij_patt_imgn        ',                                &
+>                     'ql1_ij_patt_imgn        ',                                &
+>                     'wind_ij_patt_imgn       ',                                &
+>                     'lwdown_ij_patt_imgn     ',                                &
+>                     'swdown_ij_patt_imgn     ',                                &
+>                     'precip_ij_patt_imgn     ',                                &
+>                     'pstar_ij_patt_imgn      ',                                &
+>                     'diurnal_tl1_ij_patt_imgn']
+> 
+> CHARACTER(LEN=14), DIMENSION(8) ::                                             &
+>   nc_name_clim = ['tl1_clim      ',                                            &
+>                   'ql1_clim      ',                                            &
+>                   'wind_clim     ',                                            &
+>                   'lwdown_clim   ',                                            &
+>                   'swdown_clim   ',                                            &
+>                   'precip_clim   ',                                            &
+>                   'pstar_clim    ',                                            &
+>                   'range_tl1_clim']
+> 
+> CHARACTER(LEN=14), DIMENSION(8) ::                                             &
+>   nc_name_patt = ['tl1_patt      ',                                            &
+>                   'ql1_patt      ',                                            &
+>                   'wind_patt     ',                                            &
+>                   'lwdown_patt   ',                                            &
+>                   'swdown_patt   ',                                            &
+>                   'precip_patt   ',                                            &
+>                   'pstar_patt    ',                                            &
+>                   'range_tl1_patt']
+97c123
+< INTEGER :: i,j,l,n,im,ijk  ! Index variables
+---
+> INTEGER :: n  ! Index variables
+99c125
+< INTEGER :: ERROR, error_sum  ! Error indicator
+---
+> INTEGER :: ERROR, error_sum, errorstatus  ! Error indicator
+100a127
+> CHARACTER(LEN=*), PARAMETER :: RoutineName='INIT_IMOGEN'
+109c136
+<   CALL log_fatal("init_imogen",                                                &
+---
+>   CALL log_fatal(RoutineName,                                                  &
+119c146
+<   CALL log_fatal("init_imogen",                                                &
+---
+>   CALL log_fatal(RoutineName,                                                  &
+123a151
+> 
+128c156
+<   CALL log_fatal("init_imogen",                                                &
+---
+>   CALL log_fatal(RoutineName,                                                  &
+137c165
+<   CALL log_fatal("init_imogen",                                                &
+---
+>   CALL log_fatal(RoutineName,                                                  &
+142a171,237
+> !-----------------------------------------------------------------------------
+> ! check all variables are set in imogen_run
+> !-----------------------------------------------------------------------------
+> ! co2_init_ppmv
+> IF ( ABS( co2_init_ppmv - rmdi ) < EPSILON(1.0) ) THEN
+>   errorstatus = 101
+>   CALL ereport(RoutineName, errorstatus, "co2_init_ppmv not found")
+> ELSE IF ( co2_init_ppmv < 100.0 .OR. co2_init_ppmv > 10000.0 ) THEN
+>   CALL ereport(RoutineName, errorstatus,                                       &
+>                "co2_init_ppmv must lie in the range 100.0 to 10000.0")
+> END IF
+> 
+> ! initial_co2_ch4_year
+> IF ( ocean_feed ) THEN
+>   IF ( ABS( initial_co2_ch4_year - imdi ) < EPSILON(1.0) ) THEN
+>     errorstatus = 101
+>     CALL ereport(RoutineName, errorstatus, "initial_co2_ch4_year not found")
+>   ELSE IF ( initial_co2_ch4_year < 1000 .OR. initial_co2_ch4_year > 5000 ) THEN
+>     CALL ereport(RoutineName, errorstatus,                                     &
+>                  "initial_co2_ch4_year must lie in the range 1000 to 5000")
+>   END IF
+> END IF
+> 
+> 
+> ! yr_fch4_ref, ch4_init_ppbv, fch4_ref, tau_ch4_ref, ch4_ppbv_ref
+> IF ( land_feed_ch4 ) THEN
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_init_imogen.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_init_imogen.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

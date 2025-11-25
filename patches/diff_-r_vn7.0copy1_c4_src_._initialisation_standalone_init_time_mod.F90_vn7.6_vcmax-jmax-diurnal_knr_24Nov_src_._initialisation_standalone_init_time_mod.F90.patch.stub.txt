@@ -1,0 +1,91 @@
+Patch stub generated: 2025-11-25T12:09:12.198478 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_time_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_time_mod.F90
+
+SUMMARY:
+  - added lines (>): 28
+  - removed lines (<): 20
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Namelist/IO changes: reconcile derived types and broadcast logic.
+- Signature rename: unify timestep_len/timestep or provide wrapper.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_time_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_time_mod.F90
+27c27
+<                            l_360, l_leap
+---
+>                            l_360, l_leap, l_local_solar_time
+30c30
+< USE timestep_mod, ONLY: timestep_real => timestep
+---
+> USE timestep_mod, ONLY: timestep
+32,33c32,33
+<   run_min_time, run_max_time, current_time, timestep, timestep_len,            &
+<   print_step,                                                                  &
+---
+>   run_min_time, run_max_time, current_time, timestep_number, timestep_len,     &
+>   print_step, oasis_time,                                                      &
+47a48,49
+> USE jules_model_environment_mod, ONLY: lsm_id, rivers
+> 
+85c87
+<                       main_run_end, print_step
+---
+>                       main_run_end, print_step, l_local_solar_time
+103c105
+< NAMELIST  / jules_spinup/ max_spinup_cycles, spinup_start, spinup_end,         &
+---
+> NAMELIST  /jules_spinup/ max_spinup_cycles, spinup_start, spinup_end,          &
+137,144c139,148
+< ! Then read the spinup namelist
+< CALL log_info("init_time", "Reading JULES_SPINUP namelist...")
+< READ(namelist_unit, NML = jules_spinup, IOSTAT = ERROR, IOMSG = iomessage)
+< IF ( ERROR /= 0 )                                                              &
+<   CALL log_fatal("init_time",                                                  &
+<                  "Error reading namelist JULES_SPINUP " //                     &
+<                  "(IOSTAT=" // TRIM(to_string(ERROR)) // " IOMSG=" //          &
+<                  TRIM(iomessage) // ")")
+---
+> IF ( lsm_id /= rivers ) THEN
+>   ! Then read the spinup namelist
+>   CALL log_info("init_time", "Reading JULES_SPINUP namelist...")
+>   READ(namelist_unit, NML = jules_spinup, IOSTAT = ERROR, IOMSG = iomessage)
+>   IF ( ERROR /= 0 )                                                            &
+>      CALL log_fatal("init_time",                                               &
+>                     "Error reading namelist JULES_SPINUP " //                  &
+>                     "(IOSTAT=" // TRIM(to_string(ERROR)) // " IOMSG=" //       &
+>                     TRIM(iomessage) // ")")
+> END IF
+148,151c152,155
+<   CALL log_fatal("init_time",                                                  &
+<                  "Error closing namelist file timesteps.nml " //               &
+<                  "(IOSTAT=" // TRIM(to_string(ERROR)) // " IOMSG=" //          &
+<                  TRIM(iomessage) // ")")
+---
+>    CALL log_fatal("init_time",                                                 &
+>                   "Error closing namelist file timesteps.nml " //              &
+>                   "(IOSTAT=" // TRIM(to_string(ERROR)) // " IOMSG=" //         &
+>                   TRIM(iomessage) // ")")
+164a169,171
+> IF ( l_local_solar_time )                                                      &
+>   CALL log_info("init_time", "Interpreting time as local solar time")
+> 
+249c256,257
+< timestep = 1
+---
+> timestep_number = 1
+> oasis_time = 0
+266c274
+< timestep_real = REAL(timestep_len)
+---
+> timestep = REAL(timestep_len)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_init_time_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_init_time_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

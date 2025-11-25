@@ -1,0 +1,70 @@
+Patch stub generated: 2025-11-25T12:09:12.170146 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/shared/check_compatible_options_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/shared/check_compatible_options_mod.F90
+
+SUMMARY:
+  - added lines (>): 32
+  - removed lines (<): 4
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/shared/check_compatible_options_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/shared/check_compatible_options_mod.F90
+25a26
+> USE jules_deposition_mod,          ONLY: l_deposition
+29a31
+> USE jules_soil_biogeochem_mod,     ONLY: l_layeredc, z_burn_max
+34c36
+< USE jules_vegetation_mod,          ONLY: l_triffid, l_inferno
+---
+> USE jules_vegetation_mod,          ONLY: l_triffid, l_inferno, l_trif_fire
+39c41
+< USE missing_data_mod,              ONLY: imdi
+---
+> USE missing_data_mod,              ONLY: imdi, rmdi
+46a49,50
+> USE jules_water_tracers_mod,       ONLY: l_wtrac_jls
+> USE wtrac_check_options_mod,       ONLY: wtrac_check_options
+121c125,128
+< ! These checks are not to be carried out when called from UM RECON
+---
+> IF ( lsm_id == cable ) check_tiles_namelists = .FALSE.
+> 
+> ! These checks are not to be carried out when called from UM RECON or when the
+> ! land surface model is CABLE, which has its own namelists.
+147c154
+<   ELSE IF ( lsm_id /= cable ) THEN
+---
+>   ELSE
+198a206,226
+> END IF
+> 
+> ! Deposition requires a tiled model.
+> IF ( l_aggregate .AND. l_deposition) THEN
+>   ERROR = 1
+>   WRITE(jules_message,jules_format) 'Deposition cannot use aggregate tiles.'
+> END IF
+> 
+> ! l_layeredc with l_inferno or l_trif_fire require z_burn_max to be set
+> IF ( l_layeredc .AND. ( l_trif_fire .OR. l_inferno ) ) THEN
+>   IF ( ABS( z_burn_max - rmdi ) < EPSILON(1.0) ) THEN
+>     ERROR = 1
+>     CALL jules_print(routinename,                                              &
+>                    "z_burn_max must be set when using l_layeredc with " //     &
+>                    "l_trif_fire / l_inferno")
+>   END IF
+> END IF
+> 
+> ! Check water tracer options
+> IF (l_wtrac_jls) THEN
+>   CALL wtrac_check_options(ERROR)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_shared_check_compatible_options_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_shared_check_compatible_options_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

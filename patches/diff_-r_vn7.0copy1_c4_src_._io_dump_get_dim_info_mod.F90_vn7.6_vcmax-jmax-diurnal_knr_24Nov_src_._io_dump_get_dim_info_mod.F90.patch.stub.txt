@@ -1,0 +1,177 @@
+Patch stub generated: 2025-11-25T12:09:12.210651 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/dump/get_dim_info_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/dump/get_dim_info_mod.F90
+
+SUMMARY:
+  - added lines (>): 111
+  - removed lines (<): 25
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/dump/get_dim_info_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/dump/get_dim_info_mod.F90
+1d0
+< #if !defined(UM_JULES)
+16a16
+> #if !defined(RIVERS_ONLY)
+29c29
+<   dim_cs1, dim_soil_n_pool, nsurft, nsoilt, dim_cslayer
+---
+>   dim_cs1, dim_soil_n_pool, nsurft, nsoilt, dim_cslayer, nmasst
+34,36d33
+< USE jules_rivers_mod, ONLY:                                                    &
+<   np_rivers
+< 
+64d60
+<                                p_rivers_dim_name => p_rivers_dim_name_out,     &
+134c130
+< CASE ( 'gs',  'cv', 'frac_agr_prev', 'frac_past_prev',           &
+---
+> CASE ( 'gs', 't_growth_gb', 'cv', 'frac_agr_prev', 'frac_past_prev',           &
+148c144,145
+<        'lake_h_ice_gb', 'lake_shape_factor_gb', 'latitude', 'longitude')
+---
+>        'lake_h_ice_gb', 'lake_shape_factor_gb', 'latitude', 'longitude',       &
+>        'projection_x_coord', 'projection_y_coord' )
+158,164d154
+< CASE(  't_growth_gb', 'l_growth_gb','vpd_growth_gb', 'co2_growth_gb',         &
+<         'pstar_growth_gb', 'xipam_opt','vcmax_opt','jmax_opt',                &
+<         't_sum','l_sum', 't_night','nt_sum','vpd_sum','co2_sum','pstar_sum')
+<   ndims = 2
+<   dim_names(1:ndims) = [ land_dim_name, pft_dim_name ]
+<   dim_sizes(1:ndims) = [ global_land_pts, npft ]
+<          
+170c160
+< CASE ( 'canht', 'lai','years_since_harvest')
+---
+> CASE ( 'canht', 'lai', 'years_since_harvest', 'f_nsc' )
+174a165,169
+> CASE ( 'plantNumDensity' )
+>   ndims = 3
+>   dim_names(1:ndims) = [ land_dim_name, pft_dim_name, nmasst_dim_name ]
+>   dim_sizes(1:ndims) = [ global_land_pts, npft, nmasst ]
+> 
+270,277d264
+<   ! River routing variables.
+< CASE ( 'rivers_lat_rp', 'rivers_lon_rp',                                       &
+<        'rivers_sto_rp', 'rfm_surfstore_rp', 'rfm_substore_rp',                 &
+<        'rfm_flowin_rp', 'rfm_bflowin_rp' )
+<   ndims = 1
+<   dim_names(1) = p_rivers_dim_name
+<   dim_sizes(1) = np_rivers
+< 
+484a472,567
+>   ! River routing variables and calls log_fatal is identifier not found
+>   CALL get_dim_info_rivers( l_reading, identifier, ndims, dim_sizes,           &
+>      dim_names, l_read_from_dump )
+> 
+> END SELECT
+> 
+> RETURN
+> 
+> END SUBROUTINE get_dim_info
+> 
+> SUBROUTINE get_dim_info_rivers( l_reading, identifier, ndims, dim_sizes,       &
+>    dim_names, l_read_from_dump )
+> #endif
+> !-----------------------------------------------------------------------------
+> ! Description:
+> !   Given a River routing variable's identifier, return the number, sizes and
+> !   names of its dimensions. Used when reading or writing a dump file.
+> !
+> ! Code Owner: Please refer to ModuleLeaders.txt
+> ! This file belongs in TECHNICAL
+> !-----------------------------------------------------------------------------
+> 
+> USE jules_rivers_mod, ONLY:                                                    &
+>   np_rivers
+> 
+> USE string_utils_mod, ONLY:                                                    &
+>   to_string
+> 
+> USE logging_mod, ONLY: log_fatal
+> 
+> USE model_interface_mod, ONLY: p_rivers_dim_name => p_rivers_dim_name_out
+> 
+> IMPLICIT NONE
+> 
+> !-----------------------------------------------------------------------------
+> ! Arguments with INTENT(IN).
+> !-----------------------------------------------------------------------------
+> LOGICAL, INTENT(IN) ::                                                         &
+>   l_reading
+>     ! Flag indicating where this routine has been called from.
+>     ! T means the call is from read_dump.
+>     ! F means the call is from write_dump.
+> 
+> CHARACTER(LEN=*), INTENT(IN) ::                                                &
+>   identifier  ! The identifier.
+> 
+> !-----------------------------------------------------------------------------
+> ! Arguments with INTENT(OUT).
+> !-----------------------------------------------------------------------------
+> INTEGER, INTENT(OUT) ::                                                        &
+>   ndims,                                                                       &
+>     ! Number of dimensions for the variable.
+>   dim_sizes(:)
+>     ! Size of each dimension.
+> 
+> CHARACTER(LEN=*), INTENT(OUT) ::                                               &
+>   dim_names(:)
+>     ! Name of each dimension.
+> 
+> !-----------------------------------------------------------------------------
+> ! Optional arguments.
+> !-----------------------------------------------------------------------------
+> LOGICAL, INTENT(OUT), OPTIONAL ::                                              &
+>   l_read_from_dump
+>     ! Flag passed to read_dump to indicate that a variable should be read from
+>     ! the dump file. This is TRUE for most variables, FALSE only for ancillary
+>     ! variables that were read from ancillary files (not the dump).
+> 
+> !-----------------------------------------------------------------------------
+> ! If this is call from read_dump, check we have the optional argument.
+> ! If it is present, set the default to TRUE.
+> !-----------------------------------------------------------------------------
+> IF ( l_reading ) THEN
+>   IF ( .NOT. PRESENT(l_read_from_dump) ) THEN
+>     CALL log_fatal("get_dim_info",                                             &
+>                    "l_read_from_dump must be present when called from " //     &
+>                    "read_dump.")
+>   ELSE
+>     l_read_from_dump = .TRUE.
+>   END IF
+> END IF
+> 
+> !-----------------------------------------------------------------------------
+> 
+> SELECT CASE ( identifier )
+> 
+>   ! River routing variables.
+> CASE ( 'rivers_lat_rp', 'rivers_lon_rp', 'rivers_x_coord_rp',                  &
+>        'rivers_y_coord_rp', 'rivers_sto_rp', 'rfm_surfstore_rp',               &
+>        'rfm_substore_rp', 'rfm_flowin_rp', 'rfm_bflowin_rp',                   &
+>        'rivers_outflow_rp', 'outflow_per_river' )
+>   ndims = 1
+>   dim_names(1) = p_rivers_dim_name
+>   dim_sizes(1) = np_rivers
+> 
+> CASE DEFAULT
+492a576,578
+> #if !defined(RIVERS_ONLY)
+> END SUBROUTINE get_dim_info_rivers
+> #else
+493a580
+> #endif
+544d630
+< #endif
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_dump_get_dim_info_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_dump_get_dim_info_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

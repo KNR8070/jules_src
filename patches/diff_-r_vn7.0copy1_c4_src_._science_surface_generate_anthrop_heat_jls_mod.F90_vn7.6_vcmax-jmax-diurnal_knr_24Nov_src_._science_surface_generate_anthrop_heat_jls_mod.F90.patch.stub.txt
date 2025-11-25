@@ -1,0 +1,168 @@
+Patch stub generated: 2025-11-25T12:09:12.270093 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/generate_anthrop_heat_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/generate_anthrop_heat_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 41
+  - removed lines (<): 81
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/generate_anthrop_heat_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/generate_anthrop_heat_jls_mod.F90
+22c22
+<               l_anthrop_heat_src,                                              &
+---
+>               surft_pts, surft_index,                                          &
+27,32c27
+<               anthrop_heat_surft,                                              &
+<               !Ancil_info
+<               l_lice_point)
+< 
+< !Use in module subroutines
+< USE tilepts_mod, ONLY: tilepts
+---
+>               anthrop_heat_surft)
+44c39
+< USE jules_surface_mod, ONLY: l_aggregate, l_urban2t
+---
+> USE jules_surface_mod, ONLY: l_urban2t, l_anthrop_heat_use_wrr
+49,53d43
+< USE jules_print_mgr, ONLY:                                                     &
+<     jules_message,                                                             &
+<     jules_print,                                                               &
+<     PrNorm
+< 
+69,71d58
+< ! IN Switch for  anthropogenic heat source
+< LOGICAL, INTENT(IN) :: l_anthrop_heat_src
+< 
+79c66
+< REAL(KIND=real_jlslsm), INTENT(IN OUT)    :: anthrop_heat_surft(land_pts,nsurft)
+---
+> REAL(KIND=real_jlslsm), INTENT(IN OUT) :: anthrop_heat_surft(land_pts,nsurft)
+82,88c69,72
+< LOGICAL, INTENT(IN) :: l_lice_point(land_pts)
+< 
+< ! Local Variables
+< INTEGER ::                                                                     &
+<    surft_index(land_pts,ntype),   & ! Index of tile points
+<    surft_pts(ntype),                 & ! Number of tile points
+<    urban_orig                          ! Original value of urban
+---
+> INTEGER, INTENT(IN) ::                                                         &
+>    surft_index(land_pts,ntype),                                                &
+>                               ! Index of tile points  : Only used for
+>    surft_pts(ntype)           ! Number of tile points : urban_canyon
+94,97c78,81
+<    anthrop_heat_urban(land_pts),                                               &
+<                ! For checking: Copy of anthrop_heat_surft(:,urban)
+<    urban_agg,                                                                  &
+<                ! For checking: anthrop_heat_surft aggregated for urban tiles
+---
+>    furb,                                                                       &
+>                ! Total urban fraction
+>    anthrop_heat_urban,                                                         &
+>                ! Anthropogenic heat on the total urbanised surface
+129,145c113,114
+< ! Initialise arrays
+< anthrop_heat_urban(:) = 0.0
+< 
+< ! surft_pts isn't set until after ni_bl_ctl so need to call it here.
+< CALL tilepts( land_pts, frac, surft_pts, surft_index, l_lice_point )
+< 
+< ! Check whether anthropogenic heat is switched and make sure that
+< ! we have an urban tile
+< IF ( .NOT. l_aggregate .AND.                                                   &
+<    l_anthrop_heat_src .AND. ( urban > 0 .OR. urban_canyon > 0 ) ) THEN
+< 
+<   ! Check which urban tile is present to make sure that the following is
+<   ! excecuted regardless of urban scheme. "urban" will not be present if
+<   ! using a two-tile urban scheme i.e. "urban_canyon" will be present instead
+<   urban_orig = urban
+<   IF ( urban_canyon > 0 .AND. urban < 0 ) urban = urban_canyon
+< 
+---
+> ! Make sure that we either have an urban tile
+> IF ( urban > 0 .OR. urban_canyon > 0 ) THEN
+167,169c136
+<   anthrop_heat_surft(:,urban)= mm * urban_month(im1)                           &
+<                       + (1.0 - mm) * urban_month(im)
+<   anthrop_heat_urban(:) = anthrop_heat_surft(:,urban)
+---
+>   anthrop_heat_urban = mm * urban_month(im1) + (1.0 - mm) * urban_month(im)
+172c139,140
+<   ! the canyon and roof tiles depending on anthrop_heat_scale.
+---
+>   ! the canyon and roof tiles depending on anthrop_heat_scale otherwise copy it
+>   ! to the urban tile.
+174,204c142,162
+<     n = urban_canyon
+<     DO k = 1,surft_pts(n)
+<       l = surft_index(k,n)
+<       ! Here anthrop_heat_surft(urban_roof) is a fraction (anthrop_heat_scale)
+<       ! of anthrop_heat_surft(urban_canyon) where wrr_gb is the canyon
+<       ! fraction. The total from the urban tile is conserved.
+<       anthrop_heat_surft(l,n) = anthrop_heat_surft(l,urban) /                  &
+<          ( anthrop_heat_scale * ( 1.0 - wrr_gb(l) ) + wrr_gb (l) )
+<       anthrop_heat_surft(l,urban_roof) =                                       &
+<          anthrop_heat_scale * anthrop_heat_surft(l,n)
+<     END DO
+<   END IF
+< 
+<   urban = urban_orig   ! Reset urban value to prevent errors
+< 
+< END IF
+< 
+< ! Check that anthrop_heat_surft is conserved
+< IF ( l_urban2t .AND. .NOT. l_aggregate ) THEN
+<   n = urban_canyon
+<   DO k = 1, surft_pts(n)
+<     l = surft_index(k,n)
+<     urban_agg = anthrop_heat_surft(l,urban_roof) * ( 1.0 - wrr_gb(l) ) +       &
+<        anthrop_heat_surft(l,urban_canyon) * wrr_gb(l)
+<     IF ( ABS( urban_agg - anthrop_heat_urban(l) ) > 1.0e-3 ) THEN
+<       WRITE(jules_message,*)                                                   &
+<           'WARNING: anthrop_heat not conserved on urban tiles for', k, l
+<       CALL jules_print('generate_anthrop_heat_jls',jules_message,level = PrNorm)
+<       WRITE(jules_message,*) 'Aggregated', urban_agg,                          &
+<           'Urban', anthrop_heat_urban(l)
+<       CALL jules_print('generate_anthrop_heat_jls',jules_message,level = PrNorm)
+---
+>     ! anthrop_heat_surft(urban_roof) is a fraction (anthrop_heat_scale)
+>     ! of anthrop_heat_surft(urban_canyon). The total from the urban tile is
+>     ! conserved.
+>     IF ( l_anthrop_heat_use_wrr ) THEN
+>       ! W/R supplied so use it (bit comparability plus less calculations)
+>       DO k = 1,surft_pts(urban_canyon)
+>         l = surft_index(k,urban_canyon)
+>         anthrop_heat_surft(l,urban_canyon) = anthrop_heat_urban /              &
+>            ( anthrop_heat_scale * ( 1.0 - wrr_gb(l) ) + wrr_gb (l) )
+>         anthrop_heat_surft(l,urban_roof) =                                     &
+>            anthrop_heat_scale * anthrop_heat_surft(l,urban_canyon)
+>       END DO
+>     ELSE
+>       DO k = 1,surft_pts(urban_canyon)
+>         l = surft_index(k,urban_canyon)
+>         furb = frac(l,urban_canyon) + frac(l,urban_roof)
+>         anthrop_heat_surft(l,urban_canyon) = anthrop_heat_urban * furb /       &
+>            ( frac(l,urban_canyon) + anthrop_heat_scale * frac(l,urban_roof) )
+>         anthrop_heat_surft(l,urban_roof) =                                     &
+>            anthrop_heat_scale * anthrop_heat_surft(l,urban_canyon)
+>       END DO
+206c164,166
+<   END DO
+---
+>   ELSE IF ( urban > 0 ) THEN
+>     anthrop_heat_surft(:,urban) = anthrop_heat_urban
+>   END IF
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_generate_anthrop_heat_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_generate_anthrop_heat_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

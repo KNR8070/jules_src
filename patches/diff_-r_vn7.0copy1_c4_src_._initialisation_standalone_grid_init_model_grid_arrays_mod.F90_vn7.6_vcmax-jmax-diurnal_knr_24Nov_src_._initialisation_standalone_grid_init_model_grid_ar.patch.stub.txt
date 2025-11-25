@@ -1,0 +1,56 @@
+Patch stub generated: 2025-11-25T12:09:12.185110 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/grid/init_model_grid_arrays_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/grid/init_model_grid_arrays_mod.F90
+
+SUMMARY:
+  - added lines (>): 13
+  - removed lines (<): 9
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/grid/init_model_grid_arrays_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/grid/init_model_grid_arrays_mod.F90
+22a23
+>                           imgn_vars_data,                                      &
+26c27,28
+<                           chemvars_data                                        &
+---
+>                           chemvars_data, water_resources_data,                 &
+>                           wtrac_jls_data                                       &
+30a33
+> USE imgn_vars_mod, ONLY: imgn_vars_alloc
+38,44d40
+< USE model_grid_mod, ONLY: latitude, longitude,                                 &
+<                            latitude_of_land_pts, longitude_of_land_pts
+< 
+< USE coastal, ONLY: flandg
+< 
+< USE theta_field_sizes, ONLY: t_i_length, t_j_length
+< 
+64a61
+> USE imgn_vars_mod,         ONLY: imgn_vars_data_type
+68a66,67
+> USE water_resources_vars_mod, ONLY: water_resources_data_type
+> USE jules_wtrac_type_mod, ONLY: jls_wtrac_data_type
+101a101
+> TYPE(imgn_vars_data_type),         INTENT(IN OUT) :: imgn_vars_data
+105a106,107
+> TYPE(water_resources_data_type), INTENT(IN OUT) :: water_resources_data
+> TYPE(jls_wtrac_data_type), INTENT(IN OUT) :: wtrac_jls_data
+120a123
+>   CALL imgn_vars_alloc(land_pts, imgn_vars_data)
+134c137,138
+<                           chemvars_data                                        &
+---
+>                           chemvars_data, water_resources_data,                 &
+>                           wtrac_jls_data                                       &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_grid_init_model_grid_arrays_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_grid_init_model_grid_ar.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

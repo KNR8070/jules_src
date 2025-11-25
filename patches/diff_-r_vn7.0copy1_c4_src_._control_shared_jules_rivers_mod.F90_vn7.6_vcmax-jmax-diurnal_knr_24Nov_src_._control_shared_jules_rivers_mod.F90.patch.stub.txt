@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.123456 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_rivers_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_rivers_mod.F90
+
+SUMMARY:
+  - added lines (>): 521
+  - removed lines (<): 179
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Namelist/IO changes: reconcile derived types and broadcast logic.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_rivers_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_rivers_mod.F90
+9c9
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+20c20
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+26,27d25
+< USE jules_irrig_mod, ONLY: l_irrig_limit
+< 
+32c30
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+34c32
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+36c34
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+51,58c49,58
+< ! The values of river_mouth and inland_drainage should differ and should not
+< ! be in the range 1:SIZE(flow_dir_delta,1), i.e. not in the range of values
+< ! used to encode the flow directions.
+< INTEGER, PARAMETER :: river_mouth = 9
+<   ! The value of the flow direction field that indicates a river mouth.
+< INTEGER, PARAMETER :: inland_drainage = 10
+<   ! The value of the flow direction field that indicates an inland drainage
+<   ! point, i.e. an endorheic catchment.
+---
+> INTEGER, PARAMETER :: inland_drainage = -10
+>     ! The value of nextx_grid that indicates an inland drainage point, i.e. an
+>     ! endorheic catchment. This should be <0 and should not be either of sea or
+>     ! river_mouth, nor should it appear in flow_dir_river_edge.
+> 
+> INTEGER, PARAMETER :: river_mouth = -9
+>   ! The value of nextx_grid that indicates a river mouth. This should be <0 and
+>   ! should not be either of sea or inland_drainage, nor should it appear in
+>   ! flow_dir_river_edge.
+> 
+60,63c60,65
+<     ! Value used to indicate that a river point is sea, for the UM.
+<     ! This should be <1, should not equal -1*river_mouth nor
+<     ! -1*inland_drainage, nor should it be in the range
+<     ! -1:-SIZE(flow_dir_delta,1).
+---
+>     ! The value of flow direction that is used to indicate a sea point.
+>     ! This value is used to set the flow direction variable in this code, but
+>     ! it need not be the value used to indicate sea in the input ancillary
+>     ! file. This value should be <1 and must not be any of flow_dir_river(1:8),
+>     ! dir_mouth or dir_inland_drainage.
+>     ! This value is also used to indicate sea in river_mask.
+73c75
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+76c78
+< ! The values in the flow direction ancillary layer must be consistent with the
+---
+> ! The values in any flow direction ancillary layer must be consistent with the
+97c99
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+99c101
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+104c106
+<    ,l_inland = .FALSE.
+---
+>    ,l_inland = .FALSE.                                                         &
+105a108,121
+>    ,l_riv_overbank = .FALSE.                                                   &
+>                             ! Logical to control overbank inundation
+>    ,l_outflow_per_river = .FALSE.
+>                  ! Internal flag where exact usage depends on the parent model
+>                  ! as a result of the order of namelist reading:
+>                  !   oasis_rivers, jules_rivers_props, jules_output.
+>                  ! When TRUE:
+>                  ! - OASIS-Rivers: OASIS send field contains
+>                  !   outflow_per_river so river number ancillary should be
+>                  !   specified in jules_rivers_props.
+>                  ! - Standalone: The river number ancillary has been specified
+>                  !   so outflow_per_river should be present in jules_output.
+>                  ! Both cases are checked once the latter namelist is read.
+>                  ! Additionally, rivers_outflow_rp is added to the dump.
+116c132
+<    ,a_thresh = 1
+---
+>    ,a_thresh = imdi
+118a135,139
+> ! Select shape of Earth used in TRIP river routing scheme
+> INTEGER :: trip_globe_shape = imdi
+> INTEGER, PARAMETER :: globe_spherical = 1
+> INTEGER, PARAMETER :: globe_ellipsoidal = 2
+> 
+120c141
+<    rivers_meander = 1.4                                                        &
+---
+>    rivers_meander = rmdi                                                       &
+123c144
+<    ,rivers_speed = 0.4                                                         &
+---
+>    ,rivers_speed = rmdi                                                        &
+125c146
+<    ,runoff_factor = 1.0                                                        &
+---
+>    ,runoff_factor = rmdi                                                       &
+127c148
+<    ,cland  = 0.2                                                               &
+---
+>    ,cland  = rmdi                                                              &
+129,135c150,156
+<    ,criver = 0.62                                                              &
+<                             ! subsurf river wave speed (m/s)
+<    ,cbland  = 0.1                                                              &
+<                             ! subsurf land wave speed (m/s)
+<    ,cbriver = 0.15                                                             &
+<                             ! subsurf river wave speed (m/s)
+<    ,retl = 0.0                                                                 &
+---
+>    ,criver = rmdi                                                              &
+>                             ! subsurface river wave speed (m/s)
+>    ,cbland  = rmdi                                                             &
+>                             ! subsurface land wave speed (m/s)
+>    ,cbriver = rmdi                                                             &
+>                             ! subsurface river wave speed (m/s)
+>    ,retl = rmdi                                                                &
+137c158
+<    ,retr = 0.005
+---
+>    ,retr = rmdi
+140,142c161,165
+< !-----------------------------------------------------------------------------
+< ! Rivers parameters
+< !-----------------------------------------------------------------------------
+---
+> ! Selects different fields for use in water conservation of lake evaporation
+> ! JULES ticket #1360
+> INTEGER :: lake_water_conserve_method = imdi
+> INTEGER, PARAMETER :: use_fqw_surft  = 1
+> INTEGER, PARAMETER :: use_elake_surft = 2
+144c167,183
+< ! Scalar variables (general)
+---
+> !------------------------------------------------------------------------------
+> ! Single namelist definition for UM and standalone
+> !------------------------------------------------------------------------------
+> NAMELIST  /jules_rivers/                                                       &
+>   l_rivers, l_inland, l_riv_overbank, i_river_vn, nstep_rivers,                &
+>   trip_globe_shape,                                                            &
+>   cland, criver, cbland, cbriver, runoff_factor, retl, retr,                   &
+>   a_thresh, rivers_meander, rivers_speed, lake_water_conserve_method
+> 
+> !------------------------------------------------------------------------------
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_jules_rivers_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_jules_rivers_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,31 @@
+Patch stub generated: 2025-11-25T12:09:12.195001 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_prescribed_data.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_prescribed_data.F90
+
+SUMMARY:
+  - added lines (>): 3
+  - removed lines (<): 2
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_prescribed_data.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_prescribed_data.F90
+532c532
+< IF ( l_deposition_flux .AND. .NOT. ANY(all_vars == 'tracer') ) THEN
+---
+> IF ( l_deposition_flux .AND. .NOT. ANY(all_vars == 'deposition_conc') ) THEN
+535c535,536
+<                  "tracer concentrations must be prescribed.")
+---
+>                  "surface concentrations of deposited species " //             &
+>                  "must be prescribed.")
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_init_prescribed_data.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_init_prescribed_data.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

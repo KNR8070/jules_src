@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.108595 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/imogen/imogen_update_clim.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/imogen_update_clim.F90
+
+SUMMARY:
+  - added lines (>): 68
+  - removed lines (<): 128
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/imogen/imogen_update_clim.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/imogen_update_clim.F90
+12c12
+< SUBROUTINE imogen_update_clim(progs, imgn_drive, ainfo)
+---
+> SUBROUTINE imogen_update_clim(progs, imgn_drive, imgn_vars, ainfo)
+20,23d19
+< USE theta_field_sizes, ONLY: t_i_length
+< 
+< USE datetime_mod, ONLY: secs_in_day
+< 
+26,28d21
+< USE imogen_progs, ONLY:                                                        &
+<   co2_ppmv,co2_start_ppmv,dtemp_o
+< 
+31c24
+<   co2_init_ppmv ,include_non_co2, wgen,                                        &
+---
+>   co2_init_ppmv, include_non_co2_radf,                                         &
+33c26
+<   nyr_non_co2, file_non_co2, file_non_co2_vals
+---
+>   nyr_non_co2, file_non_co2_radf, l_drive_with_global_temps
+35,36c28
+< USE imogen_time, ONLY:                                                         &
+<   mm,md,nsdmax,step_day
+---
+> USE imogen_time, ONLY: mm, md, nsdmax
+39,40c31
+<   q2co2, dir_patt, f_ocean, kappa_o,                                           &
+<   lambda_l, lambda_o,mu, dir_anom
+---
+>   q2co2, f_ocean, kappa_o, lambda_l, lambda_o, mu
+42,55c33
+< USE imogen_constants, ONLY:                                                    &
+<   n_olevs, drive_month
+< 
+< USE imogen_clim, ONLY:                                                         &
+< !   Scalars
+<     latmin_clim,latmax_clim,longmin_clim,longmax_clim,                         &
+< !   Arrays
+<     t_clim,rainfall_clim,snowfall_clim,rh15m_clim,uwind_clim,                  &
+<     vwind_clim,dtemp_clim,pstar_ha_clim,sw_clim,lw_clim,                       &
+<     f_wet_clim, lat, LONG
+< 
+< USE imogen_drive_vars, ONLY:                                                   &
+<   t_out,conv_rain_out,conv_snow_out,ls_rain_out,ls_snow_out,                   &
+<   qhum_out,wind_out,pstar_out,sw_out,lw_out
+---
+> USE imogen_constants, ONLY: n_olevs
+66a45
+> USE imgn_vars_mod, ONLY: imgn_vars_type
+90a70
+> TYPE(imgn_vars_type), INTENT(IN OUT) :: imgn_vars
+110c90
+<                !WORK Radiative forcing due to CO2 (W/m2)
+---
+>                ! Radiative forcing due to CO2 (W/m2)
+112c92
+<                !WORK Radiative forcing due to changes in CH4 concentration
+---
+>                ! Radiative forcing due to changes in CH4 concentration
+114,127c94
+<   q_non_co2,                                                                   &
+<                !WORK Radiative forcing due to non-CO2 (W/m2)
+<   q            !WORK Total radiative forcing, both CO2 and NON CO2
+< 
+< REAL :: latmin,latmax,longmin,longmax
+<                !WORK Max and min lat and long for files
+< 
+< ! Dummy variables for weather generator which is not available in this version
+< REAL ::                                                                        &
+<   precip_wg(land_pts,mm,md),                                                   &
+<   tmin_wg(land_pts,mm,md),                                                     &
+<   tmax_wg(land_pts,mm,md),                                                     &
+<   swdown_wg(land_pts,mm,md),                                                   &
+<   rh1p5m_wg(land_pts,mm,md)
+---
+>   q_total      ! Total radiative forcing
+133,134c100,101
+<   t1p5m_anom(land_pts,mm),                                                     &
+<                 ! WORK Temperature anomalies (K)
+---
+>   tl1_anom(land_pts,mm),                                                       &
+>                 ! Temperature anomalies (K)
+136,144c103,109
+<                 ! WORK Precip anomalies (mm/day)
+<   rh1p5m_anom(land_pts,mm),                                                    &
+<                 ! WORK Relative humidity anomalies
+<   uwind_anom(land_pts,mm),                                                     &
+<                 ! WORK u-wind anomalies (m/s)
+<   vwind_anom(land_pts,mm),                                                     &
+<                 ! WORK v-wind anomalies (m/s)
+<   diurnal_t1p5m_anom(land_pts,mm),                                             &
+<                 ! WORK Diurnal Temperature (K)
+---
+>                 ! Precip anomalies (mm/day)
+>   ql1_anom(land_pts,mm),                                                       &
+>                 ! Specific humidity anomalies
+>   wind_anom(land_pts,mm),                                                      &
+>                 ! wind anomalies (m/s)
+>   diurnal_tl1_anom(land_pts,mm),                                               &
+>                 ! Diurnal Temperature (K)
+146c111
+<                 ! WORK Pressure anomalies (hPa)
+---
+>                 ! Pressure anomalies (hPa)
+148c113
+<                 ! WORK Shortwave radiation anomalie
+---
+>                 ! Shortwave radiation anomalie
+150c115
+<                 ! WORK Longwave radiation anomalies
+---
+>                 ! Longwave radiation anomalies
+155d119
+< q_non_co2 = 0.0
+156a121
+> q_total   = 0.0
+158,166c123,130
+< t1p5m_anom(:,:)        = 0.0
+< precip_anom(:,:)   = 0.0
+< rh1p5m_anom(:,:)    = 0.0
+< uwind_anom(:,:)    = 0.0
+< vwind_anom(:,:)    = 0.0
+< diurnal_t1p5m_anom(:,:)    = 0.0
+< pstar_ha_anom(:,:) = 0.0
+< swdown_anom(:,:)       = 0.0
+< lwdown_anom(:,:)       = 0.0
+---
+> tl1_anom(:,:)         = 0.0
+> precip_anom(:,:)      = 0.0
+> ql1_anom(:,:)         = 0.0
+> wind_anom(:,:)        = 0.0
+> diurnal_tl1_anom(:,:) = 0.0
+> pstar_ha_anom(:,:)    = 0.0
+> swdown_anom(:,:)      = 0.0
+> lwdown_anom(:,:)      = 0.0
+174c138
+<   co2_start_ppmv = co2_ppmv
+---
+>   imgn_vars%co2_start_ppmv(1) = imgn_vars%co2_ppmv(1)
+179c143
+< ! subroutine IMOGEN_CONFIRMED_RUN which includes more stringent checks)
+---
+> ! subroutine imogen_confirmed_run which includes more stringent checks)
+181c145,146
+< IF (( .NOT. c_emissions) .AND. include_co2) THEN
+---
+> IF ( ( ( .NOT. c_emissions) .AND. include_co2 ) .OR.                           &
+>                                         l_drive_with_global_temps) THEN
+198c163
+<       co2_ppmv = co2_file_ppmv
+---
+>       imgn_vars%co2_ppmv(1) = co2_file_ppmv
+217a183
+>     ! anom = true and anlg = false
+220c186
+<     ! radiative forcing, Q. Recall that the AM has a "memory" through
+---
+>     ! radiative forcing, Q. Recall that the anlg model has a "memory" through
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_imogen_imogen_update_clim.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_imogen_imogen_update_clim.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

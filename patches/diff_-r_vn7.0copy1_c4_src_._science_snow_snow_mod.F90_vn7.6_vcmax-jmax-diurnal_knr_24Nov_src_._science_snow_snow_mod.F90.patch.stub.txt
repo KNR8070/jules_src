@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.255980 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/snow/snow_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/snow/snow_mod.F90
+
+SUMMARY:
+  - added lines (>): 409
+  - removed lines (<): 72
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/snow/snow_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/snow/snow_mod.F90
+21c21
+< SUBROUTINE snow ( land_pts, timestep, stf_hf_snow_melt, nsurft,                &
+---
+> SUBROUTINE snow ( land_pts, timestep, stf_hf_snow_melt, nsurft, n_wtrac_jls,   &
+24c24
+<                   hcaps1_soilt, hcons, melt_surft,                             &
+---
+>                   hcaps1_soilt, hcons, melt_surft, snowinc_surft,              &
+27c27,28
+<                   smvcst1_soilt, rgrain, rgrainl, rho_snow_grnd, sice,         &
+---
+>                   smvcst1_soilt, con_snow_wtrac, ei_surft_wtrac,               &
+>                   rgrain, rgrainl, rho_snow_grnd, sice,                        &
+29c30,34
+<                   tsnow, nsnow, ds, hf_snow_melt, lying_snow,                  &
+---
+>                   tsnow, nsnow, con_rain_wtrac, ls_rain_wtrac,                 &
+>                   ls_snow_wtrac, ls_graup_wtrac, melt_surft_wtrac,             &
+>                   snow_grnd_wtrac, snow_surft_wtrac, sice_wtrac,               &
+>                   sliq_wtrac,                                                  &
+>                   ds, hf_snow_melt, lying_snow,                                &
+32c37,38
+<                   dhf_surf_minus_soil,                                         &
+---
+>                   dhf_surf_minus_soil, snow_melt_wtrac,                        &
+>                   lake_snow_melt_wtrac,                                        &
+37c43
+<                   l_lice_point,                                                &
+---
+>                   l_lice_point, l_lice_surft,                                  &
+40c46,47
+<                   non_lake_frac, lake_h_mxl_gb, lake_depth_gb)
+---
+>                   non_lake_frac, lake_h_mxl_gb, lake_depth_gb                  &
+>                   )
+44a52
+> 
+71c79
+< USE jules_surface_types_mod, ONLY: lake
+---
+> USE jules_surface_types_mod, ONLY: lake, ntype
+78a87,90
+> USE jules_water_tracers_mod, ONLY: l_wtrac_jls, wtrac_calc_ratio_fn_jules
+> USE wtrac_snow_mod,          ONLY: wtrac_sn_type, wtrac_alloc_snow,            &
+>                                    wtrac_dealloc_snow
+> 
+105a118,119
+>   n_wtrac_jls,                                                                 &
+>     ! Number of water tracers
+119a134,140
+>   snowinc_surft(land_pts,nsurft),                                              &
+>     ! Total increment to snow from the surface scheme, including sublimation
+>     ! and melting (kg m-2 TS-1).
+>     ! Using the increment, rather than the rate times the timestep allows
+>     ! the mass of snow to be reduced to 0, whereas using the rate can
+>     ! result in very small presisting amounts of snow because of rounding
+>     ! errors.
+139c160
+<   smvcst1_soilt(land_pts,nsoilt)
+---
+>   smvcst1_soilt(land_pts,nsoilt),                                              &
+140a162,165
+>   con_snow_wtrac(land_pts,n_wtrac_jls),                                        &
+>     ! Water tracer convective snowfall rate (kg/m2/s).
+>   ei_surft_wtrac(land_pts,nsurft,n_wtrac_jls)
+>     ! Water tracer sublimation of snow (kg/m2/s).
+191c216
+<   lake_depth_gb(land_pts)
+---
+>   lake_depth_gb(land_pts),                                                     &
+192a218,238
+>   con_rain_wtrac(land_pts,n_wtrac_jls),                                        &
+>     ! Water tracer convective rainfall rate (kg/m2/s).
+>   ls_snow_wtrac(land_pts,n_wtrac_jls),                                         &
+>     ! Water tracer large-scale frozen precip fall rate (kg/m2/s).
+>   ls_graup_wtrac(land_pts,n_wtrac_jls),                                        &
+>     ! Water tracer large-scale graupel fall rate (kg/m2/s).
+>   ls_rain_wtrac(land_pts,n_wtrac_jls),                                         &
+>     ! Water tracer large-scale rainfall rate (kg/m2/s).
+>   melt_surft_wtrac(land_pts,nsurft,n_wtrac_jls),                               &
+>     ! Surface or canopy water tracer snowmelt rate (kg/m2/s).
+>     ! On output, this is the total melt rate for the tile
+>     ! (i.e. sum of  melt on canopy and ground).
+>   snow_grnd_wtrac(land_pts,nsurft,n_wtrac_jls),                                &
+>     ! Water tracer snow content beneath canopy (kg/m2).
+>   snow_surft_wtrac(land_pts,nsurft,n_wtrac_jls),                               &
+>     ! Water tracer snow mass content(kg/m2).
+>   sice_wtrac(land_pts,nsurft,nsmax,n_wtrac_jls),                               &
+>     ! Water tracer ice content of snow layers (kg/m2).
+>   sliq_wtrac(land_pts,nsurft,nsmax,n_wtrac_jls)
+>     ! Water tracer liquid content of snow layers (kg/m2).
+> 
+217c263
+<   dhf_surf_minus_soil(land_pts)
+---
+>   dhf_surf_minus_soil(land_pts),                                               &
+218a265,268
+>   snow_melt_wtrac(land_pts,n_wtrac_jls),                                       &
+>     ! GBM water tracer snowmelt (kg/m2/s).
+>   lake_snow_melt_wtrac(land_pts,n_wtrac_jls)
+>     ! Water tracer snowmelt on the lake tile when using FLake (kg/m2/s).
+227a278
+> LOGICAL, INTENT(IN) :: l_lice_surft(ntype)
+245c296
+<   n_can
+---
+>   n_can,                                                                       &
+246a298,302
+>   i_wt,                                                                        &
+>     ! Water tracer loop counter
+>   n_wt
+>     ! Actual or dummy pointer to array defined only when running with water
+>     ! tracers
+313a370,374
+> REAL(KIND=real_jlslsm) :: snow_ratio    ! Ratio of water tracer to water
+> 
+> TYPE(wtrac_sn_type) :: wtrac_sn         ! Water tracer working arrays
+> 
+> 
+322a384,386
+> ! Allocate water tracer arrays and initialise GBM fields
+> CALL wtrac_alloc_snow(land_pts, nsurft, nsmax, n_wtrac_jls, wtrac_sn)
+> 
+385c449
+< !$OMP PRIVATE(i)                                                               &
+---
+> !$OMP PRIVATE(i,i_wt)                                                          &
+389,390c453,454
+< !$OMP        infil_ground_ls_gbm)
+< 
+---
+> !$OMP        infil_ground_ls_gbm,l_wtrac_jls,ls_graup_wtrac,ls_snow_wtrac,     &
+> !$OMP        lake_snow_melt_wtrac,snow_melt_wtrac,n_wtrac_jls)
+406a471,481
+> IF (l_wtrac_jls) THEN
+>   DO i_wt = 1, n_wtrac_jls
+> !$OMP DO SCHEDULE(STATIC)
+>     DO i = 1, land_pts
+>       snow_melt_wtrac(i,i_wt)      = 0.0
+>       lake_snow_melt_wtrac(i,i_wt) = 0.0
+>     END DO
+> !$OMP END DO
+>   END DO
+> END IF !l_wtrac_jls
+> 
+414a490,500
+>   ! Repeat for water tracers
+>   IF (l_wtrac_jls) THEN
+>     DO i_wt = 1, n_wtrac_jls
+> !$OMP DO SCHEDULE(STATIC)
+>       DO i = 1, land_pts
+>         ls_graup_wtrac(i,i_wt) = 0.0
+>       END DO
+> !$OMP END DO
+>     END DO
+>   END IF
+> 
+422a509,520
+>   ! Repeat for water tracers
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_snow_snow_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_snow_snow_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

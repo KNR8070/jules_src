@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.135541 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/surf_couple_explicit_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/surf_couple_explicit_mod.F90
+
+SUMMARY:
+  - added lines (>): 62
+  - removed lines (<): 59
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/surf_couple_explicit_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/surf_couple_explicit_mod.F90
+47c47,48
+<     fraca, resfs, resft, rhokh, rhokh_surft, rhokh_sice, rhokh_sea,            &
+---
+>     fracaero_t, fracaero_s, resfs, resft,                                      &
+>     rhokh, rhokh_surft, rhokh_sice, rhokh_sea,                                 &
+59c60
+<     land_pts, nsurft, surft_pts,                                               &
+---
+>     land_pts, ssi_pts, sea_pts, nsurft, surft_pts,                             &
+67c68
+<     asteps_since_triffid, resp_s_acc_gb_um,                                    &
+---
+>     asteps_since_triffid,                                                      &
+73c74
+<     numcycles, cycleno, z1_uv_top, z1_tq_top, ddmfx,                           &
+---
+>     numcycles, cycleno, z1_uv_top, z1_tq_top, sky, ddmfx,                      &
+86a88
+>     wtrac_jls,                                                                 &
+109a112
+> USE jules_wtrac_type_mod, ONLY: jls_wtrac_type
+130a134,135
+> USE jules_water_tracers_mod,  ONLY:                                            &
+>   n_wtrac_jls, n_evap_srce
+140c145
+<     soil_model_rothc,                                                          &
+---
+>     soil_model_4pool,                                                          &
+148c153
+<   dim_cs1, dim_cs2, co2_dim_len,co2_dim_row
+---
+>   co2_dim_len,co2_dim_row
+163c168
+<   dim_cs1, dim_cs2, co2_dim_len,co2_dim_row, dim_cslayer
+---
+>   co2_dim_len,co2_dim_row, dim_cslayer
+201c206
+<   nsurft
+---
+>   nsurft, ssi_pts, sea_pts
+219,220d223
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) ::                                      &
+<   resp_s_acc_gb_um(land_pts,dim_cslayer,dim_cs1)
+236a240,241
+>   sky(tdims%i_start:tdims%i_end,tdims%j_start:tdims%j_end),                    &
+>     ! Skyview correction factor for surface LW
+268c273
+<   resp_s_tot_soilt(dim_cs2,nsoilt),                                            &
+---
+>   resp_s_tot_soilt(land_pts,nsoilt),                                           &
+323,325c328,332
+<   fraca(land_pts,nsurft),                                                      &
+<     !Fraction of surface moisture flux with only aerodynamic resistance for
+<     !snow-free land tiles.
+---
+>   fracaero_t(land_pts,nsurft),                                                 &
+>     !Total fraction of surface moisture flux with only aerodynamic resistance
+>   fracaero_s(land_pts,nsurft),                                                 &
+>     !Fraction of surface moisture flux with only aerodynamic resistance
+>     !from the frozen part of the tile only
+328c335
+<     !(1-FRACA) of snow-free land tiles.
+---
+>     !(1-fracaero_t) of snow-free land tiles.
+330,331c337,338
+<     !Total resistance factor. FRACA+(1-FRACA)*RESFS for snow-free land, 1 for
+<     !snow.
+---
+>     !Total resistance factor. fracaero_t+(1-fracaero_t)*resfs                  &
+>     !for snow-free land, 1 for snow.
+394a402
+> TYPE(jls_wtrac_type), INTENT(IN OUT) :: wtrac_jls
+487c495
+<   IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+>   IF ( soil_bgc_model == soil_model_4pool ) THEN
+496,501d503
+< 
+<   DO l = 1, land_pts
+<     DO n = 1, dim_cs1
+<       trifctltype%resp_s_acc_soilt(l,1,:,n) = resp_s_acc_gb_um(l,:,n)
+<     END DO
+<   END DO
+533d534
+< 
+538a540,541
+>     !IN values defining water tracer field dimensions
+>     n_wtrac_jls, n_evap_srce,                                                  &
+555,556c558,559
+<     forcing%pstar_ij,forcing%lw_down_ij,fluxes%sw_surft,jules_vars%zh,ddmfx,   &
+<     co2_mmr,co2_3d_ij,l_co2_interactive,l_phenol,                              &
+---
+>     forcing%pstar_ij,forcing%lw_down_ij,fluxes%sw_surft,sky,jules_vars%zh,     &
+>     ddmfx, co2_mmr,co2_3d_ij,l_co2_interactive,l_phenol,                       &
+564a568
+>     fluxes%l_emis_surft_set,                                                   &
+568,569c572,573
+<     progs%gs_gb,trifctltype%g_leaf_acc_pft,trifctltype%npp_acc_pft,            &
+<     trifctltype%resp_w_acc_pft,                                                &
+---
+>     fluxes%emis_surft,progs%gs_gb,chemvars%gc_corr,trifctltype%g_leaf_acc_pft, &
+>     trifctltype%npp_acc_pft,trifctltype%resp_w_acc_pft,                        &
+580c584,585
+<     alpha1,ashtf_prime_surft,fluxes%fqw_surft,epot_surft,fraca,                &
+---
+>     alpha1,ashtf_prime_surft,fluxes%fqw_surft,epot_surft,fracaero_t,           &
+>     fracaero_s(:,:),                                                           &
+584,588c589
+<     trifctltype%gpp_pft,trifctltype%gpp_pft_lay, trifctltype%apar_pft_lay,     &
+<     trifctltype%cmpf_pft_lay, trifctltype%vcmax_pft_lay,                       &
+<     trifctltype%vcmax25_pft_lay, trifctltype%wlite_pft_lay,                    &
+<     trifctltype%wcarb_pft_lay,trifctltype%wmin_pft_lay, trifctltype%ej_pft_lay,&
+<     trifctltype%npp_pft,trifctltype%resp_p_pft,                                &
+---
+>     trifctltype%gpp_pft,trifctltype%npp_pft,trifctltype%resp_p_pft,            &
+594,595c595,597
+<     ainfo%surft_index,surft_pts,tile_frac,fluxes%fsmc_pft,fluxes%emis_surft,   &
+<     emis_soil,                                                                 &
+---
+>     ainfo%surft_index,surft_pts,tile_frac,fluxes%fsmc_pft,emis_soil,           &
+>     trifctltype%growth_sug_pft,trifctltype%growth_sug_gb,progs%f_nsc_pft,      &
+>     trifctltype%lwp_c_pft, trifctltype%psi_root_zone_pft,                      &
+602,606c604
+<     progs%t_home_gb, progs%t_growth_gb, progs%l_growth_gb,                     & 
+<     progs%vpd_growth_gb,progs%co2_growth_gb,progs%pstar_growth_gb,             &
+<     progs%xipam_opt, progs%vcmax_opt,progs%jmax_opt,                           &
+<     progs%t_sum,progs%l_sum,progs%t_night,progs%nt_sum,                        &
+<     progs%co2_sum,progs%vpd_sum,progs%pstar_sum,                               &
+---
+>     progs%t_home_gb, progs%t_growth_gb,                                        &
+648c646
+<     ainfo%l_lice_point, ainfo%l_soil_point,                                    &
+---
+>     ainfo%l_lice_point, ainfo%l_soil_point, ainfo%l_lice_surft,                &
+652c650,656
+<     chemvars%flux_o3_pft, chemvars%fo3_pft                                     &
+---
+>     chemvars%flux_o3_pft, chemvars%fo3_pft,                                    &
+>     !Water tracers (IN)
+>     wtrac_jls%snow_surft, wtrac_jls%canopy_surft,                              &
+>     wtrac_jls%sthu_soilt, wtrac_jls%qw_1_ij,                                   &
+>     !Water tracers (OUT)
+>     wtrac_jls%fqw_1, wtrac_jls%fqw_surft, wtrac_jls%fqw_evapsrce,              &
+>     wtrac_jls%smc_soilt                                                        &
+655d658
+< 
+658c661
+<     nice, nice_use,                                                            &
+---
+>     nice, nice_use, n_wtrac_jls,                                               &
+676c679
+<     ! IN calcualted in land code
+---
+>     ! IN calculated in land code
+697c700,701
+<     ainfo%sice_index_ncat, ainfo%sice_frac_ncat,                               &
+---
+>     ainfo%sice_index_ncat, ainfo%sice_frac_ncat, ainfo%sice_pts_ncat,          &
+>     ssi_pts, sea_pts,                                                          &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_surf_couple_explicit_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_surf_couple_explicit_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

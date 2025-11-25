@@ -1,0 +1,29 @@
+Patch stub generated: 2025-11-25T12:09:12.173410 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/ancillaries/init_ancillaries_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/ancillaries/init_ancillaries_mod.F90
+
+SUMMARY:
+  - added lines (>): 1
+  - removed lines (<): 3
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/ancillaries/init_ancillaries_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/ancillaries/init_ancillaries_mod.F90
+45,46d44
+< USE jules_urban_mod, ONLY: l_moruses
+< 
+115c113
+< IF ( l_urban2t .OR. l_moruses ) CALL init_urban_props(ainfo,urban_param)
+---
+> IF ( l_urban2t ) CALL init_urban_props(ainfo,urban_param)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_ancillaries_init_ancillaries_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_ancillaries_init_ancil.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

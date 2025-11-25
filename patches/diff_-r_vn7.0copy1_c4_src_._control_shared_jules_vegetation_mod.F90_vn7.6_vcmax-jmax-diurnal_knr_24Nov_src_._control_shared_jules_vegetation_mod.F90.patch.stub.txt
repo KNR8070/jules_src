@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.129792 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_vegetation_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_vegetation_mod.F90
+
+SUMMARY:
+  - added lines (>): 116
+  - removed lines (<): 59
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_vegetation_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_vegetation_mod.F90
+47,49c47,49
+<   photo_pmodel =3
+<     ! plants use the model of Prentice et al., 2014, Ecology
+<     ! letter,10.1111/ele.12211
+---
+>   photo_sox_collatz = 3
+>     ! C3 plants use the model of Collatz et al.as derived for use with the
+>     ! SOX stomata model.
+63c63
+<   photo_adapt_acclim = 3,                                                      &
+---
+>   photo_adapt_acclim = 3
+65d64
+<   photo_pmodel_acclim = 4
+102c101
+<   stomata_medlyn = 2
+---
+>   stomata_medlyn = 2,                                                          &
+104a104,120
+>   stomata_sox = 3
+>     ! Use the semi-analytical version of the SOX model (Eller et al 2020)
+>     ! doi: 10.1111/nph.16419 - Eqns. 4 & 5
+> 
+> ! Parameters identifying alternative leaf dark respiration models.
+> ! These should have unique values.
+> INTEGER, PARAMETER ::                                                          &
+>   rd_classic = 1,                                                              &
+>     ! Use the original model where Rd is a fixed fraction of Vcmax.
+>     ! Eqn.13 of Clark et al (2011), doi:10.5194/gmd-4-701-2011.
+>   rd_pftq10 = 2,                                                               &
+>     ! Use explicitly a PFT-dependent Q10 with temperature adjustment,
+>     ! regardless of how Vcmax is calculated.  This is analogous to Eqns.4 & 5
+>     ! of Clark et al (2011), but for respiration.
+>   rd_tdq10 = 3
+>     ! Use a Q10 function in which Q10 depends linearly on temperature, as per
+>     ! Eqn.1 of Atkin et al (2015) doi:10.1111/nph.13253.
+138a155,156
+>   l_vcmax_jmax_diurnal = .FALSE.,                                              &
+>       !***rfu Switch to enable diurnal cycle of Vcmax and Jmax
+178a197,198
+>    l_sugar = .FALSE.,                                                          &
+>        ! Switch fo the non-structural carbohydrate model
+249,250c269,272
+<   stomata_model = stomata_jacobs
+<       ! Stomatal conductance model.
+---
+>   rd_model = imdi,                                                             &
+>       ! Chosen model of leaf dark respiration.
+>   stomata_model = imdi
+>       ! Chosen model of stomatal conductance.
+322c344
+<   n_day_photo_acclim = rmdi
+---
+>   n_day_photo_acclim = rmdi,                                                   &
+326a349,356
+>   !---------------------------------------------------------------------------
+>   ! Parameters used with the leaf dark respiration temperature-dependent Q10
+>   ! model.
+>   !---------------------------------------------------------------------------
+>   tdq10_int = rmdi,                                                            &
+>       ! Intercept in Q10 linear temperature dependence (unitless).
+>   tdq10_slope = rmdi
+>       ! Slope in Q10 linear temperature dependence (/degC).
+345,346c375,377
+<     photo_model, stomata_model, l_spec_veg_z0, l_limit_canhc,                  &
+< ! Not used in the UM yet
+---
+>     photo_model, rd_model, tdq10_int, tdq10_slope, stomata_model,              &
+>     l_spec_veg_z0, l_limit_canhc,                                              &
+> ! Not used in the UM yet  !***rfu
+349c380
+<     l_trif_biocrop, l_ag_expand
+---
+>     l_trif_biocrop, l_ag_expand, l_sugar, l_vcmax_jmax_diurnal
+358,361d388
+< REAL :: alpha_acclim
+<     ! Smoothing factor of exponential filter used with temperature acclmation.
+<     ! Small values give large amounts of smoothing.
+< 
+386,387d412
+< USE conversions_mod, ONLY:  rsec_per_day
+< 
+392,393d416
+< USE timestep_mod, ONLY: timestep
+< 
+479c502
+< CASE ( photo_collatz, photo_farquhar,photo_pmodel )
+---
+> CASE ( photo_collatz, photo_farquhar, photo_sox_collatz )
+511,512d533
+<   CASE (photo_pmodel_acclim)
+<    l_acclim = .TRUE.
+676,677c697
+<   CASE (photo_pmodel_acclim)
+<     ! NO checks necessary
+---
+> 
+684,685c704
+<        photo_acclim_model == photo_adapt_acclim  .OR.                          &
+<        photo_acclim_model == photo_pmodel_acclim ) THEN
+---
+>        photo_acclim_model == photo_adapt_acclim ) THEN
+692,696c711,714
+<     ! Check that the timescale is not too short (to avoid problems when it
+<     ! appears in the denominator). Here we compare with a timescale of 0.01
+<     ! timesteps, which would anyway mean effectively instantaneous
+<     ! acclimation.
+<     IF ( n_day_photo_acclim < 0.01 * timestep / rsec_per_day ) THEN
+---
+>     ! Check that the acclimation timescale is long enough to avoid problems
+>     ! when it appears in the denominator.  This timescale is typically tens of
+>     ! days, so set 1 day as a hard lower bound.
+>     IF ( n_day_photo_acclim < 1.0 ) THEN
+699c717
+<                    "n_day_photo_acclim is too small.")
+---
+>                    "n_day_photo_acclim must not be less than 1.0 days.")
+701,704d718
+<     ! Calculate the smoothing coefficient, assuming values will be sampled
+<     ! every timestep.
+<     alpha_acclim = 1.0 - EXP( -1.0 * timestep                                  &
+<                               / ( n_day_photo_acclim * rsec_per_day ) )
+705a720
+> 
+708,725c723,752
+< !---------------------------------------------------------------------------
+< ! check options for photo_pmodel
+< !---------------------------------------------------------------------------
+< IF (  photo_model == photo_pmodel ) THEN
+<    SELECT CASE ( photo_acclim_model )
+<     CASE ( 0 )
+<     ! This is valid, nothing more to do.
+<     CASE ( photo_adapt, photo_acclim, photo_adapt_acclim )
+<     ! Set a switch to indicate to the UM that extra input fields are needed.
+<     l_acclim = .TRUE.
+<     CASE (photo_pmodel_acclim)
+<     l_acclim = .TRUE.
+<     CASE DEFAULT
+<       errcode = 101  !  a fatal error
+<       CALL ereport("check_jules_vegetation", errcode,                          &
+<                  "Invalid value given for photo_acclim_model.")
+<   END SELECT
+< END IF ! photo_model ==photo_pmodel
+---
+> 
+> ! Check that the leaf dark respiration model is reasonable.
+> SELECT CASE ( rd_model )
+> CASE ( rd_classic, rd_pftq10 )
+>   ! These are valid, so nothing to do.
+> CASE ( rd_tdq10 )
+>   IF ( ANY(ABS([tdq10_slope, tdq10_int] - rmdi) < EPSILON(rmdi)) ) THEN
+>     errcode = 101  !  a fatal error
+>     CALL ereport("check_jules_vegetation", errcode,                            &
+>                  "Both tdq10_slope and tdq10_int must be specified with " //   &
+>                  "the TDQ10 leaf dark respiration model.")
+>   END IF
+> CASE DEFAULT
+>   errcode = 101
+>   CALL ereport("check_jules_vegetation", errcode,                              &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_jules_vegetation_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_jules_vegetation_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

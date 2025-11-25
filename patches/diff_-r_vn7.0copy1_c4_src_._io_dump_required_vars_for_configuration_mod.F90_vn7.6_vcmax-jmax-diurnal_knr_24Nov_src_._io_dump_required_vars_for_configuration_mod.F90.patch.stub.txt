@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.213022 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/dump/required_vars_for_configuration_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/dump/required_vars_for_configuration_mod.F90
+
+SUMMARY:
+  - added lines (>): 28
+  - removed lines (<): 124
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/dump/required_vars_for_configuration_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/dump/required_vars_for_configuration_mod.F90
+1c1
+< #if !defined(UM_JULES)
+---
+> #if !defined(RIVERS_ONLY)
+27c27
+< USE jules_soil_biogeochem_mod, ONLY: soil_model_ecosse, soil_model_rothc,      &
+---
+> USE jules_soil_biogeochem_mod, ONLY: soil_model_ecosse, soil_model_4pool,      &
+39,40c39
+<                                 photo_pmodel_acclim,                           &
+<                                 l_croprotate, l_trif_biocrop
+---
+>                                 l_croprotate, l_trif_biocrop, l_sugar
+59c58
+< USE jules_rivers_mod, ONLY: l_rivers, i_river_vn, rivers_trip, rivers_rfm
+---
+> USE jules_rivers_mod, ONLY: l_rivers
+68a68,73
+> USE veg3_parm_mod, ONLY: l_veg3
+> 
+> USE add_to_list_mod, ONLY: add_to_list
+> 
+> USE required_vars_for_rivers_mod, ONLY: required_vars_for_rivers
+> 
+84c89
+< INTEGER, INTENT(OUT) :: nvars  ! The number of variables
+---
+> INTEGER, INTENT(IN OUT) :: nvars  ! The number of variables
+173d177
+< nvars = 0
+194,195c198
+<      photo_acclim_model == photo_adapt_acclim .OR.                             &  
+<      photo_acclim_model == photo_pmodel_acclim ) THEN
+---
+>      photo_acclim_model == photo_adapt_acclim) THEN
+197,211d199
+<   CALL add_to_list( 'l_growth_gb', nvars, identifiers )
+<   CALL add_to_list( 'vpd_growth_gb', nvars, identifiers )
+<   CALL add_to_list( 'co2_growth_gb', nvars, identifiers )
+<   CALL add_to_list( 'pstar_growth_gb', nvars, identifiers )
+<   CALL add_to_list( 'xipam_opt', nvars, identifiers )
+<   CALL add_to_list( 'vcmax_opt', nvars, identifiers )
+<   CALL add_to_list( 'jmax_opt', nvars, identifiers )
+<   !CALL add_to_list( 'Rd25New', nvars, identifiers )
+<   CALL add_to_list( 't_sum', nvars, identifiers )
+<   CALL add_to_list( 'l_sum', nvars, identifiers )
+<   CALL add_to_list( 't_night', nvars, identifiers )
+<   CALL add_to_list( 'nt_sum', nvars, identifiers )
+<   CALL add_to_list( 'vpd_sum', nvars, identifiers )
+<   CALL add_to_list( 'co2_sum', nvars, identifiers )
+<   CALL add_to_list( 'pstar_sum', nvars, identifiers )
+257c245
+< IF ( soil_bgc_model == soil_model_rothc .AND. l_nitrogen ) THEN
+---
+> IF ( soil_bgc_model == soil_model_4pool .AND. l_nitrogen ) THEN
+269a258,261
+> IF ( l_veg3 ) THEN
+>   CALL add_to_list( 'plantNumDensity', nvars, identifiers )
+> END IF
+> 
+276a269,273
+> IF ( l_sugar ) THEN
+>   ! With SUGAR on, NSC mass fraction is prognostic for all PFTs
+>   CALL add_to_list( 'f_nsc', nvars, identifiers )
+> END IF
+> 
+301,321c298,299
+< ! River storage if river routing on and using TRIP
+< IF ( l_rivers .AND. ( i_river_vn == rivers_trip ) ) THEN
+<   IF ( read_or_write_dump_local ) THEN
+<     CALL add_to_list( 'rivers_sto_rp', nvars, identifiers )
+<   ELSE
+<     CALL log_warn( RoutineName,                                                &
+<                   "rivers_sto_rp will be initialised to zero.")
+<   END IF
+< END IF
+< 
+< ! Surface and subsurface stores and flows if river routing on and using RFM
+< IF ( l_rivers .AND. (i_river_vn == rivers_rfm) ) THEN
+<   IF ( read_or_write_dump_local ) THEN
+<     CALL add_to_list( 'rfm_surfstore_rp', nvars, identifiers )
+<     CALL add_to_list( 'rfm_substore_rp',  nvars, identifiers )
+<     CALL add_to_list( 'rfm_flowin_rp',    nvars, identifiers )
+<     CALL add_to_list( 'rfm_bflowin_rp',   nvars, identifiers )
+<   ELSE
+<     CALL log_warn( RoutineName,                                                &
+<                   "RFM river prognostics will be initialised to zero.")
+<   END IF
+---
+> IF ( l_rivers ) THEN
+>   CALL required_vars_for_rivers(nvars, identifiers, read_or_write_dump)
+500c478,479
+< ! Note that latitude and longitude are not handled here.
+---
+> ! Note that latitude and longitude (and projection coordinates) are not
+> ! handled here.
+558c537
+< IF ( soil_bgc_model == soil_model_rothc .OR.                                   &
+---
+> IF ( soil_bgc_model == soil_model_4pool .OR.                                   &
+587c566
+<   IF ( soil_bgc_model == soil_model_rothc .OR.                                 &
+---
+>   IF ( soil_bgc_model == soil_model_4pool .OR.                                 &
+766,840d744
+< SUBROUTINE add_to_list( identifier, nvars, varlist, l_append )
+< 
+< ! Adds an identifier to a list, optionally appending a suffix.
+< 
+< USE logging_mod, ONLY: log_fatal
+< 
+< IMPLICIT NONE
+< 
+< !-----------------------------------------------------------------------------
+< ! Arguments with intent(in)
+< !-----------------------------------------------------------------------------
+< CHARACTER(LEN=*), INTENT(IN) ::                                                &
+<   identifier
+<     ! An identifier for a variable.
+< 
+< !-----------------------------------------------------------------------------
+< ! Arguments with intent(inout)
+< !-----------------------------------------------------------------------------
+< 
+< INTEGER, INTENT(IN OUT) ::                                                     &
+<   nvars
+<     ! The number of values set in the list.
+< 
+< CHARACTER(LEN=*), INTENT(IN OUT) ::                                            &
+<   varlist(:)
+<     ! A list of identifiers.
+< 
+< !-----------------------------------------------------------------------------
+< ! Optional arguments with intent(in)
+< !-----------------------------------------------------------------------------
+< LOGICAL, INTENT(IN), OPTIONAL ::                                               &
+<   l_append
+<     ! Flag indicating if a suffix should be attached to the identifier.
+< 
+< !-----------------------------------------------------------------------------
+< ! Local scalar parameters.
+< !-----------------------------------------------------------------------------
+< CHARACTER(LEN=*), PARAMETER ::                                                 &
+<   RoutineName = 'ADD_TO_LIST'
+<     ! The name of this routine.
+< 
+< !-----------------------------------------------------------------------------
+< ! Local scalar variables.
+< !-----------------------------------------------------------------------------
+< LOGICAL ::                                                                     &
+<   l_append_soilt_local
+<     ! A local version of the optional argument l_append.
+< 
+< ! end of header
+< !-----------------------------------------------------------------------------
+< 
+< ! Set a local variables depending on the optional argument.
+< IF ( PRESENT(l_append) ) THEN
+<   l_append_soilt_local = l_append
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_dump_required_vars_for_configuration_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_dump_required_vars_for_configuration_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

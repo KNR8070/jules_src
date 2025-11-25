@@ -1,0 +1,138 @@
+Patch stub generated: 2025-11-25T12:09:12.106328 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/imogen/imogen_check.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/imogen_check.F90
+
+SUMMARY:
+  - added lines (>): 43
+  - removed lines (<): 32
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/imogen/imogen_check.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/imogen_check.F90
+12,14c12,13
+<   c_emissions,include_co2,include_non_co2,land_feed_co2, land_feed_ch4,        &
+<   ocean_feed,anlg,anom, wgen                                                   &
+< )
+---
+>   c_emissions, include_co2, include_non_co2_radf, land_feed_co2,               &
+>   land_feed_ch4, ocean_feed, anlg, anom, l_drive_with_global_temps)
+42c41
+<          !IN True: CO2 concentration is calculated from emissions read from
+---
+>          ! True: CO2 concentration is calculated from emissions read from
+44c43
+<          !   False: CO2 concentration read from file_scen_co2_ppmv
+---
+>          ! False: CO2 concentration read from file_scen_co2_ppmv
+46,48c45,47
+<          !IN Are adjustments to CO2 values allowed?
+<   include_non_co2,                                                             &
+<          !IN Are adjustments to non-CO2 values allowed?
+---
+>          ! Are adjustments to CO2 concentrations allowed?
+>   include_non_co2_radf,                                                        &
+>          ! Are adjustments to non-CO2 radiative forcings allowed?
+50c49
+<          !IN Are land CO2 feedbacks allowed on atmospheric C
+---
+>          ! Are land CO2 feedbacks allowed on atmospheric C
+52c51
+<          !IN Are land CH4 feedbacks allowed on atmospheric C
+---
+>          ! Are land CH4 feedbacks allowed on atmospheric C
+54c53
+<          !IN Are ocean feedbacks allowed on atmospheric C
+---
+>          ! Are ocean feedbacks allowed on atmospheric C
+56c55
+<          !IN True if the analogue model is used
+---
+>          ! True if the analogue model is used
+58,59c57,61
+<          !IN True if the anomalies are used
+<   wgen   !IN True if weather generator is used
+---
+>          ! True if the anomalies are used
+>   l_drive_with_global_temps
+>          ! True if driving with global temperature
+>          ! also need co2 concentrations as input
+>          ! no feedbacks currently included
+66c68
+<          !WORK Checks that configuration is Valid
+---
+>          ! Checks that configuration is valid
+68c70
+<          !WORK Confirms that configuration has been used before
+---
+>          ! Confirms that configuration has been used before
+116,117c118,119
+<         ( .NOT. include_non_co2) .AND. ( .NOT. land_feed_co2) .AND.            &
+<         ( .NOT. ocean_feed) .AND. ( .NOT. wgen))                               &
+---
+>         ( .NOT. include_non_co2_radf) .AND. ( .NOT. land_feed_co2) .AND.       &
+>         ( .NOT. ocean_feed))                                                   &
+130c132
+<   IF (( .NOT. include_co2) .AND. include_non_co2) THEN
+---
+>   IF (( .NOT. include_co2) .AND. include_non_co2_radf) THEN
+142c144
+<       WRITE(jules_message,*) 'Run is for prescribed CO2'
+---
+>       WRITE(jules_message,*) 'Run is for prescribed CO2 concentration'
+149c151
+<           ( .NOT. land_feed_ch4) .AND. ( .NOT. wgen)) THEN
+---
+>           ( .NOT. land_feed_ch4)) THEN
+179,180c181
+<       IF ( land_feed_co2 .AND. ocean_feed .AND. ( .NOT. land_feed_ch4) .AND.   &
+<            ( .NOT. wgen) ) THEN
+---
+>       IF ( land_feed_co2 .AND. ocean_feed .AND. ( .NOT. land_feed_ch4)) THEN
+188,189c189,190
+<   IF (include_non_co2) THEN
+<     WRITE(jules_message,*) 'Run is with non-CO2 radiative forcing'
+---
+>   IF (include_non_co2_radf) THEN
+>     WRITE(jules_message,*) 'Run is with prescribed non-CO2 radiative forcing'
+204,205c205
+<     IF ( include_co2 .AND. ocean_feed .AND. ( land_feed_ch4) .AND.             &
+<         ( .NOT. wgen) ) THEN
+---
+>     IF ( include_co2 .AND. ocean_feed .AND. ( land_feed_ch4)) THEN
+220,222c220,221
+< ! Write if weather generator is turned on
+< IF ( .NOT. wgen) THEN
+<   WRITE(jules_message,*) 'Weather generator is switched off'
+---
+> IF (l_drive_with_global_temps) THEN
+>   WRITE(jules_message,*) 'JULES is driven with global mean temperature changes'
+224,225c223
+< ELSE
+<   WRITE(jules_message,*) 'Weather generator is switched on'
+---
+>   WRITE(jules_message,*) 'there are no land or ocean feedbacks'
+226a225,237
+>   IF ( c_emissions ) THEN
+>     WRITE(jules_message,*) 'Need co2 concentration not emissions'
+>     CALL jules_print('imogen_check',jules_message)
+>     check_flag = .FALSE.
+>   ELSE
+>     IF ( .NOT. include_co2) THEN
+>       WRITE(jules_message,*) 'Need time series of co2 conc read from file'
+>       CALL jules_print('imogen_check',jules_message)
+>       check_flag = .FALSE.
+>     ELSE
+>       check_flag = .TRUE.
+>     END IF
+>   END IF
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_imogen_imogen_check.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_imogen_imogen_check.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

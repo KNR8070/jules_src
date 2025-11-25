@@ -1,0 +1,81 @@
+Patch stub generated: 2025-11-25T12:09:12.230638 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./params/imogen/imogen_run.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./params/imogen/imogen_run.F90
+
+SUMMARY:
+  - added lines (>): 22
+  - removed lines (<): 20
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./params/imogen/imogen_run.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./params/imogen/imogen_run.F90
+34c34
+<   co2_init_ppmv = 286.085,                                                     &
+---
+>   co2_init_ppmv = rmdi,                                                        &
+49,51d48
+<   file_points_order = '',                                                      &
+<               ! File containing the mapping of points in the
+<               ! IMOGEN grid to the JULES grid
+54,55c51,52
+<   file_non_co2_vals = '',                                                      &
+<               ! If used, file containing non-CO2 values
+---
+>   file_non_co2_radf = '',                                                      &
+>               ! If required, file containing non-CO2 radiative forcing
+57c54
+<               ! If used, file containing CO2 values
+---
+>               ! If used, file containing CO2 atm concentrations
+72,76c69,70
+<   include_non_co2 = .TRUE.,                                                    &
+<               ! Are adjustments to non-CO2 values allowed?
+<   file_non_co2 = .FALSE.,                                                      &
+<               ! If true, then non-CO2 radiative forcings are
+<               ! contained within a file.
+---
+>   include_non_co2_radf = .TRUE.,                                               &
+>               ! Are adjustments to radiative forcing from non-CO2 allowed?
+83,84c77,87
+<   wgen = .FALSE.
+<               ! Is the weather generator switched on.
+---
+>   l_drive_with_global_temps = .FALSE.
+>               ! Drive with annual mean global temperatures
+>               ! This takes the patterns and makes the driving data by
+>               ! combining the global temperatures and the patterns
+>               ! also need CO2 concentrations as an input to JULES
+>               ! (c_emissions=.FALSE.) There are no feedbacks.
+>               ! (land_feed_co2=.FALSE.,land_feed_ch4=.FALSE.,ocean_feed=.FALSE.)
+>               ! include_non_co2_radf=.FALSE., include_co2=.FALSE.,
+>               ! anom=.TRUE.,anlg=.FALSE.
+>               ! need a filename for the time series of global mean temperatures
+>               ! and for the co2 concentrations.
+91c94
+<   initial_co2_ch4_year = 1860,                                                 &
+---
+>   initial_co2_ch4_year = imdi,                                                 &
+109,112c112,114
+<                            include_non_co2, land_feed_co2, land_feed_ch4,      &
+<                            ocean_feed, wgen, anom, anlg, nyr_non_co2,          &
+<                            file_non_co2, file_non_co2_vals, file_ch4_n2o,      &
+<                            file_points_order,                                  &
+---
+>                            include_non_co2_radf, land_feed_co2, land_feed_ch4, &
+>                            ocean_feed, anom, anlg, nyr_non_co2,                &
+>                            file_non_co2_radf, file_ch4_n2o,                    &
+115c117
+<                            fch4_ref, tau_ch4_ref, ch4_ppbv_ref
+---
+>                            l_drive_with_global_temps
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._params_imogen_imogen_run.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._params_imogen_imogen_run.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

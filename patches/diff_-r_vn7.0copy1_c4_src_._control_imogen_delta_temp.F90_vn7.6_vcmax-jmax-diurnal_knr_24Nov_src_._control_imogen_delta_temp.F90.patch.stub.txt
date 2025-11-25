@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.100156 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/imogen/delta_temp.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/delta_temp.F90
+
+SUMMARY:
+  - added lines (>): 78
+  - removed lines (<): 78
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/imogen/delta_temp.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/delta_temp.F90
+12,13c12,16
+<   n_olevs,f_ocean,kappa,lambda_l,lambda_o,mu,q,dtemp_l,dtemp_o                 &
+< )
+---
+>   n_olevs,f_ocean,kappa,lambda_l,lambda_o,mu,dqradf,dtemp_l,dtemp_o, dtemp_g)
+> 
+> USE veg_param, ONLY: secs_per_360days
+> 
+> USE jules_print_mgr, ONLY: jules_message, jules_print
+15,17d17
+< USE jules_print_mgr, ONLY:                                                     &
+<   jules_message,                                                               &
+<   jules_print
+35,36c35,36
+< INTEGER ::                                                                     &
+<   n_olevs  !IN Number of ocean thermal layers
+---
+> INTEGER, INTENT(IN) ::                                                         &
+>   n_olevs  ! Number of ocean thermal layers
+38,40c38,40
+< REAL ::                                                                        &
+<   q,                                                                           &
+<            !IN Increase in global radiative forcing (W/m2)
+---
+> REAL, INTENT(IN) ::                                                            &
+>   dqradf,                                                                      &
+>            ! Change in global radiative forcing (W/m2)
+42c42
+<            !IN Inverse climate sensitivity over land (W/K/m2)
+---
+>            ! Inverse climate sensitivity over land (W/K/m2)
+44c44
+<            !IN Inverse climate sensitivity over ocean (W/K/m2)
+---
+>            ! Inverse climate sensitivity over ocean (W/K/m2)
+46c46
+<            !IN Ratio of land-to-ocean temperature anomalies (.)
+---
+>            ! Ratio of land-to-ocean temperature anomalies (.)
+48,49c48,49
+<            !IN Fractional coverage of planet with ocean
+<   kappa    !IN Ocean eddy diffusivity (W/m/K)
+---
+>            ! Fractional coverage of planet with ocean
+>   kappa    ! Ocean eddy diffusivity (W/m/K)
+51,57c51,53
+< INTEGER ::                                                                     &
+<   iter_per_year,                                                               &
+<            !WORK Iterations per year
+<   timesteps,                                                                   &
+<            !WORK Number of iterations per call to DELTA_TEMP
+<   i,j      !WORK Looping parameter
+< PARAMETER(iter_per_year = 20)
+---
+> REAL, INTENT(IN OUT) ::                                                        &
+>   dtemp_o(n_olevs)
+>            ! Ocean temperature anomalies (K)
+59c55
+< REAL ::                                                                        &
+---
+> REAL, INTENT(OUT) ::                                                           &
+61,63c57,59
+<            !OUT Land mean temperature anomaly
+<   dtemp_o(n_olevs)
+<            !IN/OUT Land mean temperature anomaly
+---
+>            ! Land mean temperature anomaly
+>   dtemp_g
+>            ! Global mean temperature anomaly
+66,67d61
+<   rhocp,                                                                       &
+<            !WORK Rho times cp for the ocean (J/K/m3)
+69,78c63,69
+<            !WORK Flux into the top of the ocean (W/m2)
+<   flux_bottom
+<            !WORK Flux into the top of the ocean (W/m2)
+< 
+< REAL ::                                                                        &
+<   DTIME,                                                                       &
+<            !WORK Timestep (s)
+<   dz(1:n_olevs),                                                               &
+<            !WORK Distance step (m)
+<   sec_year !WORK Seconds in a year (s)
+---
+>            ! Flux into the top of the ocean (W/m2)
+>   flux_bottom,                                                                 &
+>            ! Flux into the top of the ocean (W/m2)&
+>   timestep_local,                                                              &
+>            ! Timestep (s)
+>   dz(1:n_olevs)
+>            ! Distance step (m)
+82c73
+<            !WORK Mesh ratio
+---
+>            ! Mesh ratio
+84c75
+<            !WORK Mesh ratio
+---
+>            ! Mesh ratio
+86c77
+<            !WORK Inhomogenous component in implicit scheme (/s)
+---
+>            ! Inhomogenous component in implicit scheme (/s)
+88,98c79,85
+<            !WORK Inhomogenous component in implicit scheme (/s)
+<   p        !WORK ``Dirchlet'' part of mixed boundary
+<            !     condition at ocean surface (/m)
+< 
+< REAL ::                                                                        &
+<   u_old(1:n_olevs),                                                            &
+<            !WORK Old ocean temperature anomalies
+<   u_new(1:n_olevs)
+<            !WORK New ocean temperature anomalies
+< 
+< REAL ::                                                                        &
+---
+>            ! Inhomogenous component in implicit scheme (/s)
+>   pdirchlet,                                                                   &
+>            ! ``Dirchlet'' part of mixed boundary condition ocean surface (/m)
+>   dtemp_o_old(1:n_olevs),                                                      &
+>            ! Old ocean temperature anomalies
+>   dtemp_o_new(1:n_olevs),                                                      &
+>            ! New ocean temperature anomalies
+100c87
+<            !WORK Factor by which layers are changed
+---
+>            ! Factor by which layers are changed
+102,103c89,90
+<            !WORK Cumulated depth of layers (m)
+<   dz_top   !WORK Depth of the top layer (m)
+---
+>            ! Cumulated depth of layers (m)
+>   dz_top   ! Depth of the top layer (m)
+105,106c92,93
+< PARAMETER(rhocp = 4.04e6)
+< PARAMETER(sec_year = 3.1536e7)
+---
+> REAL, PARAMETER :: rhocp = 4.04e6
+>            ! Rho times cp for the ocean (J/K/m3)
+107a95,101
+> INTEGER ::                                                                     &
+>   timesteps,                                                                   &
+>            ! Number of iterations per call to delta_temp
+>   i,j      ! Looping parameter
+> 
+> INTEGER, PARAMETER :: iter_per_year = 20
+>            ! Iterations per year
+113c107
+< DTIME = sec_year / REAL(iter_per_year)
+---
+> timestep_local = secs_per_360days / REAL(iter_per_year)
+145c139
+< ! Now arrange that the lowest depth (here DEPTH = U(N_OLEVS+1)) is at 5000m
+---
+> ! Now arrange that the lowest depth (here depth = u(n_olevs+1)) is at 5000m
+151c145
+< r1(1) = (kappa / rhocp) * (DTIME / (dz_top * dz_top))
+---
+> r1(1) = (kappa / rhocp) * (timestep_local / (dz_top * dz_top))
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_imogen_delta_temp.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_imogen_delta_temp.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

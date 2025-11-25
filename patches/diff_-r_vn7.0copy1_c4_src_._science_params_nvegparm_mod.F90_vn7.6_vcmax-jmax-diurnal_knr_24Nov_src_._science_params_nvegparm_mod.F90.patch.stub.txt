@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.238522 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/params/nvegparm_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/nvegparm_mod.F90
+
+SUMMARY:
+  - added lines (>): 104
+  - removed lines (<): 79
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/params/nvegparm_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/nvegparm_mod.F90
+74,85c74,85
+< ALLOCATE( albsnc_nvg(nnvg))
+< ALLOCATE( albsnf_nvgu(nnvg))
+< ALLOCATE( albsnf_nvg(nnvg))
+< ALLOCATE( albsnf_nvgl(nnvg))
+< ALLOCATE( catch_nvg(nnvg))
+< ALLOCATE( emis_nvg(nnvg))
+< ALLOCATE( gs_nvg(nnvg))
+< ALLOCATE( infil_nvg(nnvg))
+< ALLOCATE( z0_nvg(nnvg))
+< ALLOCATE( ch_nvg(nnvg))
+< ALLOCATE( vf_nvg(nnvg))
+< ALLOCATE( l_z0_nvg(nnvg))
+---
+> ALLOCATE( albsnc_nvg(nnvg) )
+> ALLOCATE( albsnf_nvgu(nnvg) )
+> ALLOCATE( albsnf_nvg(nnvg) )
+> ALLOCATE( albsnf_nvgl(nnvg) )
+> ALLOCATE( catch_nvg(nnvg) )
+> ALLOCATE( emis_nvg(nnvg) )
+> ALLOCATE( gs_nvg(nnvg) )
+> ALLOCATE( infil_nvg(nnvg) )
+> ALLOCATE( z0_nvg(nnvg) )
+> ALLOCATE( ch_nvg(nnvg) )
+> ALLOCATE( vf_nvg(nnvg) )
+> ALLOCATE( l_z0_nvg(nnvg) )
+109d108
+< USE missing_data_mod, ONLY: rmdi
+111d109
+< USE jules_print_mgr,  ONLY: jules_print, jules_message, newline
+122c120
+< INTEGER :: ERROR  ! Error indicator
+---
+> INTEGER :: errorstatus = 0
+124a123,184
+> ! In LFRic if options are not required they have a zero size.
+> IF ( SIZE( albsnc_nvg(:) ) > 0 )                                               &
+>    CALL check_jules_nml_values_real ( albsnc_nvg(:), 'albsnc_nvg', nnvg,       &
+>    0.0, 1.0, RoutineName, errorstatus )
+> IF ( SIZE( albsnf_nvgu(:) ) > 0 )                                              &
+>    CALL check_jules_nml_values_real ( albsnf_nvgu(:), 'albsnf_nvgu', nnvg,     &
+>    0.0, 1.0, RoutineName, errorstatus )
+> IF ( SIZE( albsnf_nvg(:) ) > 0 )                                               &
+>    CALL check_jules_nml_values_real ( albsnf_nvg(:), 'albsnf_nvg', nnvg,       &
+>    0.0, 1.0, RoutineName, errorstatus )
+> IF ( SIZE( albsnf_nvgl(:) ) > 0 )                                              &
+>    CALL check_jules_nml_values_real ( albsnf_nvgl(:), 'albsnf_nvgl', nnvg,     &
+>    0.0, 1.0, RoutineName, errorstatus )
+> IF ( SIZE( catch_nvg(:) ) > 0 )                                                &
+>    CALL check_jules_nml_values_real ( catch_nvg(:), 'catch_nvg', nnvg,         &
+>    0.0, HUGE(1.0), RoutineName, errorstatus )
+> IF ( SIZE( emis_nvg(:) ) > 0 )                                                 &
+>    CALL check_jules_nml_values_real ( emis_nvg(:), 'emis_nvg', nnvg,           &
+>    0.0, 1.0, RoutineName, errorstatus )
+> IF ( SIZE( gs_nvg(:) ) > 0 )                                                   &
+>    CALL check_jules_nml_values_real ( gs_nvg(:), 'gs_nvg', nnvg,               &
+>    0.0, HUGE(1.0), RoutineName, errorstatus )
+> IF ( SIZE( infil_nvg(:) ) > 0 )                                                &
+>    CALL check_jules_nml_values_real ( infil_nvg(:), 'infil_nvg', nnvg,         &
+>    0.0, HUGE(1.0), RoutineName, errorstatus )
+> IF ( SIZE( z0_nvg(:) ) > 0 )                                                   &
+>    CALL check_jules_nml_values_real ( z0_nvg(:), 'z0_nvg', nnvg,               &
+>    0.0, HUGE(1.0), RoutineName, errorstatus )
+> IF ( SIZE( ch_nvg(:) ) > 0 )                                                   &
+>    CALL check_jules_nml_values_real ( ch_nvg(:), 'ch_nvg', nnvg,               &
+>    0.0, HUGE(1.0), RoutineName, errorstatus )
+> IF ( SIZE( vf_nvg(:) ) > 0 )                                                   &
+>    CALL check_jules_nml_values_real ( vf_nvg(:), 'vf_nvg', nnvg,               &
+>    0.0, 1.0, RoutineName, errorstatus )
+> IF ( SIZE( z0h_z0m(npft+1:) ) > 0 )                                            &
+>    CALL check_jules_nml_values_real ( z0h_z0m(npft+1:), 'z0hm_nvg', nnvg,      &
+>    0.0, HUGE(1.0), RoutineName, errorstatus )
+> IF ( SIZE( z0h_z0m_classic(npft+1:) ) > 0 )                                    &
+>    CALL check_jules_nml_values_real ( z0h_z0m_classic(npft+1:),                &
+>    'z0hm_classic_nvg', nnvg, 0.0, HUGE(1.0), RoutineName, errorstatus )
+> 
+> IF ( errorstatus > 0 )                                                         &
+>    CALL ereport(RoutineName, errorstatus,                                      &
+>    ' Error(s) were found in jules_nvegparm - see job.out for details')
+> 
+> END SUBROUTINE check_jules_nvegparm
+> 
+> 
+> SUBROUTINE check_jules_nml_values_real ( var, var_name, var_size,  min_value,  &
+>    max_value, RoutineName, errorstatus )
+> 
+> USE jules_print_mgr, ONLY: jules_print, jules_message
+> USE jules_surface_types_mod, ONLY: soil, npft
+> USE missing_data_mod, ONLY: rmdi
+> 
+> IMPLICIT NONE
+> 
+> INTEGER                :: var_size, errorstatus
+> REAL(KIND=real_jlslsm) :: var(var_size), min_value, max_value
+> CHARACTER(LEN=*)       :: var_name, RoutineName
+> LOGICAL                :: soil_chck(var_size)
+> 
+126,129c186,189
+< ! Check that all required variables were present in the namelist.
+< ! The namelist variables were initialised to rmdi.
+< ! Some configurations don't need all parameters (e.g. albsnc_nvg) but for now
+< ! we insist on getting all parameters (and that there are not rmdi!).
+---
+> ! The namelist variables should be initialised to rmdi and will still be
+> ! rmdi if they are attached to science options when not required (UM/JULES).
+> ! Specific checks to ensure that these required variables are not rmdi can be
+> ! found in check_compatible_options.
+131,171d190
+< ERROR = 0
+< IF ( ANY( ABS( albsnf_nvg(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+<   ERROR = 1
+<   CALL jules_print(RoutineName, "No value for albsnf_nvg")
+< END IF
+< IF ( ANY( ABS( catch_nvg(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+<   ERROR = 1
+<   CALL jules_print(RoutineName, "No value for catch_nvg")
+< END IF
+< IF ( ANY( ABS( gs_nvg(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+<   ERROR = 1
+<   CALL jules_print(RoutineName, "No value for gs_nvg")
+< END IF
+< IF ( ANY( ABS( infil_nvg(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+<   ERROR = 1
+<   CALL jules_print(RoutineName, "No value for infil_nvg")
+< END IF
+< IF ( ANY( ABS( z0_nvg(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+<   ERROR = 1
+<   CALL jules_print(RoutineName, "No value for z0_nvg")
+< END IF
+< IF ( ANY( ABS( ch_nvg(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+<   ERROR = 1
+<   CALL jules_print(RoutineName, "No value for ch_nvg")
+< END IF
+< IF ( ANY( ABS( vf_nvg(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+<   ERROR = 1
+<   CALL jules_print(RoutineName, "No value for vf_nvg")
+< END IF
+< IF ( ANY( ABS( emis_nvg(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+<   ERROR = 1
+<   CALL jules_print(RoutineName, "No value for emis_nvg")
+< END IF
+< IF ( ANY( ABS( z0h_z0m(npft+1:) - rmdi ) < EPSILON(1.0) ) ) THEN
+<   ERROR = 1
+<   CALL jules_print(RoutineName, "No value for z0hm_nvg")
+< END IF
+< IF ( ANY( ABS( z0h_z0m_classic(npft+1:) - rmdi ) < EPSILON(1.0) ) ) THEN
+<   ERROR = 1
+<   CALL jules_print(RoutineName, "No value for z0hm_classic_nvg")
+< END IF
+173,181c192,215
+< IF ( ERROR /= 0 )                                                              &
+<   CALL ereport(RoutineName, ERROR,                                             &
+<                  "Variable(s) missing from namelist - see job.out for " //     &
+<                  "error message(s)")
+< 
+< ERROR = 0
+< IF ( ANY( vf_nvg(:) > 1.0 ) ) THEN
+<   ERROR = 1
+<   CALL jules_print(RoutineName, "At least one value of vf_nvg > 1.0")
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_params_nvegparm_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_params_nvegparm_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

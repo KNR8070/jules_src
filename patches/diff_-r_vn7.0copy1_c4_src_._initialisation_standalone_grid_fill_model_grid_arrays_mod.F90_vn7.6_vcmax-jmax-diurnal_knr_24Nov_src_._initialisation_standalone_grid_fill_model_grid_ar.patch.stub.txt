@@ -1,0 +1,44 @@
+Patch stub generated: 2025-11-25T12:09:12.182419 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/grid/fill_model_grid_arrays_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/grid/fill_model_grid_arrays_mod.F90
+
+SUMMARY:
+  - added lines (>): 8
+  - removed lines (<): 8
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/grid/fill_model_grid_arrays_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/grid/fill_model_grid_arrays_mod.F90
+16,17c16,17
+< USE model_grid_mod, ONLY: latitude, longitude,                                 &
+<                            latitude_of_land_pts, longitude_of_land_pts
+---
+> USE model_grid_mod, ONLY: projection_x_coord, projection_x_coord_land,         &
+>                           projection_y_coord, projection_y_coord_land
+51,52c51,52
+< ALLOCATE(latitude_of_land_pts(land_pts))
+< ALLOCATE(longitude_of_land_pts(land_pts))
+---
+> ALLOCATE( projection_x_coord_land(land_pts) )
+> ALLOCATE( projection_y_coord_land(land_pts) )
+59,62c59,62
+<       ainfo_data%land_index(l) = (j-1) * t_i_length + i
+<       coastal_data%fland(l) = flandg(i,j)
+<       latitude_of_land_pts(l)  = latitude(i,j)
+<       longitude_of_land_pts(l) = longitude(i,j)
+---
+>       ainfo_data%land_index(l)   = (j-1) * t_i_length + i
+>       coastal_data%fland(l)      = flandg(i,j)
+>       projection_x_coord_land(l) = projection_x_coord(i,j)
+>       projection_y_coord_land(l) = projection_y_coord(i,j)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_grid_fill_model_grid_arrays_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_grid_fill_model_grid_ar.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

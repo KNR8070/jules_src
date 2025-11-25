@@ -1,0 +1,137 @@
+Patch stub generated: 2025-11-25T12:09:12.299130 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/vegetation/soilcarb_layers_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/vegetation/soilcarb_layers_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 58
+  - removed lines (<): 27
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/vegetation/soilcarb_layers_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/vegetation/soilcarb_layers_jls_mod.F90
+40c40,41
+< USE jules_soil_biogeochem_mod, ONLY: bio_hum_cn, tau_lit, l_label_frac_cs
+---
+> USE jules_soil_biogeochem_mod, ONLY: bio_hum_cn, tau_lit, l_label_frac_cs,     &
+>                                      z_burn_max
+65c66
+< INTEGER, INTENT(IN)::                                                          &
+---
+> INTEGER, INTENT(IN) ::                                                         &
+75c76
+< REAL(KIND=real_jlslsm), INTENT(IN)::                                           &
+---
+> REAL(KIND=real_jlslsm), INTENT(IN) ::                                          &
+81c82
+< REAL(KIND=real_jlslsm), INTENT(IN)::                                           &
+---
+> REAL(KIND=real_jlslsm), INTENT(IN) ::                                          &
+94c95
+< REAL(KIND=real_jlslsm), INTENT(IN OUT)::                                       &
+---
+> REAL(KIND=real_jlslsm), INTENT(IN OUT) ::                                      &
+110c111
+< REAL(KIND=real_jlslsm), INTENT(OUT)::                                          &
+---
+> REAL(KIND=real_jlslsm), INTENT(OUT) ::                                         &
+126c127
+< REAL(KIND=real_jlslsm), INTENT(IN):: t_soil_soilt_acc(land_pts,nsoilt,sm_levels)
+---
+> REAL(KIND=real_jlslsm), INTENT(IN) :: t_soil_soilt_acc(land_pts,nsoilt,sm_levels)
+154c155
+< REAL(KIND=real_jlslsm) , PARAMETER ::                                          &
+---
+> REAL(KIND=real_jlslsm), PARAMETER ::                                           &
+157c158
+<     ! Decomposable Plant Material burns between 80 to 100 %.
+---
+>     ! Decomposable Plant Material burns between 80 to 100 %
+160c161
+<     ! Resistant Plant Material burns between 0 to 20 %.
+---
+>     ! Resistant Plant Material burns between 0 to 20 %
+162c163
+<     ! and emitted_carbon_RPM, and are also set in soilcarb.
+---
+>     ! and emitted_carbon_RPM, and are also set in soilcarb
+210a212,224
+> ! l_trif_fire calculations for proportion of cs burnt
+> REAL(KIND=real_jlslsm) ::                                                      &
+>   z2,                                                                          &
+>    ! depth of bottom of soil layer for soil C burnt calculation
+>   z1,                                                                          &
+>    ! depth of top of soil layer for soil C burnt calculation
+>   prop_cs_burnt,                                                               &
+>    ! proportion of soil carbon burnt
+>   burnt_carbon_layer_dpm(land_pts, dim_cslayer),                               &
+>    ! DPM burnt carbon in each soil layer due to fire (kg m-2 per 360days)
+>   burnt_carbon_layer_rpm(land_pts, dim_cslayer)
+>    ! RPM burnt carbon in each soil layer due to fire (kg m-2 per 360days)
+> 
+230a245,246
+> burnt_carbon_layer_dpm(:,:) = 0.0
+> burnt_carbon_layer_rpm(:,:) = 0.0
+258c274
+<     cn(l,n,2) = cs(l,n,2) / ns_pool_gb(l,n,2) ! C:N ratio of DPM - Prognostic
+---
+>     cn(l,n,2) = cs(l,n,2) / ns_pool_gb(l,n,2) ! C:N ratio of RPM - Prognostic
+491c507
+< ! Remove burnt litter from top soil layer only
+---
+> ! Remove burnt litter down to z_burn_max
+496,509c512,540
+<     burnt_carbon_dpm(l) = g_burn_gb(l) *                                       &
+<                           (cs(l,1,1) * (ccdpm_min + (ccdpm_max - ccdpm_min)    &
+<                           * (1.0 - (sthu_soilt(l,1,1)))))
+<     burnt_carbon_rpm(l) = (g_burn_gb(l) *                                      &
+<                           (cs(l,1,2) * (ccrpm_min + (ccrpm_max - ccrpm_min)    &
+<                           * (1.0 - (sthu_soilt(l,1,1))))))
+<     ! Need to introduce a check because it is updated before updating soil C
+<     burnt_carbon_dpm(l) = MAX(MIN(burnt_carbon_dpm(l), cs(l,1,1) +             &
+<                           pc(l,1,1) / r_gamma - cs_min), 0.0)
+<     burnt_carbon_rpm(l) = MAX(MIN(burnt_carbon_rpm(l), cs(l,1,1) +             &
+<                           pc(l,1,1) / r_gamma - cs_min), 0.0)
+<     pc(l,1,1)     = pc(l,1,1) - burnt_carbon_dpm(l)
+<     pc(l,1,2)     = pc(l,1,2) - burnt_carbon_rpm(l)
+<     burnt_soil(l) = burnt_carbon_dpm(l) + burnt_carbon_rpm(l)
+---
+>     z2 = 0.0
+>     DO n=1,dim_cslayer
+>       z1 = z2
+>       z2 = z2 + dzsoil(n)
+>       prop_cs_burnt = 0.0
+>       IF ( z2 <  z_burn_max ) THEN
+>         prop_cs_burnt = 1.0  ! combustibility of 1
+>       ELSE IF ( z2 >= z_burn_max .AND. z1 <  z_burn_max ) THEN
+>         prop_cs_burnt = (z_burn_max - z1) / (z2 - z1)
+>       END IF
+> 
+>       burnt_carbon_layer_dpm(l,n) = prop_cs_burnt * g_burn_gb(l) *             &
+>                           (cs(l,n,1) * (ccdpm_min + (ccdpm_max - ccdpm_min)    &
+>                           * (1.0 - (sthu_soilt(l,1,n)))))
+>       burnt_carbon_layer_rpm(l,n) = prop_cs_burnt * g_burn_gb(l) *             &
+>                           (cs(l,n,2) * (ccrpm_min + (ccrpm_max - ccrpm_min)    &
+>                           * (1.0 - (sthu_soilt(l,1,n)))))
+>       ! Need to introduce a check because it is updated before updating soil C
+>       burnt_carbon_layer_dpm(l,n) = MAX(MIN(burnt_carbon_layer_dpm(l,n),       &
+>                           cs(l,n,1) +  pc(l,n,1) / r_gamma - cs_min), 0.0)
+>       burnt_carbon_layer_rpm(l,n) = MAX(MIN(burnt_carbon_layer_rpm(l,n),       &
+>                           cs(l,n,2) + pc(l,n,2) / r_gamma - cs_min), 0.0)
+>       pc(l,n,1)     = pc(l,n,1) - burnt_carbon_layer_dpm(l,n)
+>       pc(l,n,2)     = pc(l,n,2) - burnt_carbon_layer_rpm(l,n)
+>     END DO
+>     burnt_soil(l) = SUM(burnt_carbon_layer_dpm(l,:)) +                         &
+>                     SUM(burnt_carbon_layer_rpm(l,:))
+>     burnt_carbon_dpm(l) = SUM(burnt_carbon_layer_dpm(l,:))
+>     burnt_carbon_rpm(l) = SUM(burnt_carbon_layer_rpm(l,:))
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_vegetation_soilcarb_layers_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_vegetation_soilcarb_layers_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

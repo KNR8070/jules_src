@@ -1,0 +1,48 @@
+Patch stub generated: 2025-11-25T12:09:12.260072 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil/ch4_tdep_layers_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/ch4_tdep_layers_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 12
+  - removed lines (<): 8
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil/ch4_tdep_layers_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/ch4_tdep_layers_jls_mod.F90
+110c110
+<     ! For RothC (dim_cs1=4), the pools are DPM, RPM, biomass and humus
+---
+>     ! For 4-pool (dim_cs1=4), the pools are DPM, RPM, biomass and humus
+250,253c250,255
+<         DO n = 1,dim_cslayer
+<           ch4_tmp_lys(n) = MIN( ch4_tmp_lys(n), cs(i,n,k) / ( timestep *       &
+<                                                               f_wetl(i) ) )
+<         END DO
+---
+>         IF (f_wetl(i) > EPSILON(1.0)) THEN
+>           DO n = 1,dim_cslayer
+>             ch4_tmp_lys(n) = MIN( ch4_tmp_lys(n), cs(i,n,k) / ( timestep *     &
+>                                                             f_wetl(i) ) )
+>           END DO
+>         END IF
+255,257c257,261
+<         IF ( SUM(ch4_tmp_lys) > cs(i,1,k) / (timestep * f_wetl(i)) ) THEN
+<           ch4_tmp_lys(:) = ch4_tmp_lys(:) * cs(i,1,k) /                        &
+<                            ( timestep * SUM(ch4_tmp_lys) * f_wetl(i) )
+---
+>         IF (f_wetl(i) > EPSILON(1.0)) THEN
+>           IF ( SUM(ch4_tmp_lys) > cs(i,1,k) / (timestep * f_wetl(i)) ) THEN
+>             ch4_tmp_lys(:) = ch4_tmp_lys(:) * cs(i,1,k) /                      &
+>                              ( timestep * SUM(ch4_tmp_lys) * f_wetl(i) )
+>           END IF
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_ch4_tdep_layers_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_ch4_tdep_layers_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

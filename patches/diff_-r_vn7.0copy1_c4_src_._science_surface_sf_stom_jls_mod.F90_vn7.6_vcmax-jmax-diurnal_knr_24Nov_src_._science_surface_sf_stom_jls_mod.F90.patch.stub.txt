@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.292987 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/sf_stom_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/sf_stom_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 2139
+  - removed lines (<): 2225
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Signature rename: unify timestep_len/timestep or provide wrapper.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/sf_stom_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/sf_stom_jls_mod.F90
+11,723c11,700
+<     USE um_types, ONLY: real_jlslsm
+<     
+<     IMPLICIT NONE
+<     
+<     CHARACTER(LEN=*), PARAMETER, PRIVATE :: ModuleName='SF_STOM_MOD'
+<     
+<     PRIVATE
+<     PUBLIC sf_stom
+<     
+<     CONTAINS
+<     
+<     ! *********************************************************************
+<     ! Routines to calculate the bulk stomatal resistance and the canopy
+<     ! CO2 fluxes.
+<     !
+<     ! References:
+<     !   Bernacchi et al., 2001, Plant Cell and Environment, 24, 253--259,
+<     !      https://doi.org/10.1111/j.1365-3040.2001.00668.x.
+<     !   Medlyn et al., 2002, Plant, Cell and Environment, 25: 1167--1179,
+<     !     https://doi.org/10.1046/j.1365-3040.2002.00891.x.
+<     !   Mercado et al., 2018, New Phytologist, 218: 1462--1477,
+<     !     https://doi.org/10.1111/nph.15100.
+<     !
+<     ! *********************************************************************
+<     
+<     SUBROUTINE sf_stom  (land_pts,land_index                                       &
+<     ,                    veg_pts,veg_index                                         &
+<     ,                    ft,co2,co2_3d,co2_dim_len                                 &
+<     ,                    co2_dim_row,l_co2_interactive                             &
+<     ,                    fsmc,veg_state,ht,ipar,lai                                &
+<     ,                    canht,pstar                                               &
+<     ,                    q1,t1, ra,tstar,o3,t_home_gb,t_growth_gb                  &
+<     ,                    l_growth_gb, vpd_growth_gb                                &
+<     ,                    co2_growth_gb,pstar_growth_gb                             &
+<     ,                    xipam_opt,vcmax_opt,jmax_opt,t_sum,l_sum                  &
+<     ,                    t_night,nt_sum,vpd_sum,co2_sum,pstar_sum                  &
+<     ,                    can_rad_mod,ilayers,faparv                                &
+<     ,                    gpp,gpp_lay, apar_lay                                     &
+<     ,                    cmpf_lay, vcmax_lay, vcmax25_lay                          &
+<     ,                    wlite_lay, wcarb_lay                                      &
+<     ,                    wmin_lay, ej_lay,npp,resp_p,resp_l,resp_r,resp_w          &
+<     ,                    n_leaf,n_root,n_stem,lai_bal,gc                           &
+<     ,                    fapar_sun,fapar_shd,fsun                                  &
+<     ,                    flux_o3,fo3,fapar_diag,apar_diag                          &
+<     ,                    isoprene,terpene,methanol,acetone                         &
+<     ,                    open_index,open_pts,                                      &
+<                         !New arguments replacing USE statements
+<                         !crop_vars_mod (IN)
+<                         dvi_cpft,rootc_cpft)
+<     
+<     USE leaf_mod, ONLY: leaf
+<     USE leaf_limits_mod, ONLY: leaf_limits
+<     USE bvoc_emissions_mod, ONLY: bvoc_emissions
+<     
+<     USE conversions_mod, ONLY: zerodegc
+<     USE theta_field_sizes, ONLY: t_i_length
+<     
+<     USE jules_surface_types_mod, ONLY: nnpft, ncpft
+<     
+<     USE jules_vegetation_mod, ONLY:                                                &
+<     ! imported parameters
+<         photo_collatz, photo_farquhar, photo_pmodel, stomata_medlyn,               &
+<         photo_adapt, photo_acclim, photo_adapt_acclim, photo_pmodel_acclim,        &
+<         photo_act_model, photo_act_pft, photo_act_gb, n_photo_coef,                &
+<     ! imported scalars that are not changed
+<         dsj_coef, dsv_coef, jv25_coef, act_j_coef, act_v_coef,                     &
+<         l_bvoc_emis, l_fapar_diag, l_trait_phys, l_stem_resp_fix, l_o3_damage,     &
+<         l_scale_resp_pm, photo_acclim_model, photo_model, stomata_model,           &
+<         n_day_photo_acclim
+<     
+<     USE CN_utils_mod, ONLY:                                                        &
+<     ! imported procedures
+<         get_can_ave_fac, nleaf_from_lai
+<     
+<     USE pftparm, ONLY:                                                             &
+<     ! imported arrays that are not changed
+<         a_wl, a_ws, act_jmax, act_vcmax, alpha_elec, b_wl, c3, deact_jmax,         &
+<         deact_vcmax, ds_jmax, ds_vcmax, eta_sl, kpar, nl0, nr_nl, ns_nl, omega,    &
+<         r_grow, sigl, lma, nmass, kn, knl, tupp, tlow,  q10_leaf, nsw, nr, hw_sw,  &
+<         jv25_ratio,beta_c3c4,eagamma, eakc, eako, gamma25, kc25, ko25
+<     
+<     USE ccarbon, ONLY:                                                             &
+<     ! imported scalar parameters
+<        epco2,epo2
+<     
+<     USE c_rmol, ONLY: rmol
+<     
+<     USE jules_surface_mod, ONLY:                                                   &
+<     ! imported scalar parameters
+<        iter,o2,cmass
+<     
+<     USE timestep_mod, ONLY: timestep
+<     
+<     USE model_time_mod, ONLY: timestep_len, current_time
+<     
+<     USE parkind1, ONLY: jprb, jpim
+<     USE yomhook, ONLY: lhook, dr_hook
+<     
+<     USE crop_utils_mod, ONLY:                                                      &
+<        stemc_from_prognostics,                                                     &
+<        lma_from_prognostics
+<     USE cropparm, ONLY: cfrac_l
+<     
+<     USE qsat_mod, ONLY: qsat
+<     
+<     USE ereport_mod, ONLY: ereport
+<     
+<     USE veg3_field_mod, ONLY: veg_state_type
+<     
+<     USE veg3_parm_mod, ONLY: l_veg3
+<     IMPLICIT NONE
+<     
+<     !-----------------------------------------------------------------------------
+<     ! Arguments with INTENT(in).
+<     !-----------------------------------------------------------------------------
+<     INTEGER, INTENT(IN) ::                                                         &
+<      land_pts                                                                      &
+<                                 ! IN Number of land points to be
+<     !                                 !    processed.
+<     ,land_index(land_pts)                                                          &
+<                                 ! IN Index of land points on the
+<     !                                 !    P-grid.
+<     ,veg_pts                                                                       &
+<                                 ! IN Number of vegetated points.
+<     ,veg_index(land_pts)                                                           &
+<                                 ! IN Index of vegetated points
+<     !                                 !    on the land grid.
+<     ,co2_dim_len                                                                   &
+<                                 ! IN Length of a CO2 field row.
+<     ,co2_dim_row                ! IN Number of CO2 field rows.
+<     
+<     INTEGER, INTENT(IN) ::                                                         &
+<      ft                         ! IN Plant functional type.
+<     
+<     LOGICAL, INTENT(IN) :: l_co2_interactive   ! switch for 3D CO2 field
+<     
+<     INTEGER, INTENT(IN) ::                                                         &
+<       can_rad_mod                                                                  &
+<     !                           !Switch for canopy radiation model
+<      ,ilayers
+<     !                           !No of layers in canopy radiation model
+<     
+<     REAL(KIND=real_jlslsm), INTENT(IN) ::                                          &
+<      co2                                                                           &
+<                                 ! IN Atmospheric CO2 concentration
+<     ,co2_3d(co2_dim_len,co2_dim_row)                                               &
+<     !                                 ! IN 3D atmos CO2 concentration
+<     !                                 !    (kg CO2/kg air).
+<     ,fsmc(land_pts)                                                                &
+<                                 ! IN Soil water factor.
+<     ,ht(land_pts)                                                                  &
+<                                 ! IN Canopy height (m).
+<     ,ipar(land_pts)                                                                &
+<                                 ! IN Incident PAR (W/m2).
+<     ,lai(land_pts)                                                                 &
+<                                 ! IN Leaf area index.
+<     ,canht(land_pts)                                                               &
+<                                 ! IN Canopy Height
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_sf_stom_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_sf_stom_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

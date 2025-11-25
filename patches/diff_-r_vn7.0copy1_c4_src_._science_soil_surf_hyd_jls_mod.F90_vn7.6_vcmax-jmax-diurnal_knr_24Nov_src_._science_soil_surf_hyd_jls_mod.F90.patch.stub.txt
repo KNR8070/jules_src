@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.264951 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil/surf_hyd_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/surf_hyd_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 407
+  - removed lines (<): 51
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil/surf_hyd_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/surf_hyd_jls_mod.F90
+16c16
+< !            LARGE-SCALE RAIN IS CALCUALTED
+---
+> !            LARGE-SCALE RAIN IS CALCULATED
+19c19
+< !            CONVECTIVE RAIN IS CALCUALTED
+---
+> !            CONVECTIVE RAIN IS CALCULATED
+34c34,35
+<             land_pts, nsurft, sm_levels, soil_pts, timestep, l_top, l_pdm,     &
+---
+>             land_pts, nsurft, sm_levels, soil_pts, n_wtrac_jls, timestep,      &
+>             l_top, l_pdm,                                                      &
+39,40c40,42
+<             sthf_soilt, sthu_soilt,                                            &
+<             canopy_surft, canopy_gb, dsmc_dt_soilt,                            &
+---
+>             sthf_soilt, sthu_soilt, ecan_surft_wtrac, melt_surft_wtrac,        &
+>             snow_melt_wtrac, con_rain_land_wtrac, ls_rain_land_wtrac,          &
+>             canopy_surft, canopy_surft_wtrac, canopy_gb, dsmc_dt_soilt,        &
+42,43c44,45
+<             dun_roff_soilt, surf_roff_soilt)
+< 
+---
+>             dun_roff_soilt, surf_roff_soilt, canopy_gb_wtrac,                  &
+>             dsmc_dt_soilt_wtrac, surf_roff_gb_wtrac, surf_roff_soilt_wtrac)
+55a58,59
+> USE jules_water_tracers_mod, ONLY: l_wtrac_jls
+> 
+75c79
+<   soil_pts
+---
+>   soil_pts,                                                                    &
+76a81
+>   n_wtrac_jls
+130c135
+<   sthu_soilt(land_pts,nsoilt,sm_levels)
+---
+>   sthu_soilt(land_pts,nsoilt,sm_levels),                                       &
+132a138,147
+>   ecan_surft_wtrac(land_pts,nsurft,n_wtrac_jls),                               &
+>     ! Water tracer canopy evaporation (kg/m2/s).
+>   melt_surft_wtrac(land_pts,nsurft,n_wtrac_jls),                               &
+>     ! Water tracer snow melt on tiles (kg/m2/s).
+>   snow_melt_wtrac(land_pts,n_wtrac_jls),                                       &
+>     ! Water tracer GBM snow melt (kg/m2/s).
+>   con_rain_land_wtrac(land_pts,n_wtrac_jls),                                   &
+>     ! Water tracer convective rain (kg/m2/s).
+>   ls_rain_land_wtrac(land_pts,n_wtrac_jls)
+>     ! Water tracer large-scale rain (kg/m2/s).
+138c153
+<   canopy_surft(land_pts,nsurft)
+---
+>   canopy_surft(land_pts,nsurft),                                               &
+139a155,156
+>   canopy_surft_wtrac(land_pts,nsurft,n_wtrac_jls)
+>     ! Tile canopy water tracer contents (kg/m2).
+157c174
+<   surf_roff_soilt(land_pts,nsoilt)
+---
+>   surf_roff_soilt(land_pts,nsoilt),                                            &
+158a176,183
+>   canopy_gb_wtrac(land_pts,n_wtrac_jls),                                       &
+>     ! Gridbox canopy water tracer content (kg/m2).
+>   dsmc_dt_soilt_wtrac(land_pts,nsoilt,n_wtrac_jls),                            &
+>     ! Rate of change of water tracer soil moisture content (kg/m2/s).
+>   surf_roff_gb_wtrac(land_pts,n_wtrac_jls),                                    &
+>     ! Cumulative water tracer surface runoff (kg/m2/s).
+>   surf_roff_soilt_wtrac(land_pts,nsoilt,n_wtrac_jls)
+>     ! Soil-tiled contributions to water tracer surface runoff (kg/m2/s).
+164c189
+<   i,j,n,m
+---
+>   i,j,n,m,i_wt
+169a195
+>     ! i_wt for water tracer
+177c203
+<   s_roff
+---
+>   s_roff,                                                                      &
+178a205,206
+>   p_in_wtrac
+>     ! Water tracer flux reaching the soil surface (kg/m2/s).
+191a220,241
+> ! Allocatable water tracer arrays:
+> REAL(KIND=real_jlslsm), ALLOCATABLE ::                                         &
+>   surf_roff_surft_wtrac(:,:,:),                                                &
+>     ! Surface-tiled contributions to water tracer surface runoff.
+>   can_cond_wtrac(:,:),                                                         &
+>     ! Water tracer canopy condensation (kg/m2/s).
+>   tot_tfall_gb_wtrac(:,:),                                                     &
+>     ! Cumulative water tracer canopy throughfall (kg/m2/s).
+>     ! (Currently not output from this routine as just diagnostic)
+>   tot_tfall_surft_wtrac(:,:,:),                                                &
+>     ! Surface-tiled contributions to water tracer throughfall.
+>     ! (Currently not output from this routine as just diagnostic)
+>   dun_roff_soilt_wtrac(:,:,:),                                                 &
+>     ! Cumulative water tracer Dunne sfc runoff (kg/m2/s).
+>     ! (Currently not output from this routine as just diagnostic)
+>   tot_tfall_soilt_wtrac(:,:,:),                                                &
+>   melt_surft_wtrac_tile(:,:),                                                  &
+>     ! Temporary copy of the melt_surft_wtrac field for a particular tile.
+>   p_in_store(:,:)
+>     ! Water flux reaching the soil surface which is stored for water tracer
+>     ! calculations if l_pdm=T or l_top=T
+> 
+201,202c251,266
+< ! Assume snowmelt and evaporation cover 100% of the gridbox
+< frac_cov(:) = 1.0
+---
+> ! Allocate water tracer fields
+> IF (l_wtrac_jls) THEN
+>   ALLOCATE(surf_roff_surft_wtrac(land_pts,nsurft,n_wtrac_jls))
+>   ALLOCATE(can_cond_wtrac(land_pts,n_wtrac_jls))
+>   ALLOCATE(tot_tfall_gb_wtrac(land_pts,n_wtrac_jls))
+>   ALLOCATE(tot_tfall_surft_wtrac(land_pts,nsurft,n_wtrac_jls))
+>   ALLOCATE(dun_roff_soilt_wtrac(land_pts,nsoilt,n_wtrac_jls))
+>   ALLOCATE(tot_tfall_soilt_wtrac(land_pts,nsoilt,n_wtrac_jls))
+> ELSE
+>   ALLOCATE(surf_roff_surft_wtrac(1,1,1))
+>   ALLOCATE(can_cond_wtrac(1,1))
+>   ALLOCATE(tot_tfall_gb_wtrac(1,1))
+>   ALLOCATE(tot_tfall_surft_wtrac(1,1,1))
+>   ALLOCATE(dun_roff_soilt_wtrac(1,1,1))
+>   ALLOCATE(tot_tfall_soilt_wtrac(1,1,1))
+> END IF
+203a268
+> ! Assume snowmelt and evaporation cover 100% of the gridbox
+205c270,277
+< DO i = 1,land_pts
+---
+> !$OMP PARALLEL DEFAULT(NONE) PRIVATE(i, j, i_wt)                               &
+> !$OMP SHARED(land_pts, nsoilt, nsurft, frac_cov, tot_tfall_gb, surf_roff_gb,   &
+> !$OMP dsmc_dt_soilt, dun_roff_soilt, surf_roff_surft, tot_tfall_surft,         &
+> !$OMP l_wtrac_jls, surf_roff_gb_wtrac, surf_roff_surft_wtrac, n_wtrac_jls,     &
+> !$OMP tot_tfall_surft_wtrac, tot_tfall_gb_wtrac)
+> !$OMP DO SCHEDULE(STATIC)
+> DO i = 1, land_pts
+>   frac_cov(i)         = 1.0
+208,209d279
+<   dsmc_dt_soilt(i,:)  = 0.0
+<   dun_roff_soilt(i,:) = 0.0
+211,212c281,320
+< surf_roff_surft(:,:) = 0.0
+< tot_tfall_surft(:,:) = 0.0
+---
+> !$OMP END DO
+> DO j = 1, nsoilt
+> !$OMP DO SCHEDULE(STATIC)
+>   DO i = 1, land_pts
+>     dsmc_dt_soilt(i,j)  = 0.0
+>     dun_roff_soilt(i,j) = 0.0
+>   END DO
+> !$OMP END DO NOWAIT
+> END DO
+> DO j = 1, nsurft
+> !$OMP DO SCHEDULE(STATIC)
+>   DO i = 1, land_pts
+>     surf_roff_surft(i,j) = 0.0
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_surf_hyd_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_surf_hyd_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

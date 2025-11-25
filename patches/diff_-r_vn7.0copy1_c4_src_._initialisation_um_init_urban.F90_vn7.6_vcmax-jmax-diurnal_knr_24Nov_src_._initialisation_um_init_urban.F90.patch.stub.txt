@@ -1,0 +1,29 @@
+Patch stub generated: 2025-11-25T12:09:12.202245 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/um/init_urban.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/um/init_urban.F90
+
+SUMMARY:
+  - added lines (>): 3
+  - removed lines (<): 1
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/um/init_urban.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/um/init_urban.F90
+25c25
+< USE jules_surface_mod, ONLY: l_urban2t
+---
+> USE jules_surface_mod, ONLY: l_urban2t, l_anthrop_heat_use_wrr
+67a68,69
+>   ! To maintain bit comparability in generate_anthropogenic_heat
+>   IF ( ANY( urban_param%wrr_gb(:) > 0.0 ) ) l_anthrop_heat_use_wrr = .TRUE.
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_um_init_urban.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_um_init_urban.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

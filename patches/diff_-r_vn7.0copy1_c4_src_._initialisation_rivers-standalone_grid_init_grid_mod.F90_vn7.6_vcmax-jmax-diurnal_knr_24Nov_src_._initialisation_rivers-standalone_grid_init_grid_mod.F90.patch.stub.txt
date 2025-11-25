@@ -1,0 +1,61 @@
+Patch stub generated: 2025-11-25T12:09:12.165289 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/rivers-standalone/grid/init_grid_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/rivers-standalone/grid/init_grid_mod.F90
+
+SUMMARY:
+  - added lines (>): 17
+  - removed lines (<): 14
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/rivers-standalone/grid/init_grid_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/rivers-standalone/grid/init_grid_mod.F90
+16c16,17
+<                      rivers_data)
+---
+>                      rivers_data,                                              &
+>                      wtrac_jls_data)
+33,38c34,40
+< USE p_s_parms,         ONLY: psparms_data_type
+< USE ancil_info,        ONLY: ainfo_data_type
+< USE prognostics,       ONLY: progs_data_type
+< USE coastal,           ONLY: coastal_data_type
+< USE fluxes_mod,        ONLY: fluxes_data_type
+< USE jules_rivers_mod,  ONLY: rivers_data_type
+---
+> USE p_s_parms,            ONLY: psparms_data_type
+> USE ancil_info,           ONLY: ainfo_data_type
+> USE prognostics,          ONLY: progs_data_type
+> USE coastal,              ONLY: coastal_data_type
+> USE fluxes_mod,           ONLY: fluxes_data_type
+> USE jules_rivers_mod,     ONLY: rivers_data_type
+> USE jules_wtrac_type_mod, ONLY: jls_wtrac_data_type
+58,63c60,66
+< TYPE(psparms_data_type), INTENT(IN OUT) :: psparms_data
+< TYPE(ainfo_data_type),   INTENT(IN OUT) :: ainfo_data
+< TYPE(progs_data_type),   INTENT(IN OUT) :: progs_data
+< TYPE(coastal_data_type), INTENT(IN OUT) :: coastal_data
+< TYPE(fluxes_data_type),  INTENT(IN OUT) :: fluxes_data
+< TYPE(rivers_data_type),  INTENT(IN OUT) :: rivers_data
+---
+> TYPE(psparms_data_type),   INTENT(IN OUT) :: psparms_data
+> TYPE(ainfo_data_type),     INTENT(IN OUT) :: ainfo_data
+> TYPE(progs_data_type),     INTENT(IN OUT) :: progs_data
+> TYPE(coastal_data_type),   INTENT(IN OUT) :: coastal_data
+> TYPE(fluxes_data_type),    INTENT(IN OUT) :: fluxes_data
+> TYPE(rivers_data_type),    INTENT(IN OUT) :: rivers_data
+> TYPE(jls_wtrac_data_type), INTENT(IN OUT) :: wtrac_jls_data
+92c95
+<                            fluxes_data, rivers_data                            &
+---
+>                            fluxes_data, rivers_data, wtrac_jls_data            &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_rivers-standalone_grid_init_grid_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_rivers-standalone_grid_init_grid_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.247475 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/river_routing/rivers_regrid_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/rivers_regrid_mod.F90
+
+SUMMARY:
+  - added lines (>): 564
+  - removed lines (<): 309
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/river_routing/rivers_regrid_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/rivers_regrid_mod.F90
+1,2c1,2
+< !###############################################################################
+< !###############################################################################
+---
+> !##############################################################################
+> !##############################################################################
+6c6
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+8c8
+< !   Contains river routing regridding/remapping functions for standalone
+---
+> !   Contains river routing regridding/remapping functions for standalone JULES.
+16c16
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+21a22,26
+> PRIVATE  !  private scope by default
+> PUBLIC get_xy_pos, calc_grid_index, landpts_to_rivpts,                         &
+>        calc_map_river_to_land_points, rivpts_to_landpts,                       &
+>        twod_to_rp, rp_to_twod
+> 
+24,31c29,31
+< !###############################################################################
+< ! subroutine rivers_get_xy_pos
+< !
+< ! Internal procedure in module grid_utils
+< !    Given a point number and the extents (size) of a 2-D (xy) grid, returns
+< !    the x and y indices (coords) of the point. All coords are relative to (1,1)
+< !    at bottom left of grid, with numbering running left to right, bottom to
+< !    top.
+---
+> !##############################################################################
+> 
+> SUBROUTINE get_xy_pos( i, nx, ny, ix, iy )
+33c33,39
+< SUBROUTINE rivers_get_xy_pos( i, nx, ny, ix, iy )
+---
+> !------------------------------------------------------------------------------
+> ! Description:
+> !    Given a point number and the extents (size) of a 2-D (xy) grid, returns
+> !    the x and y indices (coords) of the point. All coords are relative to
+> !    (1,1) at bottom left of grid, with numbering running left to right,
+> !    bottom to top.
+> !------------------------------------------------------------------------------
+37c43,45
+< ! Scalar arguments with intent (in)
+---
+> !------------------------------------------------------------------------------
+> ! Scalar arguments with INTENT(IN):
+> !------------------------------------------------------------------------------
+47c55,57
+< ! Scalars with intent (out)
+---
+> !------------------------------------------------------------------------------
+> ! Scalar arguments with INTENT(OUT):
+> !------------------------------------------------------------------------------
+49a60,62
+> !end of header
+> !------------------------------------------------------------------------------
+> 
+51,52c64,65
+< iy = ( i - 1 ) / nx + 1
+< ix = i - (iy-1) * nx
+---
+> iy = (i - 1) / nx + 1
+> ix = i - (iy - 1) * nx
+61,62c74,75
+< END SUBROUTINE rivers_get_xy_pos
+< !###############################################################################
+---
+> RETURN
+> END SUBROUTINE get_xy_pos
+63a77
+> !##############################################################################
+65,72c79,84
+< !###############################################################################
+< ! subroutine rivers_remap_match
+< ! Computes regridding between land points and main model grid where both
+< ! grids overlap (i.e. rivers_regrid=False)
+< SUBROUTINE rivers_remap_match(                                                 &
+< !  imported rivers arrays with intent(in)
+<      ir_land_grid, il_river_grid, rivers_lat_rp, rivers_lon_rp )
+< !-----------------------------------------------------------------------------
+---
+> SUBROUTINE calc_map_river_to_land_points( global_land_pts,                     &
+>                                  x_coord_of_land, y_coord_of_land,             &
+>                                  rivers_x_coord_rp, rivers_y_coord_rp,         &
+>                                  map_river_to_land_points )
+> 
+> !------------------------------------------------------------------------------
+75,81c87,90
+< !   Computes remapping between land points and river routing grid
+< !
+< !   If the "main" model grid is 2-D, this target grid is the 2-D grid.
+< !   If the "main" grid is a vector (in offline applications of JULES this is
+< !   possible if points from a larger grid have been compressed - e.g. land
+< !   points selected from a larger grid.), the target grid is the larger grid,
+< !   across which the points are to be scattered.
+---
+> !   Computes mapping between land points and river points.
+> !   Only used when rivers_regrid=F.
+> !   For each river point, this identifies a land point (if it exists) with
+> !   the same coordinate values, and returns the number of that point.
+86c95
+< USE jules_rivers_mod, ONLY: np_rivers
+---
+> USE jules_rivers_mod, ONLY: l_trivial_mapping, np_rivers
+89,93c98
+< USE atm_land_sea_mask, ONLY: global_land_pts => atmos_number_of_landpts
+< USE um_latlon_mod, ONLY: latitude_of_land_pts => latitude,                     &
+<                          longitude_of_land_pts => longitude
+< USE um_parallel_mod, ONLY: is_master_task,                                     &
+<                            gather_land_field => gather_land2d_field
+---
+> USE um_parallel_mod, ONLY: is_master_task
+95,97c100
+< USE model_grid_mod, ONLY: global_land_pts, latitude_of_land_pts,               &
+<     longitude_of_land_pts
+< USE parallel_mod, ONLY: is_master_task, gather_land_field
+---
+> USE parallel_mod, ONLY: is_master_task
+102,108c105,110
+< REAL(KIND=real_jlslsm), ALLOCATABLE :: global_lat_of_land_pts(:)
+< REAL(KIND=real_jlslsm), ALLOCATABLE :: global_lon_of_land_pts(:)
+< 
+< INTEGER, INTENT(IN OUT) :: il_river_grid(:)
+< INTEGER, INTENT(IN OUT) :: ir_land_grid(:)
+< REAL, INTENT(IN OUT) :: rivers_lat_rp(:)
+< REAL, INTENT(IN OUT) :: rivers_lon_rp(:)
+---
+> !------------------------------------------------------------------------------
+> ! Scalar arguments with INTENT(IN):
+> !------------------------------------------------------------------------------
+> INTEGER, INTENT(IN) ::                                                         &
+>   global_land_pts
+>     ! The number of land points in the full model grid.
+110c112,123
+< ! Local scalar variables.
+---
+> !------------------------------------------------------------------------------
+> ! Array arguments with INTENT(IN):
+> !------------------------------------------------------------------------------
+> REAL(KIND=real_jlslsm), INTENT(IN) ::                                          &
+>   x_coord_of_land(global_land_pts),                                            &
+>     ! x coordinates of land points.
+>   y_coord_of_land(global_land_pts),                                            &
+>     ! y coordinates of land points.
+>   rivers_x_coord_rp(np_rivers),                                                &
+>     ! x coordinates of river points.
+>   rivers_y_coord_rp(np_rivers)
+>     ! y coordinates of river points.
+112,113c125,129
+< INTEGER :: l      !  loop counter (land point)
+< INTEGER :: ip     !  work
+---
+> !------------------------------------------------------------------------------
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_river_routing_rivers_regrid_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_river_routing_rivers_regrid_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

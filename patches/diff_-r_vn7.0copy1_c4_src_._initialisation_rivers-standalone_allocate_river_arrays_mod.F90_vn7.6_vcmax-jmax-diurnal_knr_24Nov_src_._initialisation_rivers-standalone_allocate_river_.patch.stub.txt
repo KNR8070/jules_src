@@ -1,0 +1,128 @@
+Patch stub generated: 2025-11-25T12:09:12.164169 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/rivers-standalone/allocate_river_arrays_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/rivers-standalone/allocate_river_arrays_mod.F90
+
+SUMMARY:
+  - added lines (>): 57
+  - removed lines (<): 21
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/rivers-standalone/allocate_river_arrays_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/rivers-standalone/allocate_river_arrays_mod.F90
+33c33,34
+<                                  rivers_data)
+---
+>                                  rivers_data,                                  &
+>                                  wtrac_jls_data)
+36c37
+<                                      l_acclim
+---
+>                                      l_acclim, l_sugar
+40a42
+> USE jules_water_tracers_mod,   ONLY: l_wtrac_jls
+51a54
+> USE jules_water_tracers_mod,   ONLY: n_wtrac_jls, n_evap_srce
+59a63
+> USE jules_wtrac_type_mod,      ONLY: wtrac_jls_alloc
+62,67c66,72
+< USE p_s_parms,         ONLY: psparms_data_type
+< USE ancil_info,        ONLY: ainfo_data_type
+< USE prognostics,       ONLY: progs_data_type
+< USE coastal,           ONLY: coastal_data_type
+< USE fluxes_mod,        ONLY: fluxes_data_type
+< USE jules_rivers_mod,  ONLY: rivers_data_type
+---
+> USE p_s_parms,            ONLY: psparms_data_type
+> USE ancil_info,           ONLY: ainfo_data_type
+> USE prognostics,          ONLY: progs_data_type
+> USE coastal,              ONLY: coastal_data_type
+> USE fluxes_mod,           ONLY: fluxes_data_type
+> USE jules_rivers_mod,     ONLY: rivers_data_type
+> USE jules_wtrac_type_mod, ONLY: jls_wtrac_data_type
+77,82c82,88
+< TYPE(psparms_data_type), INTENT(IN OUT) :: psparms_data
+< TYPE(ainfo_data_type),   INTENT(IN OUT) :: ainfo_data
+< TYPE(progs_data_type),   INTENT(IN OUT) :: progs_data
+< TYPE(coastal_data_type), INTENT(IN OUT) :: coastal_data
+< TYPE(fluxes_data_type),  INTENT(IN OUT) :: fluxes_data
+< TYPE(rivers_data_type),  INTENT(IN OUT) :: rivers_data
+---
+> TYPE(psparms_data_type),   INTENT(IN OUT) :: psparms_data
+> TYPE(ainfo_data_type),     INTENT(IN OUT) :: ainfo_data
+> TYPE(progs_data_type),     INTENT(IN OUT) :: progs_data
+> TYPE(coastal_data_type),   INTENT(IN OUT) :: coastal_data
+> TYPE(fluxes_data_type),    INTENT(IN OUT) :: fluxes_data
+> TYPE(rivers_data_type),    INTENT(IN OUT) :: rivers_data
+> TYPE(jls_wtrac_data_type), INTENT(IN OUT) :: wtrac_jls_data
+84a91,98
+> INTEGER :: temp_size
+> 
+> ! Dummy fields for the local river grid size which is used to set water tracer
+> ! fields in UM_JULES.  Therefore, a dummy field is needed here to pass into
+> ! wtrac_jls_assoc.
+> INTEGER, PARAMETER :: river_row_length_dum = 1
+> INTEGER, PARAMETER :: river_rows_dum = 1
+> 
+97a112,126
+> ! For now set unset dimensions to 1, which are not on switches and thus
+> ! allocated with full size when not required
+> nsurft     = 1
+> npft       = 1
+> sm_levels  = 1
+> 
+> ! OASIS-Rivers will have zero land points, so allocate nominal space instead.
+> IF ( land_pts > 0 ) THEN
+>   temp_size  = land_pts
+> ELSE
+>   temp_size  = 1
+>   t_i_length = 1
+>   t_j_length = 1
+> END IF
+> 
+102c131
+< CALL prognostics_alloc(land_pts, t_i_length, t_j_length,                       &
+---
+> CALL prognostics_alloc(temp_size, t_i_length, t_j_length,                      &
+107c136
+<                       nmasst, nnpft, l_acclim, progs_data)
+---
+>                       nmasst, nnpft, l_acclim, l_sugar, progs_data)
+111c140
+< CALL fluxes_alloc(land_pts, t_i_length, t_j_length,                            &
+---
+> CALL fluxes_alloc(temp_size, t_i_length, t_j_length,                           &
+118c147
+< CALL psparms_alloc(land_pts, t_i_length, t_j_length,                           &
+---
+> CALL psparms_alloc(temp_size, t_i_length, t_j_length,                          &
+123c152
+< CALL ancil_info_alloc(land_pts, t_i_length, t_j_length,                        &
+---
+> CALL ancil_info_alloc(temp_size, t_i_length, t_j_length,                       &
+127c156
+< CALL jules_rivers_alloc(land_pts, rivers_data)
+---
+> CALL jules_rivers_alloc(temp_size, rivers_data)
+129c158
+< CALL coastal_alloc(land_pts, t_i_length, t_j_length,                           &
+---
+> CALL coastal_alloc(temp_size, t_i_length, t_j_length,                          &
+132a162,168
+> 
+> ! Allocate water tracer arrays.  As water tracers cannot currently be used
+> ! in standalone rivers, these arrays will be set to dimension=1.
+> CALL wtrac_jls_alloc(land_pts, t_i_length, t_j_length, nsurft, nsoilt,         &
+>                      sm_levels, nsmax, nice_use, n_wtrac_jls,                  &
+>                      n_evap_srce, river_row_length_dum, river_rows_dum,        &
+>                      l_wtrac_jls, wtrac_jls_data)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_rivers-standalone_allocate_river_arrays_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_rivers-standalone_allocate_river_.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

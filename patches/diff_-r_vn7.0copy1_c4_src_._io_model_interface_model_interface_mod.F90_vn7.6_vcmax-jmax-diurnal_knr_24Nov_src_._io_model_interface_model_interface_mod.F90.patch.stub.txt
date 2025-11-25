@@ -1,0 +1,86 @@
+Patch stub generated: 2025-11-25T12:09:12.223957 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/model_interface/model_interface_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/model_interface/model_interface_mod.F90
+
+SUMMARY:
+  - added lines (>): 16
+  - removed lines (<): 21
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/model_interface/model_interface_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/model_interface/model_interface_mod.F90
+34c34
+< INTEGER, PARAMETER :: identifier_len = 30
+---
+> INTEGER, PARAMETER :: identifier_len = 29
+51c51
+<   tracer_dim_name_out       = 'tracer',                                        &
+---
+>   dep_species_dim_name_out  = 'dep_species',                                   &
+60,61c60
+<   scalar_dim_name_out       = 'scalar',                                        &
+<   canopy_dim_name_out  = 'ilayers'
+---
+>   scalar_dim_name_out       = 'scalar'
+81c80
+<   tracer_dim_name   = 'tracer',                                                &
+---
+>   dep_species_dim_name  = 'dep_species',                                       &
+84,85c83
+<   nmasst_dim_name    = 'nmasst',                                               &
+<   canopy_dim_name  = 'ilayers'
+---
+>   nmasst_dim_name    = 'nmasst'
+105c103
+<   tracer_dim_size      = -1,                                                   &
+---
+>   dep_species_dim_size = -1,                                                   &
+108,109c106
+<   nmasst_dim_size      = -1,                                                   &
+<   canopy_dim_size      = 10
+---
+>   nmasst_dim_size      = -1
+142,143c139,141
+<   var_type_tracer         = var_type_soilt_sclayer_scpool+1,                   &
+<   var_type_ch4layer       = var_type_tracer+1,                                 &
+---
+>   var_type_dep_species    = var_type_soilt_sclayer_scpool+1,                   &
+>   var_type_surft_dep_species = var_type_dep_species+1,                         &
+>   var_type_ch4layer       = var_type_surft_dep_species+1,                      &
+149,151c147
+<   var_type_nmasst         = var_type_imogen_drive + 1,                         &
+<   var_type_canlayer       = var_type_nmasst + 1
+<   
+---
+>   var_type_nmasst         = var_type_imogen_drive + 1
+172c168
+< INTEGER, PARAMETER :: n_vars = 685
+---
+> INTEGER, PARAMETER :: n_vars = 673
+190c186,187
+<     tracer_dim_name_out, ch4layer_dim_name_out, imogen_drive_dim_name_out,     &
+---
+>     dep_species_dim_name_out, ch4layer_dim_name_out,                           &
+>     imogen_drive_dim_name_out,                                                 &
+193d189
+<     canopy_dim_name_out,                                                       &     
+199,200c195
+<     sclayer_dim_name, imogen_drive_dim_name, tracer_dim_name,                  &
+<     canopy_dim_name,                                                           &
+---
+>     sclayer_dim_name, imogen_drive_dim_name, dep_species_dim_name,             &
+205c200
+<     sclayer_dim_size, tracer_dim_size, ch4layer_dim_size,                      &
+---
+>     sclayer_dim_size, dep_species_dim_size, ch4layer_dim_size,                 &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_model_interface_model_interface_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_model_interface_model_interface_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

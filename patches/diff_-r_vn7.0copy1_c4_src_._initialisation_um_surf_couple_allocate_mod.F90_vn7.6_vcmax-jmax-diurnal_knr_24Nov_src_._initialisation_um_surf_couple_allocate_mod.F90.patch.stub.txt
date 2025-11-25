@@ -1,0 +1,156 @@
+Patch stub generated: 2025-11-25T12:09:12.205112 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/um/surf_couple_allocate_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/um/surf_couple_allocate_mod.F90
+
+SUMMARY:
+  - added lines (>): 104
+  - removed lines (<): 9
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Namelist/IO changes: reconcile derived types and broadcast logic.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/um/surf_couple_allocate_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/um/surf_couple_allocate_mod.F90
+40c40
+< USE ancil_info,               ONLY: dim_cs1,                                   &
+---
+> USE ancil_info,               ONLY: dim_cs1, dim_cslayer,                      &
+45c45
+< USE jules_surface_types_mod,   ONLY: nnvg, npft, soil
+---
+> USE jules_surface_types_mod,   ONLY: npft, nnvg, ntype, soil
+48a49
+> USE jules_soil_biogeochem_mod,ONLY: l_layeredc
+84d84
+< ! This check must be run once we have access to sm_levels
+89a90,115
+> ! JULES with atmospheric deposition
+> USE jules_deposition_mod, ONLY: l_deposition, ndry_dep_species,                &
+>   dry_dep_model, dry_dep_model_jules, dry_dep_model_ukca
+> 
+> USE deposition_initialisation_aerod_mod, ONLY:                                 &
+>   deposition_initialisation_aerod_jules, deposition_initialisation_aerod_ukca
+> 
+> USE deposition_initialisation_surfddr_mod, ONLY:                               &
+>   deposition_initialisation_surfddr_ukca
+> 
+> USE deposition_species_io_mod, ONLY: deposition_io_data_all
+> ! Deposition io variables from set of "jules_deposition_species" namelists
+> ! carried in structure deposition_io_data_all.
+> 
+> USE deposition_species_mod, ONLY:                                              &
+> ! namelist variables
+>   ch4_scaling,     ch4dd_tundra,     ch4_up_flux,         ch4_mml,             &
+>   cuticle_o3,      dd_ice_coeff,     dep_species_name,                         &
+>   diffusion_coeff, diffusion_corr,   dep_species_rmm,                          &
+>   h2dd_c,          h2dd_m,           h2dd_q,                                   &
+>   r_tundra,        r_wet_soil_o3,    rsurf_std,                                &
+> ! routines
+>   check_jules_deposition_species
+> 
+> USE jules_print_mgr,  ONLY: jules_print
+> 
+107a134
+> USE water_resources_vars_mod, ONLY: water_resources_assoc
+108a136
+> USE jules_wtrac_type_mod, ONLY: wtrac_jls_assoc
+129c157,159
+<                           rivers_data, rivers
+---
+>                           water_resources_data, water_resources,               &
+>                           rivers_data, rivers,                                 &
+>                           wtrac_jls_data, wtrac_jls
+171a202
+> dim_cslayer = 1
+173a205,207
+>   IF (l_layeredc) THEN
+>     dim_cslayer = sm_levels
+>   END IF
+190c224,225
+<                            forcing_data, rivers_data, chemvars_data)
+---
+>                            forcing_data, rivers_data, chemvars_data,           &
+>                            water_resources_data, wtrac_jls_data)
+211a247
+> CALL water_resources_assoc(water_resources, water_resources_data)
+212a249
+> CALL wtrac_jls_assoc(wtrac_jls, wtrac_jls_data)
+252,254c289,349
+< ! Now we have access to sm_levels from the dump, we can check the JULES_SOIL
+< ! namelist for consistency
+< CALL check_jules_soil(sm_levels)
+---
+> ! jules_deposition
+> IF ( l_deposition ) THEN
+> 
+>   CALL jules_print(RoutineName,                                                &
+>                'Check assignment from deposition_io_data_all')
+> 
+>   ! Loop over the species.
+>   DO i = 1,ndry_dep_species
+> 
+>     ! Load values into the final variables.
+>     ! Variables that have a value for every species
+>     ! (even if not necessarily used for all species).
+>     dep_species_name(i) = deposition_io_data_all % dep_species_name_io(i)
+>     dd_ice_coeff(i,:)   = deposition_io_data_all % dd_ice_coeff_io(i,:)
+>     diffusion_coeff(i)  = deposition_io_data_all % diffusion_coeff_io(i)
+>     dep_species_rmm(i)  = deposition_io_data_all % dep_species_rmm_io(i)
+>     diffusion_corr(i)   = deposition_io_data_all % diffusion_corr_io(i)
+>     r_tundra(i)         = deposition_io_data_all % r_tundra_io(i)
+>     rsurf_std(:,i)      = deposition_io_data_all % rsurf_std_io(1:ntype,i)
+> 
+>     ! Deal with variables that only apply to one species.
+>     ! If values are given for other species they will be ignored.
+>     SELECT CASE ( dep_species_name(i) )
+> 
+>     CASE ( 'CH4' )
+> 
+>       ch4_scaling       = deposition_io_data_all % ch4_scaling_io
+>       ch4_mml           = deposition_io_data_all % ch4_mml_io
+>       ch4dd_tundra(:)   = deposition_io_data_all % ch4dd_tundra_io(:)
+>       ch4_up_flux(:)    = deposition_io_data_all % ch4_up_flux_io(1:ntype)
+> 
+>     CASE ( 'H2' )
+>       h2dd_c(:)         = deposition_io_data_all % h2dd_c_io(1:ntype)
+>       h2dd_m(:)         = deposition_io_data_all % h2dd_m_io(1:ntype)
+>       h2dd_q(:)         = deposition_io_data_all % h2dd_q_io(1:ntype)
+> 
+>     CASE ( 'O3' )
+>       cuticle_o3        = deposition_io_data_all % cuticle_o3_io
+>       r_wet_soil_o3     = deposition_io_data_all % r_wet_soil_o3_io
+> 
+>     END SELECT
+> 
+>   END DO  ! Species
+> 
+>   CALL check_jules_deposition_species(ntype)
+> 
+>   ! Initialise the parameters for the calculation of
+>   ! (1) the aerodynamic (Ra) & quasi-laminar (Rb) resistance terms
+>   ! (2) surface resistance (Rc) terms (for dry_dep_model=dry_dep_model_ukca)
+>   SELECT CASE ( dry_dep_model )
+>   CASE ( dry_dep_model_ukca )
+>     CALL deposition_initialisation_aerod_ukca()
+>     CALL deposition_initialisation_surfddr_ukca()
+>   CASE ( dry_dep_model_jules )
+>     CALL deposition_initialisation_aerod_jules()
+>   END SELECT
+> 
+> END IF  ! l_deposition
+> 
+> ! Check the jules_soil namelist for consistency
+> CALL check_jules_soil()
+282c377
+< ! Now that the arrays have been allocated and filled we can now check them
+---
+> ! Now that the arrays have been allocated and filled we can check them
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_um_surf_couple_allocate_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_um_surf_couple_allocate_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

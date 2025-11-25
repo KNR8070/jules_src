@@ -1,0 +1,41 @@
+Patch stub generated: 2025-11-25T12:09:12.250016 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/river_routing/rivers_route_utils_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/rivers_route_utils_mod.F90
+
+SUMMARY:
+  - added lines (>): 8
+  - removed lines (<): 4
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/river_routing/rivers_route_utils_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/rivers_route_utils_mod.F90
+56,57c56,57
+< !     Driver routine that calls procedures that calculates distance
+< !     between gridpoints.
+---
+> !     Driver routine that calls a procedure to calculate distances between
+> !     gridpoints, given latitude and longitude.
+63c63,64
+<      inland_drainage, river_mouth, rivers_dlat, rivers_dlon,                   &
+---
+>      inland_drainage, river_mouth, rivers_dlat=>rivers_dy,                     &
+>      rivers_dlon=>rivers_dx,                                                   &
+100a102,104
+> ! Note that it is assumed that rivers_dx and rivers_dy are increments of
+> ! latitude and longitude (not some other coordinate system).
+> 
+110c114
+<   ELSE IF ( jp == -river_mouth .OR. jp == -inland_drainage ) THEN
+---
+>   ELSE IF ( jp == river_mouth .OR. jp == inland_drainage ) THEN
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_river_routing_rivers_route_utils_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_river_routing_rivers_route_utils_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

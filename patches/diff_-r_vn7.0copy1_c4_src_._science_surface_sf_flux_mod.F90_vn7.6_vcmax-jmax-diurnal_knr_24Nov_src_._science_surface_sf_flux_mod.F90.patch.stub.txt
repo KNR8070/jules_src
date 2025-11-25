@@ -1,0 +1,47 @@
+Patch stub generated: 2025-11-25T12:09:12.287566 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/sf_flux_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/sf_flux_mod.F90
+
+SUMMARY:
+  - added lines (>): 12
+  - removed lines (<): 4
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/sf_flux_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/sf_flux_mod.F90
+17c17
+<  nsnow,n,canhc,dzsurf,hcons,ashtf,qstar,q_elev,radnet,resft,                   &
+---
+>  nsnow,n,canhc,dzsurf,hcons,ashtf,qstar,q_elev,radnet,resft,fracs,             &
+31c31
+< USE jules_surface_mod, ONLY: ls
+---
+> USE jules_surface_mod, ONLY: ls, lc, lf
+36c36,37
+< USE jules_science_fixes_mod, ONLY: l_fix_moruses_roof_rad_coupling
+---
+> USE jules_science_fixes_mod, ONLY: l_fix_moruses_roof_rad_coupling,            &
+>                                    l_fix_neg_snow
+79a81,82
+> ,fracs(points)                                                                 &
+>                            ! IN fractional coverage of snow
+220c223,228
+<   IF (snowdepth(l) > 0.0) lh = ls
+---
+>   IF (l_fix_neg_snow) THEN
+>     ! Effective latent. resft should not be 0 if there is any snow.
+>     IF (resft(l) > 0.0) lh = lc + lf * fracs(l) / resft(l)
+>   ELSE
+>     IF (snowdepth(l) > 0.0) lh = ls
+>   END IF
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_sf_flux_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_sf_flux_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

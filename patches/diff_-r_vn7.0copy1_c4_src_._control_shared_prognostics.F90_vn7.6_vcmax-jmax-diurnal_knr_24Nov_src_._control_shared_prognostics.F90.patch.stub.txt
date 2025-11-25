@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.134229 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/prognostics.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/prognostics.F90
+
+SUMMARY:
+  - added lines (>): 22
+  - removed lines (<): 167
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/prognostics.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/prognostics.F90
+188c188
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: t_growth_gb(:,:)
+---
+>   REAL(KIND=real_jlslsm), ALLOCATABLE :: t_growth_gb(:)
+191,229c191,192
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: l_growth_gb(:,:)
+<   ! Average light for thermal acclimation of
+<   ! photosynthetic capacity (W m-2).
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: vpd_growth_gb(:,:)
+<   ! Average vapour pressure deficit for thermal acclimation of
+<   ! photosynthetic capacity (Pa).
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: co2_growth_gb(:,:)
+<   ! Average co2 for thermal acclimation of
+<   ! photosynthetic capacity (Pa).
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: pstar_growth_gb(:,:)
+<   ! Average surface pressure for thermal acclimation of
+<   ! photosynthetic capacity (Pa).
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: xipam_opt(:,:)
+<   ! Sensitivity of ci/ca ratio to VPD at 
+<   ! optimal condition (Pa^1/2)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: vcmax_opt(:,:)
+<     ! Maximum rate of carboxylation at optimal
+<   ! condition(mol CO2/m2s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: jmax_opt(:,:)
+<   ! Maximum rate of electon transportation at optimal
+<   ! condition(mol CO2/m2s)
+<  ! REAL(KIND=real_jlslsm), ALLOCATABLE :: Rd25New(:,:)
+<   ! Rd25 adjusted to prior [15] night conditions
+<   ! (umol co2/m2/s)
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: t_sum(:,:)
+<   ! Daily temperature, sum of noon condition
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: l_sum(:,:)
+<   ! Daily light, sum of noon condition
+<     REAL(KIND=real_jlslsm), ALLOCATABLE :: co2_sum(:,:)
+<   ! Daily co2, sum of noon condition
+<    REAL(KIND=real_jlslsm), ALLOCATABLE :: vpd_sum(:,:)
+<   ! Daily vpd, sum of noon condition
+<    REAL(KIND=real_jlslsm), ALLOCATABLE :: t_night(:,:)
+<   ! Average temperature (night temperature) for thermal acclimation of
+<   ! dark respiration (K).
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: nt_sum(:,:)
+<   ! Daily light, sum of night condition
+<   REAL(KIND=real_jlslsm), ALLOCATABLE :: pstar_sum(:,:)
+<   ! Daily atmospheric pressure, sum of noon condition
+---
+>   REAL(KIND=real_jlslsm), ALLOCATABLE :: f_nsc_pft(:,:)
+>     ! Non-structural carbohydrate mass fraction (kgC/kgC)
+292,308c255,256
+<   REAL(KIND=real_jlslsm), POINTER :: t_growth_gb(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: l_growth_gb(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: vpd_growth_gb(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: co2_growth_gb(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: pstar_growth_gb(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: xipam_opt(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: vcmax_opt(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: jmax_opt(:,:)
+<   !REAL(KIND=real_jlslsm), POINTER :: Rd25New(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: t_sum(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: l_sum(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: co2_sum(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: t_night(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: nt_sum(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: vpd_sum(:,:)
+<   REAL(KIND=real_jlslsm), POINTER :: pstar_sum(:,:)
+<   
+---
+>   REAL(KIND=real_jlslsm), POINTER :: t_growth_gb(:)
+>   REAL(KIND=real_jlslsm), POINTER :: f_nsc_pft(:,:)
+329c277
+<                        nmasst, nnpft, l_acclim, progs_data)
+---
+>                        nmasst, nnpft, l_acclim, l_sugar, progs_data)
+344c292
+<                        l_acclim
+---
+>                        l_acclim, l_sugar
+489,504c437
+<   ALLOCATE(progs_data%t_growth_gb(land_pts,npft))
+<   ALLOCATE(progs_data%l_growth_gb(land_pts,npft))
+<   ALLOCATE(progs_data%vpd_growth_gb(land_pts,npft))
+<   ALLOCATE(progs_data%co2_growth_gb(land_pts,npft))
+<   ALLOCATE(progs_data%pstar_growth_gb(land_pts,npft))
+<   ALLOCATE(progs_data%xipam_opt(land_pts,npft))
+<   ALLOCATE(progs_data%vcmax_opt(land_pts,npft))
+<   ALLOCATE(progs_data%jmax_opt(land_pts,npft))
+<  ! ALLOCATE(progs_data%Rd25New(land_pts,npft))
+<   ALLOCATE(progs_data%t_sum(land_pts,npft))
+<   ALLOCATE(progs_data%l_sum(land_pts,npft))
+<   ALLOCATE(progs_data%t_night(land_pts,npft))
+<   ALLOCATE(progs_data%nt_sum(land_pts,npft))
+<   ALLOCATE(progs_data%co2_sum(land_pts,npft))
+<   ALLOCATE(progs_data%vpd_sum(land_pts,npft))
+<   ALLOCATE(progs_data%pstar_sum(land_pts,npft))
+---
+>   ALLOCATE(progs_data%t_growth_gb(land_pts))
+506,521c439
+<   progs_data%t_growth_gb(:,:)         = 0.0
+<   progs_data%l_growth_gb(:,:)         = 0.0
+<   progs_data%vpd_growth_gb(:,:)       = 0.0
+<   progs_data%co2_growth_gb(:,:)       = 0.0
+<   progs_data%pstar_growth_gb(:,:)     = 0.0
+<   progs_data%xipam_opt(:,:)           = 0.0
+<   progs_data%vcmax_opt(:,:)           = 0.0
+<   progs_data%jmax_opt(:,:)            = 0.0
+<  ! progs_data%Rd25New(:,:)             = 0.0
+<   progs_data%t_sum(:,:)               = 0.0
+<   progs_data%l_sum(:,:)               = 0.0
+<   progs_data%t_night(:,:)             = 0.0
+<   progs_data%nt_sum(:,:)              = 0.0
+<   progs_data%co2_sum(:,:)             = 0.0
+<   progs_data%vpd_sum(:,:)             = 0.0
+<   progs_data%pstar_sum(:,:)           = 0.0
+---
+>   progs_data%t_growth_gb(:)         = 0.0
+524,539c442
+<   ALLOCATE(progs_data%t_growth_gb(1,1))
+<   ALLOCATE(progs_data%l_growth_gb(1,1))
+<   ALLOCATE(progs_data%vpd_growth_gb(1,1))
+<   ALLOCATE(progs_data%co2_growth_gb(1,1))
+<   ALLOCATE(progs_data%pstar_growth_gb(1,1))
+<   ALLOCATE(progs_data%xipam_opt(1,1))
+<   ALLOCATE(progs_data%vcmax_opt(1,1))
+<   ALLOCATE(progs_data%jmax_opt(1,1))
+<   !ALLOCATE(progs_data%Rd25New(1,1))
+<   ALLOCATE(progs_data%t_sum(1,1))
+<   ALLOCATE(progs_data%l_sum(1,1))
+<   ALLOCATE(progs_data%t_night(1,1))
+<   ALLOCATE(progs_data%nt_sum(1,1))
+<   ALLOCATE(progs_data%co2_sum(1,1))
+<   ALLOCATE(progs_data%vpd_sum(1,1))
+<   ALLOCATE(progs_data%pstar_sum(1,1))
+---
+>   ALLOCATE(progs_data%t_growth_gb(1))
+541,555c444
+<   progs_data%t_growth_gb(1,1)       = 0.0
+<   progs_data%l_growth_gb(1,1)         = 0.0
+<   progs_data%vpd_growth_gb(1,1)       = 0.0
+<   progs_data%pstar_growth_gb(1,1)     = 0.0
+<   progs_data%xipam_opt(1,1)           = 0.0
+<   progs_data%vcmax_opt(1,1)           = 0.0
+<   progs_data%jmax_opt(1,1)            = 0.0
+<   !progs_data%Rd25New(1,1)             = 0.0
+<   progs_data%t_sum(1,1)               = 0.0
+<   progs_data%l_sum(1,1)               = 0.0
+<   progs_data%t_night(1,1)             = 0.0
+<   progs_data%nt_sum(1,1)              = 0.0
+<   progs_data%co2_sum(1,1)              = 0.0
+<   progs_data%vpd_sum(1,1)             = 0.0
+<   progs_data%pstar_sum(1,1)           = 0.0
+---
+>   progs_data%t_growth_gb(1)         = 0.0
+557a447,451
+> ! Prognostics for SUGAR module
+> ALLOCATE(progs_data%f_nsc_pft(land_pts,npft))
+> progs_data%f_nsc_pft(:,:) = 0.0
+> 
+> 
+679,693c573,576
+<   DEALLOCATE(progs_data%l_growth_gb)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_prognostics.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_prognostics.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,52 @@
+Patch stub generated: 2025-11-25T12:09:12.258234 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil/calc_fsat_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/calc_fsat_mod.F90
+
+SUMMARY:
+  - added lines (>): 8
+  - removed lines (<): 8
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil/calc_fsat_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/calc_fsat_mod.F90
+75,76c75,76
+< REAL(KIND=real_jlslsm), PARAMETER :: ti_sc_const = 2.7
+<     ! ti_sc_const Constant required to ensure that there is no underflow
+---
+> REAL(KIND=real_jlslsm), PARAMETER :: log_ti_sc_const = LOG(2.7)
+>     ! log_ti_sc_const Constant required to ensure that there is no underflow
+166c166
+<         calc      = (alf_ksat-1.0) * (LOG(ti_sc) + LOG(ti_sc_const))           &
+---
+>         calc      = (alf_ksat-1.0) * (LOG(ti_sc) + log_ti_sc_const)            &
+199c199
+<             calc = (alf_ksat-1.0) * (LOG(ti_sc) + LOG(ti_sc_const))            &
+---
+>             calc = (alf_ksat-1.0) * (LOG(ti_sc) + log_ti_sc_const)             &
+209c209
+<           calc = (alf_ksat-1.0) * (LOG(ti_sc) + LOG(ti_sc_const))              &
+---
+>           calc = (alf_ksat-1.0) * (LOG(ti_sc) + log_ti_sc_const)               &
+233c233
+<             calc = (alf_ksat-1.0) * (LOG(ti_sc) + LOG(ti_sc_const))            &
+---
+>             calc = (alf_ksat-1.0) * (LOG(ti_sc) + log_ti_sc_const)             &
+241c241
+<               calc = (alf_ksat-1.0) * (LOG(ti_sc) + LOG(ti_sc_const))          &
+---
+>               calc = (alf_ksat-1.0) * (LOG(ti_sc) + log_ti_sc_const)           &
+251c251
+<             calc = (alf_ksat-1.0) * (LOG(ti_sc) + LOG(ti_sc_const))            &
+---
+>             calc = (alf_ksat-1.0) * (LOG(ti_sc) + log_ti_sc_const)             &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_calc_fsat_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_calc_fsat_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

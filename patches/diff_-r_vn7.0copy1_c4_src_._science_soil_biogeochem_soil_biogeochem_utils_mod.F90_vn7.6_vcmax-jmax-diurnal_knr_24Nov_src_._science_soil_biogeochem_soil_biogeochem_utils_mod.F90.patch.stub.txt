@@ -1,0 +1,113 @@
+Patch stub generated: 2025-11-25T12:09:12.267739 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil_biogeochem/soil_biogeochem_utils_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil_biogeochem/soil_biogeochem_utils_mod.F90
+
+SUMMARY:
+  - added lines (>): 77
+  - removed lines (<): 4
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil_biogeochem/soil_biogeochem_utils_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil_biogeochem/soil_biogeochem_utils_mod.F90
+32c32
+< PUBLIC soil_n_precalc
+---
+> PUBLIC soil_n_precalc, calc_litc_norm
+74c74
+<   soil_model_rothc, soil_model_ecosse,                                         &
+---
+>   soil_model_4pool, soil_model_ecosse,                                         &
+234c234
+< CASE ( soil_model_rothc )
+---
+> CASE ( soil_model_4pool )
+268c268
+<   CASE ( soil_model_rothc )
+---
+>   CASE ( soil_model_4pool )
+334a335
+> !#############################################################################
+336a338,409
+> SUBROUTINE calc_litc_norm(litc_norm)
+> 
+> !-----------------------------------------------------------------------------
+> ! Description:
+> !   Set the normalisation factor for vertical profile of litter input.
+> !-----------------------------------------------------------------------------
+> 
+> USE ancil_info, ONLY: dim_cslayer
+> 
+> USE jules_soil_biogeochem_mod, ONLY:                                           &
+>   soil_model_4pool, soil_model_ecosse,                                         &
+>   soil_bgc_model, tau_lit
+> 
+> #if !defined(UM_JULES)
+> USE jules_soil_ecosse_mod, ONLY: dz_soilc
+> #endif
+> 
+> USE jules_soil_mod, ONLY: dzsoil
+> 
+> IMPLICIT NONE
+> 
+> !-----------------------------------------------------------------------------
+> ! Array arguments with intent(inout)
+> !-----------------------------------------------------------------------------
+> REAL(KIND=real_jlslsm), INTENT(IN OUT) ::                                      &
+>   litc_norm
+>     ! Normalisation factor for vertical profile of litter input
+> 
+> !-----------------------------------------------------------------------------
+> ! Local variables.
+> !-----------------------------------------------------------------------------
+> REAL(KIND=real_jlslsm) :: dz(dim_cslayer)
+>     ! Thicknesses of soil layers (m).
+> 
+> LOGICAL :: have_layers
+>     !  T if we have multiple soil layers, else F.
+> 
+> INTEGER :: iz
+> 
+> CHARACTER(LEN=*), PARAMETER :: RoutineName = 'CALC_LITC_NORM'
+> 
+> !-----------------------------------------------------------------------------
+> ! Set flag for multiple layers.
+> !-----------------------------------------------------------------------------
+> have_layers = dim_cslayer > 1
+> 
+> !-----------------------------------------------------------------------------
+> ! Get soil layer thicknesses.
+> !-----------------------------------------------------------------------------
+> SELECT CASE ( soil_bgc_model )
+> CASE ( soil_model_4pool )
+>   dz(1:dim_cslayer) = dzsoil(1:dim_cslayer)
+> #if !defined(UM_JULES)
+> CASE ( soil_model_ecosse )
+>   dz(:) = dz_soilc(:)
+> #endif
+> END SELECT
+> 
+> !-----------------------------------------------------------------------------
+> ! Calculate dz * exp(-tau*z) for mid-point depth in each layer.
+> !-----------------------------------------------------------------------------
+> IF ( have_layers ) THEN
+>   litc_norm =  dz(1) * EXP( -tau_lit * 0.5 * dz(1) )
+>   DO iz = 2,dim_cslayer
+>     litc_norm = litc_norm + dz(iz) *                                           &
+>                 EXP( -tau_lit * ( SUM(dz(1:iz-1)) + 0.5 * dz(iz) ) )
+>   END DO
+> END IF
+> 
+> RETURN
+> 
+> END SUBROUTINE calc_litc_norm
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_biogeochem_soil_biogeochem_utils_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_biogeochem_soil_biogeochem_utils_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

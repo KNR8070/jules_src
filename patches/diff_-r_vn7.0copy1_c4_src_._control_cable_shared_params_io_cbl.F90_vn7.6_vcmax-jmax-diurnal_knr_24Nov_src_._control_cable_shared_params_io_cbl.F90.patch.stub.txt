@@ -1,0 +1,86 @@
+Patch stub generated: 2025-11-25T12:09:12.093914 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/cable/shared/params_io_cbl.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/cable/shared/params_io_cbl.F90
+
+SUMMARY:
+  - added lines (>): 43
+  - removed lines (<): 13
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/cable/shared/params_io_cbl.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/cable/shared/params_io_cbl.F90
+0a1,10
+> !******************************COPYRIGHT********************************************
+> ! (c) CSIRO 2022.
+> ! All rights reserved.
+> !
+> ! This routine has been licensed to the other JULES partners for use and
+> ! distribution under the JULES collaboration agreement, subject to the terms and
+> ! conditions set out therein.
+> !
+> ! [Met Office Ref SC0237]
+> !******************************COPYRIGHT********************************************
+2a13,37
+> !-----------------------------------------------------------------------------
+> ! Description:
+> !   Defines variable types and variables for veg and soil parameters.
+> !   We only define the pointer associations relevant to TYPES to be parssed
+> !   around (following JULES params*_io). The allocation is unecessary as these
+> !   input parameters are read in from namelist (following JULES params *_io),
+> !   these are initialized in corresponding section
+> !   Based on cable_def_types_mod.F90 from the CABLE trunk.
+> !
+> ! This MODULE is USEd by:
+> !      cable_fields_mod.F90,
+> !      init_vegin_cbl.inc
+> !
+> ! This MODULE contains 2 public Subroutines:
+> !      params_io_assoc_cbl,
+> !      params_io_nullify_cbl
+> !
+> ! Code Owner: Please refer to ModuleLeaders.txt
+> ! This file belongs in CABLE SCIENCE
+> !
+> ! Code Description:
+> !   Language: Fortran 90.
+> !   This code is written to JULES coding standards v1.
+> !-----------------------------------------------------------------------------
+> 
+12a48
+> PUBLIC :: params_io_assoc_cbl
+17,25d52
+< !-----------------------------------------------------------------------------
+< ! Description:
+< !   Defines variable types and variables for CABLE standalone runs.
+< !   Based on cable_def_types_mod.F90 from the CABLE trunk.
+< !
+< ! Code Owner: Please refer to ModuleLeaders.txt
+< ! This file belongs in CABLE SCIENCE
+< !-----------------------------------------------------------------------------
+< 
+154,156d180
+< !Allocation unecessary as these input parameters are read in from namelist
+< !(following JULES params *_io) these are initialized in corresponding section
+< !Here we include the pointer association relevant to TYPES to be passed around
+160c184,187
+< !No USE statements other than Dr Hook
+---
+> ! Description:
+> !   Associate veg. and soil parameters pointer types
+> 
+>   !No USE statements other than Dr Hook
+242a270,272
+> 
+> ! Description:
+> !   Nullify veg. and soil parameters pointer types
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_cable_shared_params_io_cbl.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_cable_shared_params_io_cbl.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

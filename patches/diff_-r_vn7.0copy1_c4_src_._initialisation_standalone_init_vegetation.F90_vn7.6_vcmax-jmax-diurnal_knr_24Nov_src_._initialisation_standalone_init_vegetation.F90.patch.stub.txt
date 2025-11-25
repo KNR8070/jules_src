@@ -1,0 +1,68 @@
+Patch stub generated: 2025-11-25T12:09:12.199045 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_vegetation.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_vegetation.F90
+
+SUMMARY:
+  - added lines (>): 13
+  - removed lines (<): 21
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_vegetation.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_vegetation.F90
+34,39c34,38
+<                                 photo_pmodel, photo_adapt,                     &
+<                                 photo_acclim, photo_adapt_acclim,              &
+<                                 photo_pmodel_acclim,                           &
+<                                 photo_act_model, photo_act_pft, photo_act_gb,  &
+<                                 photo_jv_model, jv_scale, jv_ntotal,           &
+<                                 stomata_model, stomata_jacobs, stomata_medlyn, &
+---
+>                                 photo_sox_collatz, photo_adapt,photo_acclim,   &
+>                                 photo_adapt_acclim, photo_act_model,           &
+>                                 photo_act_pft, photo_act_gb, photo_jv_model,   &
+>                                 jv_scale, jv_ntotal, stomata_model,            &
+>                                 stomata_jacobs, stomata_medlyn, stomata_sox,   &
+119c118
+< CASE ( photo_pmodel )
+---
+> CASE ( photo_sox_collatz )
+121c120,121
+<                 "C3 plants use the P model of photosynthesis.")
+---
+>                 "C3 plants use the Collatz model of photosynthesis "//         &
+>                 "as derived for use with the SOX stomata model.")
+123,125d122
+< SELECT CASE ( photo_model )
+< CASE ( photo_collatz, photo_farquhar )
+< 
+128,131d124
+< CASE ( photo_pmodel )
+< CALL log_info("init_vegetation",                                               &
+<               "C4 plants use the P model of photosynthesis.")
+< END SELECT
+133,135c126,127
+< ! Report options that are ony allowed with Farquhar photosynthesis and P-model
+< IF ( photo_model ==  photo_farquhar .OR.                                       &
+<        photo_model == photo_pmodel ) THEN
+---
+> ! Report options that are ony allowed with Farquhar photosynthesis.
+> IF ( photo_model ==  photo_farquhar ) THEN
+149,151d140
+<   CASE (photo_pmodel_acclim)
+<     CALL log_info("init_vegetation",                                           &
+<                   "Acclimation of photosynthesis selected.")           
+184a174,176
+> CASE ( stomata_sox )
+>   CALL log_info("init_vegetation",                                             &
+>                 "Using the SOX model of stomatal conductance.")
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_init_vegetation.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_init_vegetation.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

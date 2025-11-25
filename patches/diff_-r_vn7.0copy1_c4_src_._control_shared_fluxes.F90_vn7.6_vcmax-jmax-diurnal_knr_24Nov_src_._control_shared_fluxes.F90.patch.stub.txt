@@ -1,0 +1,81 @@
+Patch stub generated: 2025-11-25T12:09:12.118169 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/fluxes.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/fluxes.F90
+
+SUMMARY:
+  - added lines (>): 35
+  - removed lines (<): 1
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/fluxes.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/fluxes.F90
+43a44
+> USE missing_data_mod, ONLY: rmdi
+48a50,51
+>   ! T if varying grey emissivity is used for surface tile type
+>   LOGICAL, ALLOCATABLE :: l_emis_surft_set(:)
+49a53
+> 
+111a116,118
+>   REAL(KIND=real_jlslsm), ALLOCATABLE :: snowinc_surft(:,:)
+>   !   Increment to snow from sublimation and melting on
+>   !   surface tiles (kg m-2 TS-1)
+156a164,165
+>   REAL(KIND=real_jlslsm), ALLOCATABLE :: lake_evap(:)
+>   !   Evaporation from lakes (kg m-2 s-1).
+160a170,172
+>   ! T if varying grey emissivity is used for surface tile type
+>   LOGICAL, POINTER :: l_emis_surft_set(:)
+> 
+223a236,238
+>   REAL(KIND=real_jlslsm), POINTER :: snowinc_surft(:,:)
+>   !   Increment to snow from sublimation and melting on
+>   !   surface tiles (kg m-2 TS-1)
+268c283,285
+<   !   Tile roughness lengths for heat and moisture (m).
+---
+>   !   Tile roughness lengths for heat and moisture (m)
+>   REAL(KIND=real_jlslsm), POINTER :: lake_evap(:)
+>   !   Evaporation from lakes (kg m-2 s-1).
+304a322,325
+> ALLOCATE(fluxes_data%l_emis_surft_set(nsurft))
+> 
+> fluxes_data%l_emis_surft_set(:) = .FALSE.
+> 
+351a373
+> ALLOCATE(fluxes_data%snowinc_surft(land_pts,nsurft))
+358a381
+> ALLOCATE(fluxes_data%lake_evap(land_pts))
+392a416
+> fluxes_data%snowinc_surft(:,:)           = 0.0
+399a424
+> fluxes_data%lake_evap(:)                 = rmdi
+426a452
+> DEALLOCATE(fluxes_data%l_emis_surft_set)
+465a492
+> DEALLOCATE(fluxes_data%snowinc_surft)
+472a500
+> DEALLOCATE(fluxes_data%lake_evap)
+505a534
+> fluxes%l_emis_surft_set => fluxes_data%l_emis_surft_set
+544a574
+> fluxes%snowinc_surft => fluxes_data%snowinc_surft
+551a582
+> fluxes%lake_evap => fluxes_data%lake_evap
+580a612
+> NULLIFY(fluxes%l_emis_surft_set)
+619a652
+> NULLIFY(fluxes%snowinc_surft)
+626a660
+> NULLIFY(fluxes%lake_evap)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_fluxes.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_fluxes.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

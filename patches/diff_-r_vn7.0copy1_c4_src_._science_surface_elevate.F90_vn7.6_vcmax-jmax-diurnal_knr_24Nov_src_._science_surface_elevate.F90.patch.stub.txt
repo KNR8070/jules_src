@@ -1,0 +1,109 @@
+Patch stub generated: 2025-11-25T12:09:12.268833 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/elevate.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/elevate.F90
+
+SUMMARY:
+  - added lines (>): 64
+  - removed lines (<): 6
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/elevate.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/elevate.F90
+26c26
+<  land_pts,nsurft,surft_pts,land_index,surft_index,                             &
+---
+>  land_pts,nsurft,n_wtrac_jls,surft_pts,land_index,surft_index,                 &
+28c28
+<  t_elev,q_elev)
+---
+>  t_elev,q_elev,qw_1_wtrac,q_elev_wtrac)
+42a43,44
+> USE jules_water_tracers_mod, ONLY: l_wtrac_jls, wtrac_calc_ratio_fn_jules
+> 
+52a55,56
+> ,n_wtrac_jls                                                                   &
+>                        ! IN Number of water tracers in JULES
+70c74
+< ,surf_hgt(land_pts,nsurft)
+---
+> ,surf_hgt(land_pts,nsurft)                                                     &
+72a77,79
+> ,qw_1_wtrac(tdims%i_start:tdims%i_end,tdims%j_start:tdims%j_end,n_wtrac_jls)
+>                        ! IN Total water tracer content of lowest
+> !                            !    atmospheric layer (kg per kg air).
+85a93,97
+> REAL(KIND=real_jlslsm), INTENT(OUT) ::                                         &
+>  q_elev_wtrac(land_pts,nsurft,n_wtrac_jls)
+>                           ! OUT Water tracer specific humidity at elevated
+>                                 !  height (kg per kg air)
+> 
+98c110
+< ,delevation
+---
+> ,delevation                                                                    &
+100c112,113
+< 
+---
+> ,ratio_wt
+>                         ! Water tracer to water ratio at lowest atmos level
+109c122,125
+< ,n                   ! Tile index loop counter
+---
+> ,n                                                                             &
+>                      ! Tile index loop counter
+> ,i_wt
+>                      ! Water tracer loop counter
+179a196,237
+> 
+> ! Water tracers - set elevated water tracer specific elevated value
+> 
+> IF (l_wtrac_jls) THEN
+> 
+> !$OMP PARALLEL DEFAULT(NONE) PRIVATE(l,i,j,k,i_wt,n,ratio_wt)                  &
+> !$OMP SHARED(nsurft, land_pts, q_elev, q_elev_wtrac, surft_pts,                &
+> !$OMP        surft_index, land_index, t_i_length, qw_1, qw_1_wtrac,            &
+> !$OMP        n_wtrac_jls)
+> 
+>   ! Initialise output arrays
+>   DO i_wt = 1, n_wtrac_jls
+>     DO n = 1,nsurft
+> !$OMP DO SCHEDULE(STATIC)
+>       DO l = 1,land_pts
+>         q_elev_wtrac(l,n,i_wt) = 0.0
+>       END DO
+> !$OMP END DO
+>     END DO
+>   END DO
+> 
+>   ! Set elevated water tracer value to have same ratio as lowest atmospheric
+>   ! level
+>   DO i_wt = 1, n_wtrac_jls
+>     DO n = 1,nsurft
+> !$OMP DO SCHEDULE(STATIC)
+>       DO k = 1,surft_pts(n)
+>         l = surft_index(k,n)
+>         j=(land_index(l) - 1) / t_i_length + 1
+>         i = land_index(l) - (j-1) * t_i_length
+> 
+>         ratio_wt = wtrac_calc_ratio_fn_jules(i_wt,                             &
+>                       qw_1_wtrac(i,j,i_wt), qw_1(i,j))
+>         q_elev_wtrac(l,n,i_wt) = ratio_wt * q_elev(l,n)
+> 
+>       END DO
+> !$OMP END DO NOWAIT
+>     END DO
+>   END DO
+> !$OMP END PARALLEL
+> END IF
+>
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_elevate.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_elevate.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

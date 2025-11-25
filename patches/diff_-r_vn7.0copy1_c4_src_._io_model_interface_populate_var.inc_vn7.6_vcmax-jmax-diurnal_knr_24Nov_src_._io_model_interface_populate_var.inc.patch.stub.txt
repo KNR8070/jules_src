@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.224671 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/model_interface/populate_var.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/model_interface/populate_var.inc
+
+SUMMARY:
+  - added lines (>): 113
+  - removed lines (<): 200
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/model_interface/populate_var.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/model_interface/populate_var.inc
+13c13
+<                             lake_vars, chemvars, rivers, rivers_data
+---
+>                             lake_vars, chemvars, rivers, water_resources
+18a19
+> USE imgn_vars_mod, ONLY: imgn_vars
+21c22
+<   dim_cslayer, dim_soil_n_pool, land_pts, nsurft, nsoilt
+---
+>   dim_cslayer, land_pts, nsurft, nsoilt
+24c25
+<   grid_area_ij, latitude, longitude
+---
+>   grid_area_ij, latitude, longitude, projection_x_coord, projection_y_coord
+32,34d32
+< USE jules_deposition_mod, ONLY:                                                &
+<   tracer_field
+< 
+38,41d35
+< USE jules_water_resources_mod, ONLY:                                           &
+<   conveyance_loss, demand_rate_domestic, demand_rate_industry,                 &
+<   demand_rate_livestock, demand_rate_transfers, irrig_eff, sfc_water_frac
+< 
+122a117,130
+> CASE ( 'projection_x_coord' )
+>   IF ( PRESENT(cube) ) THEN
+>     CALL cube_get_data(cube, projection_x_coord)
+>   ELSE
+>     projection_x_coord(:,:) = const_val
+>   END IF
+> 
+> CASE ( 'projection_y_coord' )
+>   IF ( PRESENT(cube) ) THEN
+>     CALL cube_get_data(cube, projection_y_coord)
+>   ELSE
+>     projection_y_coord(:,:) = const_val
+>   END IF
+> 
+1924a1933,1940
+> CASE ( 'f_nsc' )
+>   IF ( PRESENT(cube) ) THEN
+>     cube_land = map_to_land(cube)
+>     CALL cube_get_data(cube_land, progs%f_nsc_pft(:,:))
+>   ELSE
+>     progs%f_nsc_pft(:,:) = const_val
+>   END IF
+> 
+2086c2102
+< CASE ( 't1p5m_ij_anom_imgn' )
+---
+> CASE ( 'tl1_ij_anom_imgn' )
+2088c2104
+<     CALL cube_get_data(cube, imgn_drive%t1p5m_ij_anom)
+---
+>     CALL cube_get_data(cube, imgn_drive%tl1_ij_anom)
+2090c2106
+<     imgn_drive%t1p5m_ij_anom(:,:,:) = const_val
+---
+>     imgn_drive%tl1_ij_anom(:,:,:) = const_val
+2093c2109
+< CASE ( 'uwind_ij_anom_imgn' )
+---
+> CASE ( 'wind_ij_anom_imgn' )
+2095c2111
+<     CALL cube_get_data(cube, imgn_drive%uwind_ij_anom)
+---
+>     CALL cube_get_data(cube, imgn_drive%wind_ij_anom)
+2097,2104c2113
+<     imgn_drive%uwind_ij_anom(:,:,:) = const_val
+<   END IF
+< 
+< CASE ( 'vwind_ij_anom_imgn' )
+<   IF ( PRESENT(cube) ) THEN
+<     CALL cube_get_data(cube, imgn_drive%vwind_ij_anom)
+<   ELSE
+<     imgn_drive%vwind_ij_anom(:,:,:) = const_val
+---
+>     imgn_drive%wind_ij_anom(:,:,:) = const_val
+2121c2130
+< CASE ( 'diurnal_t1p5m_ij_anom_imgn' )
+---
+> CASE ( 'diurnal_tl1_ij_anom_imgn' )
+2123c2132
+<     CALL cube_get_data(cube, imgn_drive%diurnal_t1p5m_ij_anom)
+---
+>     CALL cube_get_data(cube, imgn_drive%diurnal_tl1_ij_anom)
+2125c2134
+<     imgn_drive%diurnal_t1p5m_ij_anom(:,:,:) = const_val
+---
+>     imgn_drive%diurnal_tl1_ij_anom(:,:,:) = const_val
+2135c2144
+< CASE ( 'rh1p5m_ij_anom_imgn' )
+---
+> CASE ( 'ql1_ij_anom_imgn' )
+2137c2146
+<     CALL cube_get_data(cube, imgn_drive%rh1p5m_ij_anom)
+---
+>     CALL cube_get_data(cube, imgn_drive%ql1_ij_anom)
+2139c2148
+<     imgn_drive%rh1p5m_ij_anom(:,:,:) = const_val
+---
+>     imgn_drive%ql1_ij_anom(:,:,:) = const_val
+2149,2156c2158
+< CASE ( 't1p5m_ij_clim_imgn' )
+<   IF ( PRESENT(cube) ) THEN
+<     CALL cube_get_data(cube, imgn_drive%t1p5m_ij_clim)
+<   ELSE
+<     imgn_drive%t1p5m_ij_clim(:,:,:) = const_val
+<   END IF
+< 
+< CASE ( 't1p5m_ij_patt_imgn' )
+---
+> CASE ( 'tl1_ij_clim_imgn' )
+2158c2160
+<     CALL cube_get_data(cube, imgn_drive%t1p5m_ij_patt)
+---
+>     CALL cube_get_data(cube, imgn_drive%tl1_ij_clim)
+2160c2162
+<     imgn_drive%t1p5m_ij_patt(:,:,:) = const_val
+---
+>     imgn_drive%tl1_ij_clim(:,:,:) = const_val
+2163c2165
+< CASE ( 'uwind_ij_patt_imgn' )
+---
+> CASE ( 'tl1_ij_patt_imgn' )
+2165c2167
+<     CALL cube_get_data(cube, imgn_drive%uwind_ij_patt)
+---
+>     CALL cube_get_data(cube, imgn_drive%tl1_ij_patt)
+2167c2169
+<     imgn_drive%uwind_ij_patt(:,:,:) = const_val
+---
+>     imgn_drive%tl1_ij_patt(:,:,:) = const_val
+2170c2172
+< CASE ( 'vwind_ij_patt_imgn' )
+---
+> CASE ( 'wind_ij_patt_imgn' )
+2172c2174
+<     CALL cube_get_data(cube, imgn_drive%vwind_ij_patt)
+---
+>     CALL cube_get_data(cube, imgn_drive%wind_ij_patt)
+2174c2176
+<     imgn_drive%vwind_ij_patt(:,:,:) = const_val
+---
+>     imgn_drive%wind_ij_patt(:,:,:) = const_val
+2191c2193
+< CASE ( 'diurnal_t1p5m_ij_patt_imgn' )
+---
+> CASE ( 'diurnal_tl1_ij_patt_imgn' )
+2193c2195
+<     CALL cube_get_data(cube, imgn_drive%diurnal_t1p5m_ij_patt)
+---
+>     CALL cube_get_data(cube, imgn_drive%diurnal_tl1_ij_patt)
+2195c2197
+<     imgn_drive%diurnal_t1p5m_ij_patt(:,:,:) = const_val
+---
+>     imgn_drive%diurnal_tl1_ij_patt(:,:,:) = const_val
+2205c2207
+< CASE ( 'rh1p5m_ij_patt_imgn' )
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_model_interface_populate_var.inc_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_model_interface_populate_var.inc.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

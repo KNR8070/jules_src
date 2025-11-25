@@ -1,0 +1,34 @@
+Patch stub generated: 2025-11-25T12:09:12.222058 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/model_interface/get_var_attrs.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/model_interface/get_var_attrs.inc
+
+SUMMARY:
+  - added lines (>): 3
+  - removed lines (<): 3
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/model_interface/get_var_attrs.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/model_interface/get_var_attrs.inc
+20c20
+<      soil_model_ecosse, soil_model_rothc, soil_model_1pool,                    &
+---
+>      soil_model_ecosse, soil_model_4pool, soil_model_1pool,                    &
+108c108
+<   CASE ( soil_model_ecosse, soil_model_rothc )
+---
+>   CASE ( soil_model_ecosse, soil_model_4pool )
+119c119
+<   CASE ( soil_model_ecosse, soil_model_rothc )
+---
+>   CASE ( soil_model_ecosse, soil_model_4pool )
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_model_interface_get_var_attrs.inc_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_model_interface_get_var_attrs.inc.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

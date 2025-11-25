@@ -1,0 +1,34 @@
+Patch stub generated: 2025-11-25T12:09:12.233893 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/fire/fire_timestep_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/fire/fire_timestep_mod.F90
+
+SUMMARY:
+  - added lines (>): 3
+  - removed lines (<): 3
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Signature rename: unify timestep_len/timestep or provide wrapper.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/fire/fire_timestep_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/fire/fire_timestep_mod.F90
+8c8
+<                          current_time, current_month, timestep_len, land_pts)
+---
+>                          current_time, current_month, timestep, land_pts)
+42c42
+< REAL(KIND=real_jlslsm), INTENT(IN)    :: timestep_len
+---
+> REAL(KIND=real_jlslsm), INTENT(IN)    :: timestep
+66c66
+< IF ( current_time < timestep_len) THEN
+---
+> IF ( current_time < NINT(timestep) ) THEN
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_fire_fire_timestep_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_fire_fire_timestep_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

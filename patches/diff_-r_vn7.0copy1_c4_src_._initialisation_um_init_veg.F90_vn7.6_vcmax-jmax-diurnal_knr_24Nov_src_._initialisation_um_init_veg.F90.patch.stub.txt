@@ -1,0 +1,58 @@
+Patch stub generated: 2025-11-25T12:09:12.202752 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/um/init_veg.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/um/init_veg.F90
+
+SUMMARY:
+  - added lines (>): 17
+  - removed lines (<): 5
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/um/init_veg.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/um/init_veg.F90
+14c14,15
+< SUBROUTINE init_veg(a_step, triffid_period_arg, nstep_since_triffid, trif_vars)
+---
+> SUBROUTINE init_veg(a_step, triffid_period_arg, nstep_since_triffid,           &
+>                     trif_vars, progs)
+21a23
+> USE init_layeredcn_mod,       ONLY: init_layeredcn
+26c28,29
+<                                     triffid_period, l_trif_init_accum
+---
+>                                     triffid_period, l_trif_init_accum,         &
+>                                     l_nitrogen
+28a32
+> USE prognostics,   ONLY: progs_type
+51c55,56
+<                                     rsp_w_pft_acc, resp_s_acc1, g_lf_pft_acc,  &
+---
+>                                     rsp_w_pft_acc, resp_s_acc_4pool,           &
+>                                     g_lf_pft_acc,                              &
+86a92
+> TYPE(progs_type), INTENT(IN OUT) :: progs
+134c140,141
+< CALL tilepts(land_pts,frac_surft,surft_pts,surft_index,ainfo%l_lice_point)
+---
+> CALL tilepts(land_pts,frac_surft,surft_pts,surft_index,ainfo%l_lice_point,     &
+>              ainfo%l_lice_surft)
+186a194,198
+>       IF (l_nitrogen) THEN
+>         ! initialise n_inorg_avail_pft
+>         CALL init_layeredcn(ainfo%soil_index, progs)
+>       END IF
+> 
+190c202
+<                       rsp_w_pft_acc, resp_s_acc1)
+---
+>                       rsp_w_pft_acc, resp_s_acc_4pool)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_um_init_veg.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_um_init_veg.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,109 @@
+Patch stub generated: 2025-11-25T12:09:12.116993 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/ancil_info.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/ancil_info.F90
+
+SUMMARY:
+  - added lines (>): 34
+  - removed lines (<): 37
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/ancil_info.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/ancil_info.F90
+82,83c82,83
+<                     !  size of depth dimension in soil carbon (cs)
+<                     !  and related respiration variables
+---
+>                     !  size of depth dimension in soil carbon (cs),
+>                     !  nitrogen and related respiration variables
+87,90d86
+<  ,dim_cs2                                                                      &
+<                     !  size used for some variables that are only
+<                     !  used with TRIFFID. If not using TRIFFID these
+<                     !  variables are set to be smaller to save some space
+99,112d94
+< !Allocatables not for the TYPE because they do not vary with gridbox
+< LOGICAL, ALLOCATABLE ::                                                        &
+<   l_lice_surft(:)
+<     !  TRUE if a land ice (surface) tile, FALSE otherwise
+< 
+< INTEGER, ALLOCATABLE ::                                                        &
+<   soilt_pts(:),                                                                &
+<     !  Number of points for each soil tile
+<   surft_pts(:),                                                                &
+<     !  Number of land points which include the nth surface type
+<   sice_pts_ncat(:)
+<     !  Number of points for each sea-ice category
+< 
+< 
+126a109,110
+>   LOGICAL, ALLOCATABLE :: l_lice_surft(:)
+>     !  TRUE if a land ice (surface) tile, FALSE otherwise
+137c121,126
+< 
+---
+>   INTEGER, ALLOCATABLE :: soilt_pts(:)
+>     !  Number of points for each soil tile
+>   INTEGER, ALLOCATABLE :: surft_pts(:)
+>     !  Number of land points which include the nth surface type
+>   INTEGER, ALLOCATABLE :: sice_pts_ncat(:)
+>     !  Number of points for each sea-ice category
+190a180
+>   LOGICAL, POINTER :: l_lice_surft(:)
+194a185,187
+>   INTEGER, POINTER :: soilt_pts(:)
+>   INTEGER, POINTER :: surft_pts(:)
+>   INTEGER, POINTER :: sice_pts_ncat(:)
+251,260c244,247
+< !Allocatables not for the TYPE because they do not vary with gridbox
+< ALLOCATE( soilt_pts(nsoilt))
+< ALLOCATE( l_lice_surft(ntype))
+< ALLOCATE( surft_pts(ntype))
+< ALLOCATE( sice_pts_ncat(nice))
+< soilt_pts(:)     = 0
+< l_lice_surft(:)  = .FALSE.
+< surft_pts(:)     = 0
+< sice_pts_ncat(:) = 0
+< 
+---
+> ALLOCATE(ainfo_data%l_lice_surft(ntype))
+> ALLOCATE(ainfo_data%soilt_pts(nsoilt))
+> ALLOCATE(ainfo_data%surft_pts(ntype))
+> ALLOCATE(ainfo_data%sice_pts_ncat(nice))
+288a276,279
+> ainfo_data%l_lice_surft(:)             = .FALSE.
+> ainfo_data%soilt_pts(:)                = 0
+> ainfo_data%surft_pts(:)                = 0
+> ainfo_data%sice_pts_ncat(:)            = 0
+340,345d330
+< !Allocatables not for the TYPE because they do not vary with gridbox
+< DEALLOCATE(soilt_pts)
+< DEALLOCATE(l_lice_surft)
+< DEALLOCATE(surft_pts)
+< DEALLOCATE(sice_pts_ncat)
+< 
+346a332,335
+> DEALLOCATE(ainfo_data%l_lice_surft)
+> DEALLOCATE(ainfo_data%soilt_pts)
+> DEALLOCATE(ainfo_data%surft_pts)
+> DEALLOCATE(ainfo_data%sice_pts_ncat)
+405a395,398
+> ainfo%l_lice_surft => ainfo_data%l_lice_surft
+> ainfo%soilt_pts => ainfo_data%soilt_pts
+> ainfo%surft_pts => ainfo_data%surft_pts
+> ainfo%sice_pts_ncat => ainfo_data%sice_pts_ncat
+461a455,458
+> NULLIFY(ainfo%l_lice_surft)
+> NULLIFY(ainfo%soilt_pts)
+> NULLIFY(ainfo%surft_pts)
+> NULLIFY(ainfo%sice_pts_ncat)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_ancil_info.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_ancil_info.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

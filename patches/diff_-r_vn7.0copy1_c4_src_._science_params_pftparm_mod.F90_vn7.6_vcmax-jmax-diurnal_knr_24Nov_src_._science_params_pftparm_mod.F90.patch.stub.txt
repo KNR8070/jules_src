@@ -1,0 +1,115 @@
+Patch stub generated: 2025-11-25T12:09:12.240151 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/params/pftparm_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/pftparm_mod.F90
+
+SUMMARY:
+  - added lines (>): 42
+  - removed lines (<): 38
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/params/pftparm_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/pftparm_mod.F90
+156c156
+< ,jv25_ratio(:)                                                                 &
+---
+> ,jv25_ratio(:)
+159,181d158
+< !---------------------------------------------------------------------------
+< ! Parameters for the pmodel.
+< !---------------------------------------------------------------------------
+< ,beta_c3c4(:)                                                                  &
+<                  ! Unit cost ratio for C3/C4 plants.
+<                  ! unitless
+< ,eagamma(:)                                                                    &
+<                  ! Activation energy for gammastar
+< ,eakc(:)                                                                       &
+<                  ! Activation energy for carboxylase                          
+<                  ! (J mol-1) 
+< ,eako(:)                                                                       &
+<                  ! Activation energy for oxygenase
+<                  ! (J mol-1).  
+< ,gamma25(:)                                                                    &
+<                  ! stomata conductance at 25 deg C
+< 		! (pascal)                                               
+< ,kc25(:)                                                                       &
+<                  ! Michaelis-Menten const carboxylase, 25 deg C               
+<                  ! (pascal).
+< ,ko25(:)
+<                  ! Michaelis-Menten const oxygenase, 25 deg C
+<                  ! (pascal).
+359a337,359
+> !-----------------------------------------------------------------------------
+> ! Parameters for SUGAR
+> !-----------------------------------------------------------------------------
+> REAL(KIND=real_jlslsm), ALLOCATABLE ::                                         &
+>  sug_grec(:)                                                                   &
+>                  ! Turnover of structural carbon into NSC (KgC/m2/s)
+> ,sug_g0(:)                                                                     &
+>                  ! Specific structural C growth rate (KgC/m2/s)
+> ,sug_yg(:)
+>                  ! Growth yield fraction
+> 
+> !-----------------------------------------------------------------------------
+> ! Parameters for SOX
+> !-----------------------------------------------------------------------------
+> REAL(KIND=real_jlslsm), ALLOCATABLE ::                                         &
+>  sox_a(:)                                                                      &
+>                  ! The shape parameter in the xylem vulnerability curve.
+> ,sox_p50(:)                                                                    &
+>                  ! Xlem water potential at which xylem hydraulic
+>                  ! conductance is half its maximum value. (MPa)
+> ,sox_rp_min(:)
+>                  ! Plant minimum hydraulic resistance. (m2 s MPa/mol)
+> 
+437d436
+< ALLOCATE( beta_c3c4(npft))
+445,447d443
+< ALLOCATE( eagamma(npft))
+< ALLOCATE( eakc(npft))
+< ALLOCATE( eako(npft))
+450d445
+< ALLOCATE( gamma25(npft))
+453,454d447
+< ALLOCATE( kc25(npft))
+< ALLOCATE( ko25(npft))
+469d461
+< beta_c3c4(:)    = 0.0
+477,479d468
+< eagamma(:)      = 0.0
+< eakc(:)         = 0.0
+< eako(:)         = 0.0
+482d470
+< gamma25(:)      = 0.0
+485,486d472
+< kc25(:)         = 0.0
+< ko25(:)         = 0.0
+625a612,629
+> 
+> ! SUGAR parameters
+> ALLOCATE( sug_grec(npft))
+> ALLOCATE( sug_g0(npft))
+> ALLOCATE( sug_yg(npft))
+> 
+> sug_grec(:) = 0.0
+> sug_g0(:)   = 0.0
+> sug_yg(:)   = 0.0
+> 
+> ! SOX parameters
+> ALLOCATE( sox_a(npft))
+> ALLOCATE( sox_p50(npft))
+> ALLOCATE( sox_rp_min(npft))
+> 
+> sox_a(:)      = 0.0
+> sox_p50(:)    = 0.0
+> sox_rp_min(:) = 0.0
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_params_pftparm_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_params_pftparm_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.276007 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/jules_land_sf_implicit.jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/jules_land_sf_implicit.jls.F90
+
+SUMMARY:
+  - added lines (>): 218
+  - removed lines (<): 34
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/jules_land_sf_implicit.jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/jules_land_sf_implicit.jls.F90
+7a8
+> USE ereport_mod, ONLY: ereport
+34a36,37
+> ! IN values defining water tracer field dimensions
+>  n_wtrac_jls, n_evap_srce,                                                     &
+36,37c39,40
+<  lw_down,sw_surft,t_soil_soilt,r_gamma,alpha1,ashtf_prime_surft,               &
+<  dtrdz_charney_grid_1,fraca,resfs,resft,rhokh_surft,                           &
+---
+>  lw_down,sw_surft,sky,t_soil_soilt,r_gamma,alpha1,ashtf_prime_surft,           &
+>  dtrdz_charney_grid_1,fracaero_t,fracaero_s,resfs,resft,rhokh_surft,           &
+45c48
+<  ext_soilt,melt_surft,tstar_surft_old,ERROR,                                   &
+---
+>  ext_soilt,melt_surft,snowinc_surft,tstar_surft_old,ERROR,                     &
+54a58
+>  lake_evap,                                                                    &
+62c66,74
+<  crop_vars                                                                     &
+---
+>  crop_vars,                                                                    &
+>  ! Water tracers (IN)
+>  snow_surft_wtrac, smc_soilt_wtrac, canopy_wtrac, fqw_evapsrce_wtrac,          &
+>  ! Water tracers (INOUT)
+>  fqw_surft_wtrac,                                                              &
+>  ! Water tracers (OUT)
+>  ei_surft_wtrac, ei_wtrac, esoil_surft_wtrac, esoil_soilt_wtrac,               &
+>  ext_soilt_wtrac, ecan_surft_wtrac, ecan_wtrac, lake_evap_wtrac,               &
+>  fqw_1_wtrac, dfqw_wtrac                                                       &
+89a102,104
+> USE jules_rivers_mod,         ONLY: l_rivers, lake_water_conserve_method,      &
+>                                     use_fqw_surft, use_elake_surft,            &
+>                                     i_river_vn, rivers_um_trip
+93c108,111
+< USE solinc_data,              ONLY: sky, l_skyview
+---
+> USE solinc_data,              ONLY: l_skyview
+> 
+> USE jules_water_tracers_mod,  ONLY: l_wtrac_imp_jls, standard_ratio_wtrac
+> USE sf_land_imp_wtrac_mod,    ONLY: sf_land_imp_wtrac
+125a144,149
+> INTEGER, INTENT(IN) ::                                                         &
+>  n_wtrac_jls,                                                                  &
+>                              ! IN No. of water tracers in JULES
+>  n_evap_srce
+>                              ! IN No. of evaporative water sources
+> 
+161a186,187
+> ,sky(tdims%i_start:tdims%i_end,tdims%j_start:tdims%j_end)                      &
+>                              ! IN skyview correction for surface LW
+184c210,214
+< ,fraca(land_pts,nsurft)                                                        &
+---
+> ,fracaero_t(land_pts,nsurft)                                                   &
+>                              ! IN Total fraction of surface moisture
+>                              !    flux with only aerodynamic
+>                              !    resistance
+> ,fracaero_s(land_pts,nsurft)                                                   &
+187,188c217,218
+<                              !    resistance for snow-free land
+<                              !    tiles.
+---
+>                              !    resistance over the frozen part of the
+>                              !    surface
+192c222
+<                              !    factor for fraction (1-FRACA) of
+---
+>                              !    factor for fraction (1-fracaero_t) of
+196c226
+<                              !    FRACA+(1-FRACA)*RESFS for
+---
+>                              !    fracaero+(1-fracaero)*resfs for
+201a232,247
+> ! Water tracers (IN)
+> REAL(KIND=real_jlslsm), INTENT(IN) :: snow_surft_wtrac(land_pts,nsurft,        &
+>                                                        n_wtrac_jls)
+>                              ! Water tracer lying snow on tiles (kg/m2)
+> REAL(KIND=real_jlslsm), INTENT(IN) :: smc_soilt_wtrac(land_pts,nsoilt,         &
+>                                                        n_wtrac_jls)
+>                              ! Water tracer in available soil moisture
+>                              !    (kg/m2).
+> REAL(KIND=real_jlslsm), INTENT(IN) :: canopy_wtrac(land_pts,nsurft,n_wtrac_jls)
+>                              ! Water tracer surface/canopy water for
+>                              !    snow-free land tiles (kg/m2)
+> REAL(KIND=real_jlslsm), INTENT(IN) :: fqw_evapsrce_wtrac(land_pts,             &
+>                                                n_evap_srce,nsurft,n_wtrac_jls)
+>                              ! Water tracer surface FQW for each
+>                              !     evap source for land tiles (kg/m2/s)
+> 
+225a272,278
+> 
+> ! Water tracers (INOUT)
+> REAL(KIND=real_jlslsm), INTENT(IN OUT) :: fqw_surft_wtrac(land_pts,nsurft,     &
+>                                                          n_wtrac_jls)
+>                              ! Water tracer surface FQW for land tiles
+>                              !    (kg/m2/s)
+> 
+274a328,333
+> ,snowinc_surft(land_pts,nsurft)                                                &
+>                              ! OUT Total increment to snow on land tiles
+>                              !     (kg m-2 TS-1). This is used in preference
+>                              !     to the rate to ensure the precise removal
+>                              !     of snow, rather than allowing rounding
+>                              !     errors to generate very small amounts.
+285a345,388
+> 
+> ! Water tracers (OUT)
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: ei_surft_wtrac(land_pts,nsurft,         &
+>                                                         n_wtrac_jls)
+>                              ! Water tracer sublimation for land tiles
+>                              !     (kg/m2/s)
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: ei_wtrac(tdims%i_start:tdims%i_end,     &
+>                                         tdims%j_start:tdims%j_end,n_wtrac_jls)
+>                              ! Water tracer sublimation from lying snow
+>                              !     (kg/m2/s).
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: esoil_surft_wtrac(land_pts,nsurft,      &
+>                                                          n_wtrac_jls)
+>                              ! Water tracer sfc evapotranspiration for
+>                              !                 snow-free land tiles (kg/m2/s)
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: esoil_soilt_wtrac(                      &
+>                                             tdims%i_start:tdims%i_end,         &
+>                                             tdims%j_start:tdims%j_end,nsoilt,  &
+>                                             n_wtrac_jls)
+>                              ! Water tracer surface evapotranspiration
+>                              !     from soil moisture store per soil tile
+>                              !     (kg/m2/s)
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: ext_soilt_wtrac(land_pts,nsoilt,        &
+>                                                        sm_levels,n_wtrac_jls)
+>                              ! Water tracer extraction of water from each
+>                              !     soil layer (kg/m2/s)
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: ecan_surft_wtrac(land_pts,nsurft,       &
+>                                                         n_wtrac_jls)
+>                              ! Water tracer canopy evaporation for snow-free
+>                              !     land tiles (kg/m2/s)
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: ecan_wtrac(tdims%i_start:tdims%i_end,   &
+>                                          tdims%j_start:tdims%j_end,n_wtrac_jls)
+>                              ! Water tracer GBM evaporation from
+>                              !     canopy/surface store (kg/m2/s)
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: lake_evap_wtrac(land_pts,n_wtrac_jls)
+>                              ! Water tracer lake evaporation
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: fqw_1_wtrac(                            &
+>                                           tdims%i_start:tdims%i_end,           &
+>                                           tdims%j_start:tdims%j_end,n_wtrac_jls)
+>                              ! Water tracer surface flux (kg/m2/s)
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: dfqw_wtrac(tdims%i_start:tdims%i_end,   &
+>                                         tdims%j_start:tdims%j_end,n_wtrac_jls)
+>                              ! Increment in water tracer GBM moisture flux
+>                              !      (kg/m2/s)
+> 
+294a398
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: lake_evap(land_pts)
+316c420
+< ,snowmelt(tdims%i_start:tdims%i_end,tdims%j_start:tdims%j_end)
+---
+> ,snowmelt(tdims%i_start:tdims%i_end,tdims%j_start:tdims%j_end)                 &
+317a422,429
+> ,snowinc_flake(land_pts,nsurft)
+>                              ! Increment to ice for FLake
+> 
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_jules_land_sf_implicit.jls.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_jules_land_sf_implicit.jls.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,104 @@
+Patch stub generated: 2025-11-25T12:09:12.174624 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/ancillaries/init_irrig_props_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/ancillaries/init_irrig_props_mod.F90
+
+SUMMARY:
+  - added lines (>): 22
+  - removed lines (<): 21
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/ancillaries/init_irrig_props_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/ancillaries/init_irrig_props_mod.F90
+81a82,83
+> CHARACTER(LEN=*), PARAMETER :: RoutineName='INIT_IRRIG_PROPS'
+> 
+101c103
+< CALL log_info("init_irrig_props", "Reading JULES_IRRIG_PROPS namelist...")
+---
+> CALL log_info(RoutineName, "Reading JULES_IRRIG_PROPS namelist...")
+106c108
+<   CALL log_fatal("init_irrig_props",                                           &
+---
+>   CALL log_fatal(RoutineName,                                                  &
+111c113
+< CALL jules_print('init_irrig_props', 'Contents of namelist init_irrig_props')
+---
+> CALL jules_print(RoutineName, 'Contents of namelist init_irrig_props')
+114c116
+< CALL jules_print('init_irrig_props',lineBuffer)
+---
+> CALL jules_print(RoutineName,lineBuffer)
+117c119
+< CALL jules_print('init_irrig_props',lineBuffer)
+---
+> CALL jules_print(RoutineName,lineBuffer)
+120c122
+< CALL jules_print('init_irrig_props',lineBuffer)
+---
+> CALL jules_print(RoutineName,lineBuffer)
+123c125
+< CALL jules_print('init_irrig_props',lineBuffer)
+---
+> CALL jules_print(RoutineName,lineBuffer)
+126c128
+< CALL jules_print('init_irrig_props',lineBuffer)
+---
+> CALL jules_print(RoutineName,lineBuffer)
+129c131
+< CALL jules_print('init_irrig_props',lineBuffer)
+---
+> CALL jules_print(RoutineName,lineBuffer)
+139c141
+<     CALL log_info("init_irrig_props", "'frac_irrig' will be read from file")
+---
+>     CALL log_info(RoutineName, "'frac_irrig' will be read from file")
+143c145
+<       CALL log_fatal("init_irrig_props", "No file name provided")
+---
+>       CALL log_fatal(RoutineName, "No file name provided")
+153c155
+<         CALL log_fatal("init_irrig_props",                                     &
+---
+>         CALL log_fatal(RoutineName,                                            &
+155c157
+<       CALL log_info("init_irrig_props",                                        &
+---
+>       CALL log_info(RoutineName,                                               &
+164c166
+<         CALL log_fatal("init_irrig_props",                                     &
+---
+>         CALL log_fatal(RoutineName,                                            &
+167c169
+<       CALL log_info("init_irrig_props",                                        &
+---
+>       CALL log_info(RoutineName,                                               &
+180c182
+<       CALL log_info("init_irrig_props",                                        &
+---
+>       CALL log_info(RoutineName,                                               &
+187c189
+<       CALL log_fatal("init_irrig_props",                                       &
+---
+>       CALL log_fatal(RoutineName,                                              &
+197,198c199,200
+<   CALL log_info("init_frac",                                                   &
+<                 "frac will be read from the dump file.  " //                   &
+---
+>   CALL log_info(RoutineName,                                                   &
+>                 "Irrigation ancil information will be read from the dump." //  &
+200,201c202
+< 
+< END IF !.NOT. ancil_dump_read%frac
+---
+> END IF !.NOT. ancil_dump_read%irrig
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_ancillaries_init_irrig_props_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_ancillaries_init_irrig.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

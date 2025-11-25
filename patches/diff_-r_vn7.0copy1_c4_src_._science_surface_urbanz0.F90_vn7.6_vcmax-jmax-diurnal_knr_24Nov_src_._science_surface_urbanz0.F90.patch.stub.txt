@@ -1,0 +1,33 @@
+Patch stub generated: 2025-11-25T12:09:12.294958 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/urbanz0.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/urbanz0.F90
+
+SUMMARY:
+  - added lines (>): 2
+  - removed lines (<): 4
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/urbanz0.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/urbanz0.F90
+26,27d25
+< 
+< 
+31c29
+< USE um_types, ONLY: REAL64
+---
+> USE um_types, ONLY: real_64
+85c83
+< REAL ( KIND=REAL64 ) ::  & ! Do need the double precision (Aurore Porson)
+---
+> REAL ( KIND=real_64 ) ::  & ! Do need the double precision (Aurore Porson)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_urbanz0.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_urbanz0.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

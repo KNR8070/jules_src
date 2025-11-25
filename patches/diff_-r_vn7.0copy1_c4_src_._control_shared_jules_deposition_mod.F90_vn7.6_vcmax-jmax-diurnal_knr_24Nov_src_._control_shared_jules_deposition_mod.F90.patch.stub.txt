@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.119924 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_deposition_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_deposition_mod.F90
+
+SUMMARY:
+  - added lines (>): 210
+  - removed lines (<): 105
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Namelist/IO changes: reconcile derived types and broadcast logic.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_deposition_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_deposition_mod.F90
+9a10,11
+> MODULE jules_deposition_mod
+> 
+23c25
+< MODULE jules_deposition_mod
+---
+> USE max_dimensions,          ONLY: ndep_species_max
+27c29,33
+< USE um_types, ONLY: real_jlslsm
+---
+> USE ereport_mod,             ONLY: ereport
+> 
+> USE jules_print_mgr,         ONLY: jules_message, jules_print
+> 
+> USE um_types,                ONLY: real_jlslsm
+42,43c48,52
+<   dry_dep_ukca_jules = 1
+<     ! Deposition is calculated in JULES using code modelled on UKCA.
+---
+>   dry_dep_model_ukca  = 1,                                                     &
+>     ! Deposition is calculated in JULES using UKCA routines.
+>   dry_dep_model_jules = 2
+>     ! Deposition is calculated in JULES using code modelled on UKCA and
+>     ! with restrictions on pft configuations and ordering removed.
+67c76
+<   l_deposition = .FALSE.,                                                      &
+---
+>   l_deposition = .FALSE. ,                                                     &
+69c78
+<   l_deposition_flux = .FALSE.
+---
+>   l_deposition_flux = .FALSE. ,                                                &
+73a83,89
+>   l_deposition_from_ukca = .FALSE. ,                                           &
+>     ! Switch to call JULES deposition routines from ukca_chemistry_ctl
+>   l_deposition_gc_corr = .FALSE.
+>     ! Switch to use stomatal conductance corrected for bare soil evaporation
+>     ! Only used if deposition is requested.
+>     ! T means stomatal conductance corrected for bare soil evaporation
+>     ! F means uses current incorrect treatment of stomatal conductance
+81a98,107
+> REAL(KIND=real_jlslsm), PARAMETER ::                                           &
+>   dep_rnull = 1.0e+30,                                                         &
+>     ! Infinite resistance to deposition (1/dep_rnull~0)
+>   dep_rzero =  0.0,                                                            &
+>     ! Zero resistance to deposition
+>   dep_rten  = 10.0,                                                            &
+>     ! Resistance of 10 s m-1
+>   glmin     =  1.0e-6
+>     ! Minimum leaf conductance (m s-1)
+> 
+83c109
+<   l_ukca_ddep_lev1  = .FALSE.
+---
+>   l_ukca_ddep_lev1  = .FALSE. ,                                                &
+96a123,130
+>   l_ukca_dry_dep_so2wet = .FALSE. ,                                            &
+>     ! True if considering the impact of surface wetness on dry deposition
+>   l_ukca_ddepo3_ocean =.FALSE. ,                                               &
+>     ! when true using oceanic O3 dry-deposition scheme
+>     ! of Luhar et al. (2018)
+>   l_ukca_emsdrvn_ch4 =.FALSE.
+>     ! when true using emission-driven CH4 scheme
+> 
+101,110c135,138
+<   dzl_const, dry_dep_model, l_deposition, l_deposition_flux,                   &
+<   l_ukca_ddep_lev1, ndry_dep_species, tundra_s_limit
+< 
+< !-----------------------------------------------------------------------------
+< ! Variables for the dry deposition scheme(s).
+< !-----------------------------------------------------------------------------
+< REAL(KIND=real_jlslsm), ALLOCATABLE ::                                         &
+<   tracer_field(:,:)
+<     ! Concentration of chemical tracers in the atmosphere, for the
+<     ! calculation of deposition, as mass mixing ratio (kg kg-1).
+---
+>   dry_dep_model, dzl_const, l_deposition, l_deposition_flux,                   &
+>   l_deposition_from_ukca, l_deposition_gc_corr, l_ukca_ddep_lev1,              &
+>   l_ukca_ddepo3_ocean, l_ukca_dry_dep_so2wet, l_ukca_emsdrvn_ch4,              &
+>   ndry_dep_species, tundra_s_limit
+115,166d142
+< 
+< SUBROUTINE jules_deposition_alloc(land_pts)
+< 
+< !No USE statements other than Dr Hook
+< USE parkind1,    ONLY: jprb, jpim
+< USE yomhook,     ONLY: lhook, dr_hook
+< 
+< USE ereport_mod, ONLY: ereport
+< 
+< IMPLICIT NONE
+< 
+< !Arguments
+< INTEGER, INTENT(IN) :: land_pts
+< 
+< INTEGER :: errcode
+< 
+< INTEGER(KIND=jpim), PARAMETER :: zhook_in  = 0
+< INTEGER(KIND=jpim), PARAMETER :: zhook_out = 1
+< REAL(KIND=jprb)               :: zhook_handle
+< 
+< CHARACTER(LEN=*), PARAMETER :: RoutineName='JULES_DEPOSITION_ALLOC'
+< 
+< !End of header
+< 
+< IF (lhook) CALL dr_hook(ModuleName//':'//RoutineName,zhook_in,zhook_handle)
+< 
+< errcode = 101
+< 
+< IF ( l_deposition ) THEN
+< 
+<   ! Model-dependent variables.
+<   SELECT CASE ( dry_dep_model )
+<   CASE ( dry_dep_ukca_jules )
+<     ! Deposition variables.
+<     IF ( l_deposition_flux ) THEN
+<       ALLOCATE( tracer_field(land_pts,ndry_dep_species))
+< 
+<       tracer_field(:,:) = 0.0
+< 
+<     END IF  !  l_deposition_flux
+<   CASE DEFAULT
+<     CALL ereport ("Invalid value for dry_dep_model. ", errcode,                &
+<                    "Please check jules_deposition_alloc")
+<   END SELECT
+< END IF  !  l_deposition
+< 
+< 
+< IF (lhook) CALL dr_hook(ModuleName//':'//RoutineName,zhook_out,zhook_handle)
+< RETURN
+< END SUBROUTINE jules_deposition_alloc
+< 
+< #if !defined(RIVERS_ONLY)
+174,180d149
+< USE max_dimensions,          ONLY: ndep_species_max
+< 
+< USE jules_surface_mod, ONLY:                                                   &
+<   l_aggregate
+< 
+< USE ereport_mod, ONLY: ereport
+< 
+190a160
+> ! Checks on l_deposition = FALSE
+191a162,170
+>   ! l_deposition_flux cannot be TRUE
+>   IF ( l_deposition_flux ) THEN
+>     errorstatus = 100 !  a hard error
+>     WRITE(jules_message,'(A,L1)') "Deposition switch l_deposition_flux is " // &
+>        "not available if l_deposition = FALSE. l_deposition_flux = ",          &
+>        l_deposition_flux
+>     CALL ereport( TRIM(routineName), errorstatus, jules_message)
+>   END IF
+> 
+200,201c179,180
+< CASE ( dry_dep_ukca_jules )
+<   !  Acceptable values.
+---
+> CASE ( dry_dep_model_ukca, dry_dep_model_jules )
+>   ! Acceptable values.
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_jules_deposition_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_jules_deposition_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

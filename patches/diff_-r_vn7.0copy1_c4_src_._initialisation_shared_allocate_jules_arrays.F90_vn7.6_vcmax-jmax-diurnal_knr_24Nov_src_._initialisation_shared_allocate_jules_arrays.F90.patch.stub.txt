@@ -1,0 +1,117 @@
+Patch stub generated: 2025-11-25T12:09:12.168902 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/shared/allocate_jules_arrays.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/shared/allocate_jules_arrays.F90
+
+SUMMARY:
+  - added lines (>): 59
+  - removed lines (<): 16
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/shared/allocate_jules_arrays.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/shared/allocate_jules_arrays.F90
+36c36,37
+<                                  chemvars_data                                 &
+---
+>                                  chemvars_data, water_resources_data,          &
+>                                  wtrac_jls_data                                &
+41c42
+<                                     l_acclim
+---
+>                                     l_acclim, l_sugar
+50,51c51,55
+< USE jules_deposition_mod,     ONLY: dry_dep_model, l_deposition,               &
+<                                     ndry_dep_species
+---
+> USE jules_water_resources_mod,ONLY: l_water_domestic,                          &
+>                                     l_water_industry, l_water_irrigation,      &
+>                                     l_water_livestock, l_water_resources,      &
+>                                     l_water_transfers, nwater_use
+> USE jules_deposition_mod,     ONLY: l_deposition, ndry_dep_species
+52a57
+> USE jules_water_tracers_mod,  ONLY: l_wtrac_jls
+68a74
+> USE jules_water_tracers_mod,  ONLY: n_wtrac_jls, n_evap_srce
+94a101
+> USE jules_wtrac_type_mod,     ONLY: wtrac_jls_alloc
+98,100d104
+< USE jules_deposition_mod,     ONLY: jules_deposition_alloc
+< USE deposition_species_mod,   ONLY: deposition_species_alloc
+< USE jules_water_resources_mod, ONLY: water_resources_alloc
+105a110,111
+> USE deposition_species_mod,   ONLY: deposition_species_alloc
+> USE water_resources_vars_mod, ONLY: water_resources_alloc
+127a134,143
+> USE water_resources_vars_mod, ONLY: water_resources_data_type
+> USE jules_wtrac_type_mod,    ONLY: jls_wtrac_data_type
+> 
+> ! The following are needed to get the local river grid size
+> ! (which is needed for water tracers)
+> #if defined(UM_JULES)
+> USE UM_ParVars,      ONLY: lasize
+> USE UM_ParParams,    ONLY: halo_type_no_halo
+> USE Field_Types,     ONLY: fld_type_r
+> #endif
+156a173,176
+> TYPE(water_resources_data_type), INTENT(IN OUT) :: water_resources_data
+> 
+> !Water tracer TYPES containing field data (IN OUT)
+> TYPE(jls_wtrac_data_type),  INTENT(IN OUT) :: wtrac_jls_data
+158a179,186
+> 
+> INTEGER :: i_wt
+> 
+> ! Local river grid size
+> ! These are used for water tracers.  They are only set correctly if UM_JULES.
+> INTEGER :: river_row_length
+> INTEGER :: river_rows
+> 
+177c205
+<                       nmasst, nnpft, l_acclim, progs_data)
+---
+>                       nmasst, nnpft, l_acclim, l_sugar, progs_data)
+184c212,213
+< CALL chemvars_alloc(land_pts,npft,chemvars_data)
+---
+> CALL chemvars_alloc(land_pts, t_i_length, t_j_length, npft, ntype,             &
+>                     l_deposition, ndry_dep_species, chemvars_data)
+246,252d274
+< 
+< CALL jules_deposition_alloc(land_pts)
+< 
+< CALL deposition_species_alloc(ntype,ndry_dep_species,                          &
+<                               l_deposition, dry_dep_model)
+< 
+< CALL water_resources_alloc(land_pts)
+267a290,310
+> 
+> CALL deposition_species_alloc(ntype, ndry_dep_species, l_deposition)
+> 
+> CALL water_resources_alloc( land_pts, nwater_use, l_water_domestic,            &
+>                             l_water_industry, l_water_irrigation,              &
+>                             l_water_livestock, l_water_resources,              &
+>                             l_water_transfers, water_resources_data )
+> 
+> ! Set up local river grid sizes  (Note, water tracers only work in UM_JULES)
+> #if defined(UM_JULES)
+> river_row_length = lasize(1,fld_type_r,halo_type_no_halo)
+> river_rows       = lasize(2,fld_type_r,halo_type_no_halo)
+> #else
+> river_row_length = 1
+> river_rows       = 1
+> #endif
+> 
+> CALL wtrac_jls_alloc(land_pts, t_i_length, t_j_length, nsurft, nsoilt,         &
+>                        sm_levels, nsmax, nice_use, n_wtrac_jls,                &
+>                        n_evap_srce, river_row_length, river_rows,              &
+>                        l_wtrac_jls, wtrac_jls_data)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_shared_allocate_jules_arrays.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_shared_allocate_jules_arrays.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

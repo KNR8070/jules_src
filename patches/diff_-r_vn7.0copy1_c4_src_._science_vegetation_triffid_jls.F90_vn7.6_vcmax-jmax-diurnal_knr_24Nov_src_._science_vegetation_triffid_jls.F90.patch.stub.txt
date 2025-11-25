@@ -1,0 +1,84 @@
+Patch stub generated: 2025-11-25T12:09:12.300297 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/vegetation/triffid_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/vegetation/triffid_jls.F90
+
+SUMMARY:
+  - added lines (>): 28
+  - removed lines (<): 12
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/vegetation/triffid_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/vegetation/triffid_jls.F90
+137c137
+<   soil_model_rothc,                                                            &
+---
+>   soil_model_4pool,                                                            &
+692,694c692,694
+< ! If not using RothC, set variables related to the soil to zero. In that case
+< ! these are not used further below.
+< IF ( soil_bgc_model /= soil_model_rothc ) THEN
+---
+> ! If not using 4-pool soil C, set variables related to the soil to zero.
+> ! In that case these are not used further below.
+> IF ( soil_bgc_model /= soil_model_4pool ) THEN
+721c721
+<   IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+>   IF ( soil_bgc_model == soil_model_4pool ) THEN
+734c734
+<   END IF  !  RothC
+---
+>   END IF  !  4-pool soil C
+1308c1308
+< IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+> IF ( soil_bgc_model == soil_model_4pool ) THEN
+1407c1407
+< END IF  !  soil_model_rothc
+---
+> END IF  !  soil_model_4pool
+1541c1541
+<   IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+>   IF ( soil_bgc_model == soil_model_4pool ) THEN
+1595c1595
+<   END IF  !  soil_bgc_model == soil_model_rothc
+---
+>   END IF  !  soil_bgc_model == soil_model_4pool
+1609c1609
+< IF ( (soil_bgc_model == soil_model_rothc) .AND. .NOT. l_layeredC) THEN
+---
+> IF ( (soil_bgc_model == soil_model_4pool) .AND. .NOT. l_layeredC) THEN
+1611a1612,1617
+> !IF ( (soil_bgc_model == soil_model_4pool) .AND. l_layeredC) THEN
+> !  DO t = 1,trif_pts
+> !    l = trif_index(t)
+> !    n_inorg_gb(l) = SUM(n_inorg_soilt_lyrs(l,1,:))
+> !  END DO
+> !END IF
+1624a1631,1638
+> !
+> ! Include veg_c_fire_emissions_gb and burnt_soil in the calculation of
+> ! triffid_co2_gb, the loss of carbon as CO2 from all land sources. This
+> ! assumes that all carbon lost from land due to fire is lost as CO2, in
+> ! the absence of any explicit stores of burnt carbon. Failing to add it
+> ! results in loss of conservation of carbon in CO2 emissions-driven
+> ! configuration. Both variables have the same units (kg/m2/360 days) as
+> ! exudates_gb, etc, as seen in src/io/model_interface/variable_metadata.F90.
+1632c1646,1648
+<                       wp_slow_out_gb(l)
+---
+>                       wp_slow_out_gb(l) +                                      &
+>                       veg_c_fire_emission_gb(l) +                              &
+>                       burnt_soil(l)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_vegetation_triffid_jls.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_vegetation_triffid_jls.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

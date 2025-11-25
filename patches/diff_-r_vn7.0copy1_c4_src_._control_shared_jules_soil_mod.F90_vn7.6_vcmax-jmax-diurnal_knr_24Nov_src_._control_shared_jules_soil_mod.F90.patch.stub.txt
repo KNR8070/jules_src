@@ -1,0 +1,75 @@
+Patch stub generated: 2025-11-25T12:09:12.127865 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_soil_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_soil_mod.F90
+
+SUMMARY:
+  - added lines (>): 8
+  - removed lines (<): 34
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_soil_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_soil_mod.F90
+32,34d31
+< INTEGER, PARAMETER ::                                                          &
+<   sm_levels_default = 4
+< 
+36,40c33
+<   sm_levels = sm_levels_default
+<       ! Number of soil layers (standalone only - this variable is not used
+<       ! when run in the UM)
+<       ! When running in the UM, its value is checked against the default and
+<       ! a warning is issued if it has changed
+---
+>   sm_levels = imdi
+175c168
+< ! Levels - not used in the UM
+---
+> ! Soil levels
+191c184
+< SUBROUTINE check_jules_soil(sm_levels_in)
+---
+> SUBROUTINE check_jules_soil()
+214,219d206
+< INTEGER, INTENT(IN) :: sm_levels_in
+<     ! The number of soil levels
+<     ! This is passed in because the value in the namelist is not used when
+<     ! running in the UM
+<     ! This is due to complications with reading it from dump etc.
+< 
+225,239c212,216
+< !-----------------------------------------------------------------------------
+< ! Verify that a suitable sm_levels was given in the namelist
+< !
+< !   * If we are running in the UM and the user tried to specify sm_levels
+< !     using the namelist, emit an error as it is probably something that
+< !     needs looking at
+< !     We use the passed in value instead
+< !   * If we are running standalone, we ignore the passed in value and use the
+< !     value from the namelist
+< !-----------------------------------------------------------------------------
+< #if defined(UM_JULES)
+< IF ( sm_levels /= sm_levels_default ) THEN
+<   CALL ereport(RoutineName, errorstatus,                                       &
+<                "sm_levels cannot be set using the JULES_SOIL namelist " //     &
+<                "when running as part of the UM")
+---
+> ! Check that sm_levels has been set
+> IF ( sm_levels < 1 ) THEN
+>   errorstatus = 101
+>   CALL ereport("check_jules_soil", errorstatus,                                &
+>                "sm_levels must be between 1 and sm_levels_max")
+241,243d217
+< 
+< sm_levels = sm_levels_in
+< #endif
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_jules_soil_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_jules_soil_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

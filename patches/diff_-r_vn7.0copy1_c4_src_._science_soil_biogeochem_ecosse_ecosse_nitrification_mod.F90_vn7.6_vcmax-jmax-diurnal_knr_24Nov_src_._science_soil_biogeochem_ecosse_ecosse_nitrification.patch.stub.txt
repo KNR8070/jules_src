@@ -1,0 +1,60 @@
+Patch stub generated: 2025-11-25T12:09:12.266606 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil_biogeochem/ecosse/ecosse_nitrification_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil_biogeochem/ecosse/ecosse_nitrification_mod.F90
+
+SUMMARY:
+  - added lines (>): 10
+  - removed lines (<): 10
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil_biogeochem/ecosse/ecosse_nitrification_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil_biogeochem/ecosse/ecosse_nitrification_mod.F90
+301c301
+<   temp_mod_q10, temp_mod_rothc, water_mod_jules, water_mod_rothc,              &
+---
+>   temp_mod_q10, temp_mod_smith, water_mod_clark, water_mod_smith,              &
+311,312c311,312
+<   rate_modifier_jules_temp, rate_modifier_jules_water,                         &
+<   rate_modifier_rothc_temp, rate_modifier_rothc_water
+---
+>   rate_modifier_q10_temp, rate_modifier_clark_water,                           &
+>   rate_modifier_smith_temp, rate_modifier_smith_water
+393c393
+< CASE ( water_mod_rothc )
+---
+> CASE ( water_mod_smith )
+396c396
+<   CALL rate_modifier_rothc_water( land_pts, nlayer, vs_pts,                    &
+---
+>   CALL rate_modifier_smith_water( land_pts, nlayer, vs_pts,                    &
+401c401
+< CASE ( water_mod_jules )
+---
+> CASE ( water_mod_clark )
+403c403
+<   CALL rate_modifier_jules_water( land_pts, nlayer, vs_pts, vs_index,          &
+---
+>   CALL rate_modifier_clark_water( land_pts, nlayer, vs_pts, vs_index,          &
+413c413
+< CASE ( temp_mod_rothc )
+---
+> CASE ( temp_mod_smith )
+416c416
+<   CALL rate_modifier_rothc_temp( land_pts, nlayer, vs_pts,                     &
+---
+>   CALL rate_modifier_smith_temp( land_pts, nlayer, vs_pts,                     &
+421c421
+<   CALL rate_modifier_jules_temp( land_pts, nlayer, vs_pts,                     &
+---
+>   CALL rate_modifier_q10_temp( land_pts, nlayer, vs_pts,                       &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_biogeochem_ecosse_ecosse_nitrification_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_biogeochem_ecosse_ecosse_nitrification.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

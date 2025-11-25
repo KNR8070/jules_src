@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.219580 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/input/time_varying/interpolation/interpolation_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/input/time_varying/interpolation/interpolation_mod.F90
+
+SUMMARY:
+  - added lines (>): 370
+  - removed lines (<): 2
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/input/time_varying/interpolation/interpolation_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/input/time_varying/interpolation/interpolation_mod.F90
+59,60c59,428
+< #include "get_required_time_bounds.inc"
+< #include "interpolate.inc"
+---
+> 
+> SUBROUTINE get_required_time_bounds(interp_flags, lower_bound, upper_bound)
+> 
+> IMPLICIT NONE
+> 
+> !-----------------------------------------------------------------------------
+> ! Description:
+> !   Given a list of interpolation flags, returns the common lower bound and
+> !   upper bound required to use all the given interpolation schemes in the
+> !   same file
+> !
+> ! Code Owner: Please refer to ModuleLeaders.txt
+> ! This file belongs in TECHNICAL
+> !
+> ! Code Description:
+> !   Language: Fortran 90.
+> !   This code is written to JULES coding standards v1.
+> !-----------------------------------------------------------------------------
+> ! Argument types
+> CHARACTER(LEN=*), INTENT(IN) :: interp_flags(:)
+> 
+> ! Return types
+> INTEGER, INTENT(OUT) :: lower_bound, upper_bound
+> 
+> 
+> ! Work variables
+> LOGICAL :: required_times(-1:2)  ! Array indicating the required times
+> INTEGER :: i  ! Loop variable
+> 
+> !-----------------------------------------------------------------------------
+> 
+> required_times(:) = .FALSE.
+> 
+> DO i = 1,SIZE(interp_flags)
+> 
+>   ! If all the times are already required, we can exit early
+>   IF ( ALL(required_times) ) EXIT
+> 
+>   ! Otherwise, set the required times based on the interpolation flag
+>   SELECT CASE ( interp_flags(i) )
+>   CASE ( interp_ave_backward )
+>     required_times(0:2) = .TRUE.
+> 
+>   CASE ( interp_ave_centred )
+>     required_times(-1:2) = .TRUE.
+> 
+>   CASE ( interp_ave_forward )
+>     required_times(-1:1) = .TRUE.
+> 
+>   CASE ( interp_instant )
+>     required_times(0:1) = .TRUE.
+> 
+>   CASE ( no_interp_end )
+>     required_times(1) = .TRUE.
+> 
+>   CASE ( no_interp_centred )
+>     required_times(0:1) = .TRUE.
+> 
+>   CASE ( no_interp_start )
+>     required_times(0) = .TRUE.
+> 
+>   CASE DEFAULT
+>     CALL log_fatal("get_required_times",                                       &
+>                    "Unrecognised interpolation flag - " // interp_flags(i))
+>   END SELECT
+> 
+> END DO
+> 
+> ! The required lower bound is the first element for which required_times=T
+> DO i = -1,2
+>   IF ( required_times(i) ) THEN
+>     lower_bound = i
+>     EXIT
+>   END IF
+> END DO
+> 
+> ! The required upper bound is the last element for which required_times=T
+> ! So step backwards through the required_times array to detect it
+> DO i = 2,-1,-1
+>   IF ( required_times(i) ) THEN
+>     upper_bound = i
+>     EXIT
+>   END IF
+> END DO
+> 
+> RETURN
+> 
+> END SUBROUTINE get_required_time_bounds
+> 
+> FUNCTION interpolate(DATA, interp_flag, tsteps_in_period, tstep)               &
+>                                                      RESULT(interpolated_data)
+> 
+> USE data_cube_mod, ONLY: data_cube,                                            &
+>                           OPERATOR ( * ), OPERATOR ( + ), OPERATOR ( / ),      &
+>                           cube_safe_copy, cube_free
+> 
+> IMPLICIT NONE
+> 
+> !-----------------------------------------------------------------------------
+> ! Description:
+> !   Returns data interpolated to the current time as a data cube
+> !
+> ! Code Owner: Please refer to ModuleLeaders.txt
+> ! This file belongs in TECHNICAL
+> !
+> ! Code Description:
+> !   Language: Fortran 90.
+> !   This code is written to JULES coding standards v1.
+> !-----------------------------------------------------------------------------
+> ! Argument types
+> #if defined(SUN_FORTRAN)
+> TYPE(data_cube), POINTER :: DATA(:)
+> #else
+> TYPE(data_cube), POINTER, INTENT(IN) :: DATA(:)
+> #endif
+>                     ! The data to interpolate, a data_cube for each time
+>                     ! Marked as a pointer to preserve array indexing
+>                     ! The SUN compiler, for whatever reason, doesn't like
+>                     ! the INTENT and POINTER attributes together, so we
+>                     ! remove the INTENT for it
+> CHARACTER(LEN=*), INTENT(IN) :: interp_flag
+>                     ! The interpolation scheme to use
+> INTEGER, INTENT(IN) :: tsteps_in_period(-1:1)
+>                     ! The number of timesteps in the interpolated data
+>                     ! for each data timestep
+>                     ! I.e. tsteps_in_period(-1) is the number of interpolated
+>                     !      (i.e. model) timesteps between data(-1) and data(0)
+>                     !      tsteps_in_period(0) is the number of interpolated
+>                     !      timesteps between data(0) and data(1)
+>                     ! etc...
+> INTEGER, INTENT(IN) :: tstep
+>                     ! The interpolated (i.e. model) timestep that we want data for
+>                     ! This is a number from 0 to (tsteps_in_period(0) - 1)
+> 
+> 
+> ! Return type
+> TYPE(data_cube) :: interpolated_data
+>                     ! The interpolated data for the current time
+> 
+> ! Work variables
+> REAL :: weights(-1:2)  ! The weights for each time
+> 
+> ! Used in CASE ( INTERP_AVE_BACKWARD ) and CASE ( INTERP_AVE_FORWARD )
+> REAL :: n1, n2  ! The number of timesteps in the first and second intervals
+> 
+> ! Used in CASE ( INTERP_AVE_CENTRED )
+> REAL :: n  ! The number of timesteps in the interval
+> 
+> ! Used in all INTERP_AVE_* cases
+> TYPE(data_cube) :: weighted_data
+> TYPE(data_cube) :: numer
+> TYPE(data_cube) :: denom
+> 
+> ! Temporary cubes used for preventing memory leaks
+> TYPE(data_cube) :: temp1, temp2, temp3, temp4
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_input_time_varying_interpolation_interpolation_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_input_time_varying_interpolation_interpolation_mod.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,82 @@
+Patch stub generated: 2025-11-25T12:09:12.249017 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/river_routing/rivers_route_rfm_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/rivers_route_rfm_mod.F90
+
+SUMMARY:
+  - added lines (>): 13
+  - removed lines (<): 29
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/river_routing/rivers_route_rfm_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/rivers_route_rfm_mod.F90
+67,69c67
+< SUBROUTINE rivers_route_rfm( sfc_runoff, sub_sfc_runoff,                       &
+<                              outflow, baseflow, riverout_rgrid,                &
+<                             !  imported river arrays
+---
+> SUBROUTINE rivers_route_rfm( sfc_runoff, sub_sfc_runoff, outflow, baseflow,    &
+74,76c72,74
+<        nstep_rivers, np_rivers, river_mouth, rivers_dlat, rivers_first         &
+<        ,rivers_dx, runoff_factor, a_thresh, cland, criver, cbland, cbriver     &
+<        ,retl, retr, rfm_land, rfm_river, rfm_sea,                              &
+---
+>        nstep_rivers, np_rivers, river_mouth                                    &
+>        ,rivers_first, rivers_length, runoff_factor, cland, criver, cbland      &
+>        ,cbriver, retl, retr, rfm_land, rfm_river, rfm_sea,                     &
+82,85d79
+< USE planet_constants_mod, ONLY: planet_radius  ! the Earth's radius (m)
+< 
+< USE conversions_mod, ONLY: pi_over_180
+< 
+110,111d103
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: riverout_rgrid(np_rivers)
+<        ! River outflow into the ocean on river grid (kg s-1)
+158c150
+< ! rivers model timestep(s)
+---
+> ! Calculate rivers model timestep length.
+161,167d152
+< ! horizontal gridsize (m)
+< IF (rivers_dx <= 0) THEN
+<   dx = planet_radius * (ABS(rivers_dlat) * pi_over_180)
+< ELSE
+<   dx = rivers_dx
+< END IF
+< 
+169,172c154,157
+< rivertheta    = criver  * dt / dx
+< landtheta     = cland   * dt / dx
+< sublandtheta  = cbland  * dt / dx
+< subrivertheta = cbriver * dt / dx
+---
+> rivertheta    = criver  * dt / rivers_length
+> landtheta     = cland   * dt / rivers_length
+> sublandtheta  = cbland  * dt / rivers_length
+> subrivertheta = cbriver * dt / rivers_length
+246c231
+<   IF (landtype == rfm_land) THEN  !land
+---
+>   IF (landtype == rfm_land) THEN  !Gridcell is land
+277c262
+<   ELSE IF (landtype == rfm_river) THEN  !river
+---
+>   ELSE IF (landtype == rfm_river) THEN  !Gridcell is river
+317,318c302,303
+<   IF ( rivers%rivers_next_rp(ip) == -river_mouth ) THEN
+<     riverout_rgrid(ip) = rivers%rfm_rivflow_rp(ip)  * rho_water
+---
+>   IF ( rivers%rivers_next_rp(ip) == river_mouth ) THEN
+>     rivers%rivers_outflow_rp(ip) = rivers%rfm_rivflow_rp(ip)  * rho_water
+337d321
+<   ! HL: N.B. Add option to select what output units required for river flow
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_river_routing_rivers_route_rfm_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_river_routing_rivers_route_rfm_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

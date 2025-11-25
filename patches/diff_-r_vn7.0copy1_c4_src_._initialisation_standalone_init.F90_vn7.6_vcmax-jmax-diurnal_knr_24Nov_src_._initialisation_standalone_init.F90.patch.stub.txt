@@ -1,0 +1,85 @@
+Patch stub generated: 2025-11-25T12:09:12.187042 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init.F90
+
+SUMMARY:
+  - added lines (>): 32
+  - removed lines (<): 9
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init.F90
+1d0
+< #if !defined(UM_JULES)
+26a26
+>                    imgn_vars_data, imgn_vars,                                  &
+30a31,32
+>                    water_resources_data, water_resources,                      &
+>                    wtrac_jls_data, wtrac_jls,                                  &
+46,47c48,49
+< USE initial_conditions_mod,       ONLY: init_ic
+< USE spinup_mod,                   ONLY: spinup_init
+---
+> USE init_ic_mod,                  ONLY: init_ic
+> USE spinup_init_mod,              ONLY: spinup_init
+130a133,135
+> USE imgn_vars_mod,                ONLY: imgn_vars_data_type,                   &
+>                                         imgn_vars_type,                        &
+>                                         imgn_vars_assoc
+140,142c145,150
+< USE jules_chemvars_mod,         ONLY: chemvars_data_type,                      &
+<                                       chemvars_type,                           &
+<                                       chemvars_assoc
+---
+> USE jules_chemvars_mod,           ONLY: chemvars_data_type,                    &
+>                                         chemvars_type,                         &
+>                                         chemvars_assoc
+> USE water_resources_vars_mod,     ONLY: water_resources_data_type,             &
+>                                         water_resources_type,                  &
+>                                         water_resources_assoc
+151a160,163
+> USE jules_wtrac_type_mod,         ONLY: jls_wtrac_type,                        &
+>                                         jls_wtrac_data_type,                   &
+>                                         wtrac_jls_assoc
+> 
+187a200
+> TYPE(imgn_vars_data_type), INTENT(IN OUT) :: imgn_vars_data
+191a205,206
+> TYPE(water_resources_data_type), INTENT(IN OUT) :: water_resources_data
+> TYPE(jls_wtrac_data_type), INTENT(IN OUT)      :: wtrac_jls_data
+212a228
+> TYPE(imgn_vars_type), INTENT(IN OUT) :: imgn_vars
+216a233,234
+> TYPE(water_resources_type), INTENT(IN OUT) :: water_resources
+> TYPE(jls_wtrac_type), INTENT(IN OUT)      :: wtrac_jls
+218a237
+> 
+295a315
+>                imgn_vars_data,                                                 &
+299c319,320
+<                chemvars_data                                                   &
+---
+>                chemvars_data, water_resources_data,                            &
+>                wtrac_jls_data                                                  &
+319a341
+> CALL imgn_vars_assoc(imgn_vars,imgn_vars_data)
+323a346,347
+> CALL water_resources_assoc(water_resources,water_resources_data)
+> CALL wtrac_jls_assoc(wtrac_jls,wtrac_jls_data)
+351c375
+<   CALL init_imogen(nml_dir,progs_data, trifctltype, imgn_drive, ainfo)
+---
+>   CALL init_imogen(nml_dir,progs_data, trifctltype, imgn_drive, imgn_vars, ainfo)
+407d430
+< #endif
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_init.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_init.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

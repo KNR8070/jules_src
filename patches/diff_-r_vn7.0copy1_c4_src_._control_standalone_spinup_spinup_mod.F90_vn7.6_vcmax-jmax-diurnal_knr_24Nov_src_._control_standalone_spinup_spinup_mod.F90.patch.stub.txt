@@ -1,0 +1,45 @@
+Patch stub generated: 2025-11-25T12:09:12.154875 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/standalone/spinup/spinup_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/spinup/spinup_mod.F90
+
+SUMMARY:
+  - added lines (>): 0
+  - removed lines (<): 21
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/standalone/spinup/spinup_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/spinup/spinup_mod.F90
+13,14d12
+< USE logging_mod, ONLY: log_info, log_fatal
+< 
+45,63d42
+< 
+< 
+< !-----------------------------------------------------------------------------
+< ! Visibility declarations
+< !-----------------------------------------------------------------------------
+< PRIVATE
+< PUBLIC max_spinup_vars, nvars, spinup_vars,                                    &
+<        spinup_init, spinup_check
+< 
+< 
+< CONTAINS
+< 
+< 
+< ! Fortran INCLUDE statements would be preferred, but (at least) the pgf90
+< ! compiler objects to their use when the included file contains pre-processor
+< ! directives. At present, such directives are used to exclude files from
+< ! the UM build, so are required. This may change in the future.
+< #include "spinup_init.inc"
+< #include "spinup_check.inc"
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_standalone_spinup_spinup_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_standalone_spinup_spinup_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

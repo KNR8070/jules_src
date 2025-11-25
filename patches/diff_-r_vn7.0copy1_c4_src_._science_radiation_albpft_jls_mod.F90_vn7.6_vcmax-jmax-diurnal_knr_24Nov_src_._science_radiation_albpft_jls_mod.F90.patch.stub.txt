@@ -1,0 +1,60 @@
+Patch stub generated: 2025-11-25T12:09:12.242977 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/radiation/albpft_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/radiation/albpft_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 15
+  - removed lines (<): 11
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/radiation/albpft_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/radiation/albpft_jls_mod.F90
+188c188,189
+< REAL(KIND=real_jlslsm) :: exp_hla, exp_minus_hla, exp_minus_kla
+---
+> REAL(KIND=real_jlslsm) :: exp_hla, exp_minus_hla, exp_minus_kla,               &
+>         exp_k_dlai_min_la
+232c233,234
+< !$OMP         alpa_arr, omegal_arr, alpal_arr, omegau_arr,alpau_arr)           &
+---
+> !$OMP         alpa_arr, omegal_arr, alpal_arr, omegau_arr,alpau_arr,           &
+> !$OMP         exp_k_dlai_min_la)                                               &
+302a305,311
+>     ! If albpft_call is 0, then either there's no scaling to albedo obs,
+>     ! or this is the first call in that process to make a first guess:
+>     IF (albpft_call == 0 ) THEN
+>       om   = omega_arr(band)
+>       alpl = alpa_arr(band)
+>     END IF
+> 
+307,313c316
+<       ! If albpft_call is 0, then either there's no scaling to albedo obs,
+<       ! or this is the first call in that process to make a first guess:
+<       IF (albpft_call == 0 ) THEN
+<         om   = omega_arr(band)
+<         alpl = alpa_arr(band)
+< 
+<       ELSE IF ( albpft_call == 1 ) THEN
+---
+>       IF ( albpft_call == 1 ) THEN
+544a548
+>             exp_k_dlai_min_la = EXP(k * (dlai - la))
+557c561
+<             dabeer_dla(i) = (EXP(-k * (la - dlai)) - exp_minus_kla) / dlai
+---
+>             dabeer_dla(i) = (exp_k_dlai_min_la - exp_minus_kla) / dlai
+563c567
+<             fsun(l,n,i) = exp_minus_kla * (EXP(k * dlai) - 1.0) / (k * dlai)
+---
+>             fsun(l,n,i) = (exp_k_dlai_min_la - exp_minus_kla) / (k * dlai)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_radiation_albpft_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_radiation_albpft_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

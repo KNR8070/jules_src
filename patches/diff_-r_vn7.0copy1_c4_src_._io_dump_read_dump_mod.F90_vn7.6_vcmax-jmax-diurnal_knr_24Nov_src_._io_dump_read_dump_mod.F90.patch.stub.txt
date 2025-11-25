@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.211363 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/dump/read_dump_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/dump/read_dump_mod.F90
+
+SUMMARY:
+  - added lines (>): 63
+  - removed lines (<): 273
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/dump/read_dump_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/dump/read_dump_mod.F90
+1c1
+< #if !defined(UM_JULES)
+---
+> #if !defined(RIVERS_ONLY)
+18c18,19
+<                             jules_vars, fluxes, rivers
+---
+>                             jules_vars, fluxes, rivers, water_resources
+> USE imgn_vars_mod, ONLY: imgn_vars
+25c26,27
+<   land_pts, dim_cs1, dim_soil_n_pool, nsurft, nsoilt, dim_cslayer, nsoilt
+---
+>   land_pts, dim_cs1, dim_soil_n_pool, nsurft, nsoilt, dim_cslayer, nsoilt,     &
+>   nmasst
+38,40d39
+< USE imogen_progs, ONLY:                                                        &
+<   co2_ppmv, co2_change_ppmv, dtemp_o, fa_ocean, ch4_ppbv
+< 
+56,58d54
+< USE jules_water_resources_mod, ONLY:                                           &
+<   conveyance_loss, irrig_eff, sfc_water_frac
+< 
+63,65c59,60
+< USE mpi, ONLY: mpi_real, mpi_comm_world, mpi_logical, mpi_integer
+< USE io_constants, ONLY:                                                        &
+<   mode_read, max_dim_var, max_sdf_name_len
+---
+> USE mpi, ONLY: mpi_real, mpi_logical, mpi_integer
+> USE jules_vars_mod, ONLY: mpi_local_comm
+70,72d64
+< USE string_utils_mod, ONLY:                                                    &
+<   to_string
+< 
+74,76c66
+<   file_handle, file_open, file_introspect,                                     &
+<   file_inquire_dim, file_inquire_var, file_read_var,                           &
+<   file_close
+---
+>   file_handle, file_read_var, file_close
+80c70,72
+< USE get_dim_info_mod, ONLY: get_dim_info
+---
+> 
+> USE read_dump_shared_mod,     ONLY: read_dump_shared
+> USE read_dump_var_rivers_mod, ONLY: read_dump_var_rivers
+104,109d95
+< ! Local parameters.
+< LOGICAL, PARAMETER :: l_reading_true = .TRUE.
+<   ! A value of .TRUE. that is passed to argument l_reading of subroutine
+<   ! get_dim_info to show that it is being called in connection with reading
+<   ! (rather than writing) a dump.
+< 
+117,140d102
+< INTEGER :: dim_size_file
+<   ! The size of the dimension currently being
+<   ! processed in the file
+< 
+< ! Used when defining dimensions and variables
+< INTEGER :: ndims
+<   ! The number of dimensions the current variable has
+< CHARACTER(LEN=max_sdf_name_len) :: dim_names(max_dim_var)
+<   ! The dimension names the current variable should use
+< INTEGER :: dim_sizes(max_dim_var)
+<   ! The dimension sizes for the current variable
+< INTEGER :: dim_ids(max_dim_var)
+<   ! The dimension ids for the current variable as
+<   ! calculated from file_inquire_dim
+< LOGICAL :: is_record_dim
+<   ! Detects if the current dimension is a record dim
+< INTEGER :: ndims_file
+<   ! The number of dimensions the variable has in file
+<   ! Compared to ndims above for each variable
+< INTEGER :: dim_ids_file(max_dim_var)
+<   ! The ids of the dimensions the variable has in the file
+<   ! Compared to dim_ids above to verify the variable has the
+<   ! correct dimensions
+< 
+144,150d105
+< LOGICAL :: is_record_var
+<   ! Indicates if a variable uses the record dimension
+< 
+< LOGICAL :: l_read_from_dump
+<   ! Used to bypass checking the dimensions of ancil variables that are
+<   ! not to be read from the dump.
+< 
+180d134
+< nvars = SIZE(identifiers)
+187,277c141,143
+< !-----------------------------------------------------------------------------
+< ! In the master task only, we open the file and check that the correct
+< ! dimensions exist and are of a size compatible with this run
+< !-----------------------------------------------------------------------------
+< IF ( is_master_task() ) THEN
+<   !-----------------------------------------------------------------------------
+<   ! We use the lowest level file API here, as we don't want to impose the input
+<   ! grid
+<   !-----------------------------------------------------------------------------
+<   FILE=file_open(file_name, mode_read)
+< 
+<   ! We want to auto-detect the dimensions and variables in the file
+<   CALL file_introspect(FILE)
+< 
+<   DO i = 1,nvars
+< 
+<     !-----------------------------------------------------------------------
+<     ! Get information about the dimensions used by the variable.
+<     ! The argument l_reading_true shows that we are reading (not writing) a
+<     ! dump.
+<     !-----------------------------------------------------------------------
+<     CALL get_dim_info( l_reading_true, identifiers(i), ndims,  dim_sizes,      &
+<                        dim_names, l_read_from_dump )
+< 
+<     !-------------------------------------------------------------------------
+<     ! Check the dimensions exist and have the correct size
+<     !-------------------------------------------------------------------------
+<     IF ( l_read_from_dump ) THEN
+<       DO j = 1,ndims
+<         ! Retrive information about the dimension from the file we store the id
+<         ! for use outside this loop
+<         CALL file_inquire_dim(                                                 &
+<           FILE, dim_names(j), dim_ids(j), dim_size_file, is_record_dim         &
+<         )
+< 
+<         ! Check that we found a dimension
+<         IF ( dim_ids(j) < 0 )                                                  &
+<           CALL log_fatal("read_dump",                                          &
+<                          "Could not find expected dimension '" //              &
+<                          TRIM(dim_names(j)) // "' in dump file")
+< 
+<         ! Check that the dimension is not a record dimension (there shouldn't
+<         ! be one in dump files).
+<         IF ( is_record_dim )                                                   &
+<           CALL log_fatal("read_dump",                                          &
+<                          "Dimension '" // TRIM(dim_names(j)) // "' is a " //   &
+<                          "record dimension - should not exist in dump file")
+< 
+<         ! Check that the dimension has the correct size
+<         IF ( dim_size_file /= dim_sizes(j) )                                   &
+<           CALL log_fatal("read_dump",                                          &
+<                          "Dimension '" // TRIM(dim_names(j)) // "' has " //    &
+<                          "size incompatible with current run (required: " //   &
+<                          TRIM(to_string(dim_sizes(j))) // ", found: " //       &
+<                          TRIM(to_string(dim_size_file)) // ")")
+<       END DO  ! dims
+< 
+<       !-----------------------------------------------------------------------
+<       ! Check that the variable exists and has the correct dimensions
+<       !-----------------------------------------------------------------------
+<       ! Retrieve information about the variable from the file
+<       CALL file_inquire_var(                                                   &
+<         FILE, identifiers(i), var_ids(i), ndims_file, dim_ids_file,            &
+<         is_record_var                                                          &
+<       )
+< 
+<       ! Check that we found a variable
+<       IF ( var_ids(i) < 1 )                                                    &
+<         CALL log_fatal("read_dump",                                            &
+<                        "Failed to find requested variable '" //                &
+<                        TRIM(identifiers(i)) // "' in dump file")
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_dump_read_dump_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_dump_read_dump_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.104845 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/imogen/imgn_drive_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/imgn_drive_mod.F90
+
+SUMMARY:
+  - added lines (>): 99
+  - removed lines (<): 136
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/imogen/imgn_drive_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/imgn_drive_mod.F90
+44,47c44,46
+<   REAL, ALLOCATABLE :: t1p5m_ij_clim(:,:,:)
+<   REAL, ALLOCATABLE :: rh1p5m_ij_clim(:,:,:)
+<   REAL, ALLOCATABLE :: uwind_ij_clim(:,:,:)
+<   REAL, ALLOCATABLE :: vwind_ij_clim(:,:,:)
+---
+>   REAL, ALLOCATABLE :: tl1_ij_clim(:,:,:)
+>   REAL, ALLOCATABLE :: ql1_ij_clim(:,:,:)
+>   REAL, ALLOCATABLE :: wind_ij_clim(:,:,:)
+50c49
+<   REAL, ALLOCATABLE :: diurnal_t1p5m_ij_clim(:,:,:)
+---
+>   REAL, ALLOCATABLE :: diurnal_tl1_ij_clim(:,:,:)
+54,57c53,55
+<   REAL, ALLOCATABLE :: t1p5m_ij_anom(:,:,:)
+<   REAL, ALLOCATABLE :: rh1p5m_ij_anom(:,:,:)
+<   REAL, ALLOCATABLE :: uwind_ij_anom(:,:,:)
+<   REAL, ALLOCATABLE :: vwind_ij_anom(:,:,:)
+---
+>   REAL, ALLOCATABLE :: tl1_ij_anom(:,:,:)
+>   REAL, ALLOCATABLE :: ql1_ij_anom(:,:,:)
+>   REAL, ALLOCATABLE :: wind_ij_anom(:,:,:)
+60c58
+<   REAL, ALLOCATABLE :: diurnal_t1p5m_ij_anom(:,:,:)
+---
+>   REAL, ALLOCATABLE :: diurnal_tl1_ij_anom(:,:,:)
+64,67c62,64
+<   REAL, ALLOCATABLE :: t1p5m_ij_patt(:,:,:)
+<   REAL, ALLOCATABLE :: rh1p5m_ij_patt(:,:,:)
+<   REAL, ALLOCATABLE :: uwind_ij_patt(:,:,:)
+<   REAL, ALLOCATABLE :: vwind_ij_patt(:,:,:)
+---
+>   REAL, ALLOCATABLE :: tl1_ij_patt(:,:,:)
+>   REAL, ALLOCATABLE :: ql1_ij_patt(:,:,:)
+>   REAL, ALLOCATABLE :: wind_ij_patt(:,:,:)
+70c67
+<   REAL, ALLOCATABLE :: diurnal_t1p5m_ij_patt(:,:,:)
+---
+>   REAL, ALLOCATABLE :: diurnal_tl1_ij_patt(:,:,:)
+76c73
+<   REAL, ALLOCATABLE :: t1p5m_ij_drive(:,:,:,:,:)
+---
+>   REAL, ALLOCATABLE :: tl1_ij_drive(:,:,:,:,:)
+81c78
+<   REAL, ALLOCATABLE :: q1p5m_ij_drive(:,:,:,:,:)
+---
+>   REAL, ALLOCATABLE :: ql1_ij_drive(:,:,:,:,:)
+87,90d83
+<   ! whar is this?
+<   REAL, ALLOCATABLE :: dctot_co2(:)
+<   REAL, ALLOCATABLE :: dctot_ch4(:)
+< 
+96,99c89,91
+<   REAL, POINTER :: t1p5m_ij_clim(:,:,:)
+<   REAL, POINTER :: rh1p5m_ij_clim(:,:,:)
+<   REAL, POINTER :: uwind_ij_clim(:,:,:)
+<   REAL, POINTER :: vwind_ij_clim(:,:,:)
+---
+>   REAL, POINTER :: tl1_ij_clim(:,:,:)
+>   REAL, POINTER :: ql1_ij_clim(:,:,:)
+>   REAL, POINTER :: wind_ij_clim(:,:,:)
+102c94
+<   REAL, POINTER :: diurnal_t1p5m_ij_clim(:,:,:)
+---
+>   REAL, POINTER :: diurnal_tl1_ij_clim(:,:,:)
+105,108c97,99
+<   REAL, POINTER :: t1p5m_ij_anom(:,:,:)
+<   REAL, POINTER :: rh1p5m_ij_anom(:,:,:)
+<   REAL, POINTER :: uwind_ij_anom(:,:,:)
+<   REAL, POINTER :: vwind_ij_anom(:,:,:)
+---
+>   REAL, POINTER :: tl1_ij_anom(:,:,:)
+>   REAL, POINTER :: ql1_ij_anom(:,:,:)
+>   REAL, POINTER :: wind_ij_anom(:,:,:)
+111c102
+<   REAL, POINTER :: diurnal_t1p5m_ij_anom(:,:,:)
+---
+>   REAL, POINTER :: diurnal_tl1_ij_anom(:,:,:)
+115,118c106,108
+<   REAL, POINTER :: t1p5m_ij_patt(:,:,:)
+<   REAL, POINTER :: rh1p5m_ij_patt(:,:,:)
+<   REAL, POINTER :: uwind_ij_patt(:,:,:)
+<   REAL, POINTER :: vwind_ij_patt(:,:,:)
+---
+>   REAL, POINTER :: tl1_ij_patt(:,:,:)
+>   REAL, POINTER :: ql1_ij_patt(:,:,:)
+>   REAL, POINTER :: wind_ij_patt(:,:,:)
+121c111
+<   REAL, POINTER :: diurnal_t1p5m_ij_patt(:,:,:)
+---
+>   REAL, POINTER :: diurnal_tl1_ij_patt(:,:,:)
+125c115
+<   REAL, POINTER :: t1p5m_ij_drive(:,:,:,:,:)
+---
+>   REAL, POINTER :: tl1_ij_drive(:,:,:,:,:)
+130c120
+<   REAL, POINTER :: q1p5m_ij_drive(:,:,:,:,:)
+---
+>   REAL, POINTER :: ql1_ij_drive(:,:,:,:,:)
+135,136d124
+<   REAL, POINTER :: dctot_co2(:)
+<   REAL, POINTER :: dctot_ch4(:)
+175,178c163,165
+< ALLOCATE( imgn_drive_data%t1p5m_ij_clim(t_i_length,t_j_length,mm))
+< ALLOCATE( imgn_drive_data%rh1p5m_ij_clim(t_i_length,t_j_length,mm))
+< ALLOCATE( imgn_drive_data%uwind_ij_clim(t_i_length,t_j_length,mm))
+< ALLOCATE( imgn_drive_data%vwind_ij_clim(t_i_length,t_j_length,mm))
+---
+> ALLOCATE( imgn_drive_data%tl1_ij_clim(t_i_length,t_j_length,mm))
+> ALLOCATE( imgn_drive_data%ql1_ij_clim(t_i_length,t_j_length,mm))
+> ALLOCATE( imgn_drive_data%wind_ij_clim(t_i_length,t_j_length,mm))
+181c168
+< ALLOCATE( imgn_drive_data%diurnal_t1p5m_ij_clim(t_i_length,t_j_length,mm))
+---
+> ALLOCATE( imgn_drive_data%diurnal_tl1_ij_clim(t_i_length,t_j_length,mm))
+184,187c171,173
+< ALLOCATE( imgn_drive_data%t1p5m_ij_anom(t_i_length,t_j_length,mm))
+< ALLOCATE( imgn_drive_data%rh1p5m_ij_anom(t_i_length,t_j_length,mm))
+< ALLOCATE( imgn_drive_data%uwind_ij_anom(t_i_length,t_j_length,mm))
+< ALLOCATE( imgn_drive_data%vwind_ij_anom(t_i_length,t_j_length,mm))
+---
+> ALLOCATE( imgn_drive_data%tl1_ij_anom(t_i_length,t_j_length,mm))
+> ALLOCATE( imgn_drive_data%ql1_ij_anom(t_i_length,t_j_length,mm))
+> ALLOCATE( imgn_drive_data%wind_ij_anom(t_i_length,t_j_length,mm))
+190c176
+< ALLOCATE( imgn_drive_data%diurnal_t1p5m_ij_anom(t_i_length,t_j_length,mm))
+---
+> ALLOCATE( imgn_drive_data%diurnal_tl1_ij_anom(t_i_length,t_j_length,mm))
+193,196c179,181
+< ALLOCATE( imgn_drive_data%t1p5m_ij_patt(t_i_length,t_j_length,mm))
+< ALLOCATE( imgn_drive_data%rh1p5m_ij_patt(t_i_length,t_j_length,mm))
+< ALLOCATE( imgn_drive_data%uwind_ij_patt(t_i_length,t_j_length,mm))
+< ALLOCATE( imgn_drive_data%vwind_ij_patt(t_i_length,t_j_length,mm))
+---
+> ALLOCATE( imgn_drive_data%tl1_ij_patt(t_i_length,t_j_length,mm))
+> ALLOCATE( imgn_drive_data%ql1_ij_patt(t_i_length,t_j_length,mm))
+> ALLOCATE( imgn_drive_data%wind_ij_patt(t_i_length,t_j_length,mm))
+199c184
+< ALLOCATE( imgn_drive_data%diurnal_t1p5m_ij_patt(t_i_length,t_j_length,mm))
+---
+> ALLOCATE( imgn_drive_data%diurnal_tl1_ij_patt(t_i_length,t_j_length,mm))
+202c187
+< ALLOCATE( imgn_drive_data%t1p5m_ij_drive(t_i_length,t_j_length,mm,md,nsdmax))
+---
+> ALLOCATE( imgn_drive_data%tl1_ij_drive(t_i_length,t_j_length,mm,md,nsdmax))
+207c192
+< ALLOCATE( imgn_drive_data%q1p5m_ij_drive(t_i_length,t_j_length,mm,md,nsdmax))
+---
+> ALLOCATE( imgn_drive_data%ql1_ij_drive(t_i_length,t_j_length,mm,md,nsdmax))
+212,213d196
+< ALLOCATE( imgn_drive_data%dctot_co2(land_pts))
+< ALLOCATE( imgn_drive_data%dctot_ch4(land_pts))
+215,218c198,200
+< imgn_drive_data%t1p5m_ij_clim(:,:,:) = rmdi
+< imgn_drive_data%rh1p5m_ij_clim(:,:,:) = rmdi
+< imgn_drive_data%uwind_ij_clim(:,:,:) = rmdi
+< imgn_drive_data%vwind_ij_clim(:,:,:) = rmdi
+---
+> imgn_drive_data%tl1_ij_clim(:,:,:) = rmdi
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_imogen_imgn_drive_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_imogen_imgn_drive_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,22 @@
+Patch stub generated: 2025-11-25T12:09:12.191253 UTC
+
+HEADER:
+Only in vn7.0copy1_c4/src/./initialisation/standalone/initial_conditions: total_snow_init.inc
+
+SUMMARY:
+  - added lines (>): 0
+  - removed lines (<): 0
+  - only in one tree: True
+
+RECOMMENDATIONS:
+- File exists only in one tree: decide whether to copy/integrate.
+
+DIFF PREVIEW:
+Only in vn7.0copy1_c4/src/./initialisation/standalone/initial_conditions: total_snow_init.inc
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/Only_in_vn7.0copy1_c4_src_._initialisation_standalone_initial_conditions__total_snow_init.inc.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

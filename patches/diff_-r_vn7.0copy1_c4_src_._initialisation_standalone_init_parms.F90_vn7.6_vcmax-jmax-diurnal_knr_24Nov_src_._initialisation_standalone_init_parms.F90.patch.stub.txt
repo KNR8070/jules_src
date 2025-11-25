@@ -1,0 +1,45 @@
+Patch stub generated: 2025-11-25T12:09:12.194522 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_parms.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_parms.F90
+
+SUMMARY:
+  - added lines (>): 6
+  - removed lines (<): 7
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/init_parms.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/init_parms.F90
+22,23c22
+< USE ancil_info, ONLY: land_pts, nsurft, sea_pts, sice_pts, ssi_pts, surft_pts, &
+<                       sice_pts_ncat
+---
+> USE ancil_info, ONLY: land_pts, nsurft, sea_pts, sice_pts, ssi_pts
+69c68
+< CALL sparm(land_pts, nsurft, surft_pts,                                        &
+---
+> CALL sparm(land_pts, nsurft, ainfo%surft_pts,                                  &
+75c74
+< CALL infiltration_rate(land_pts, nsurft, surft_pts, ainfo%surft_index,         &
+---
+> CALL infiltration_rate(land_pts, nsurft, ainfo%surft_pts, ainfo%surft_index,   &
+141c140
+< sice_pts_ncat(:) = 0
+---
+> ainfo%sice_pts_ncat(:) = 0
+150,151c149,150
+<         sice_pts_ncat(n) = sice_pts_ncat(n) + 1
+<         ainfo%sice_index_ncat(sice_pts_ncat(n),n) = l
+---
+>         ainfo%sice_pts_ncat(n) = ainfo%sice_pts_ncat(n) + 1
+>         ainfo%sice_index_ncat(ainfo%sice_pts_ncat(n),n) = l
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_init_parms.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_init_parms.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

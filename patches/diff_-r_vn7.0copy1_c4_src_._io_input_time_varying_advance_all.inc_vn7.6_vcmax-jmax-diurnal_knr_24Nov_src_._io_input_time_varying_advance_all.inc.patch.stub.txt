@@ -1,0 +1,42 @@
+Patch stub generated: 2025-11-25T12:09:12.218023 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/input/time_varying/advance_all.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/input/time_varying/advance_all.inc
+
+SUMMARY:
+  - added lines (>): 5
+  - removed lines (<): 5
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Signature rename: unify timestep_len/timestep or provide wrapper.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/input/time_varying/advance_all.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/input/time_varying/advance_all.inc
+11c11
+< USE precision_mod, ONLY: INT64
+---
+> USE precision_mod, ONLY: int_64
+45c45
+< INTEGER(KIND=INT64) :: diff_secs
+---
+> INTEGER(KIND=int_64) :: diff_secs
+123c123
+<   IF ( MOD(diff_secs, INT(timestep_len, INT64)) /= 0 )                         &
+---
+>   IF ( MOD(diff_secs, INT(timestep_len, int_64)) /= 0 )                        &
+169c169
+<         INT(files(i)%fh%data_period, INT64)                                    &
+---
+>         INT(files(i)%fh%data_period, int_64)                                   &
+215c215
+<     IF ( MOD(diff_secs, INT(timestep_len, INT64)) /= 0 )                       &
+---
+>     IF ( MOD(diff_secs, INT(timestep_len, int_64)) /= 0 )                      &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_input_time_varying_advance_all.inc_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_input_time_varying_advance_all.inc.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

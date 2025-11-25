@@ -1,0 +1,65 @@
+Patch stub generated: 2025-11-25T12:09:12.252913 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/river_routing/um/riv_rout-river1a_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/um/riv_rout-river1a_mod.F90
+
+SUMMARY:
+  - added lines (>): 10
+  - removed lines (<): 17
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/river_routing/um/riv_rout-river1a_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/river_routing/um/riv_rout-river1a_mod.F90
+31,32c31,32
+<      yva, river_row_length, river_rows, frac, regrid, ru,                      &
+<      ratmed, dt, cyclic_trip, gridbox_areas, global_trip, invert_trip,         &
+---
+>      yva, river_row_length, river_rows, frac, regrid,                          &
+>      dt, gridbox_areas,                                                        &
+59a60
+> USE jules_rivers_mod, ONLY: rivers_speed, rivers_meander
+130c131
+<      ! land seak fraction across all processes
+---
+>      ! land sea fraction across all processes
+158c159
+<      , regrid                                                                  &
+---
+>      , regrid
+160,164d160
+<      , cyclic_trip                                                             &
+<      ! indicates if trips grid is cyclic
+<      , global_trip                                                             &
+<      ! indicates if atmos grid is cyclic
+<      , invert_trip
+170,174c166
+<      ru                                                                        &
+<      ! effective river flow velocity (m/s)
+<      , ratmed                                                                  &
+<      ! river meander ratio
+<      , dt
+---
+>        dt
+424c416
+<   WRITE(umMessage, '(A,F6.4)') 'Meandering Ratio  = ', ratmed
+---
+>   WRITE(umMessage, '(A,F6.4)') 'Meandering Ratio  = ', rivers_meander
+426c418,419
+<   WRITE(umMessage, '(A,F6.4,A)') 'Effective Velocity ru =', ru, ' (m/s)'
+---
+>   WRITE(umMessage, '(A,F6.4,A)') 'Effective Velocity ru =', rivers_speed,      &
+>       ' (m/s)'
+433c426
+< CALL routedbl(runoff_trip, ru, ratmed, ndev, dt                                &
+---
+> CALL routedbl(runoff_trip, rivers_speed, rivers_meander, ndev, dt              &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_river_routing_um_riv_rout-river1a_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_river_routing_um_riv_rout-river1a_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,180 @@
+Patch stub generated: 2025-11-25T12:09:12.301273 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/vegetation/veg-veg2a_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/vegetation/veg-veg2a_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 40
+  - removed lines (<): 53
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/vegetation/veg-veg2a_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/vegetation/veg-veg2a_jls_mod.F90
+19c19
+<                fraca, fracp, fracb, frac_vs,                                   &
+---
+>                fracaero, fracp, fracb, frac_vs,                                &
+45c45
+<                l_lice_point,                                                   &
+---
+>                l_lice_point, l_lice_surft,                                     &
+59,62c59
+< 
+< #if !defined(UM_JULES)
+< USE soilcarb_mix_mod, ONLY: soilcarb_mix
+< #endif
+---
+> USE soilcarb_mix_mod,         ONLY: soilcarb_mix
+75,79c72
+< USE veg_param, ONLY:                                                           &
+< #if !defined(UM_JULES)
+<   litc_norm,                                                                   &
+< #endif
+<   agric
+---
+> USE veg_param, ONLY: litc_norm, agric
+85c78
+<   soil_model_rothc,                                                            &
+---
+>   soil_model_4pool,                                                            &
+89,93c82
+< USE jules_soil_mod, ONLY:                                                      &
+< #if !defined(UM_JULES)
+<   dzsoil,                                                                      &
+< #endif
+<   sm_levels
+---
+> USE jules_soil_mod, ONLY: dzsoil, sm_levels
+147c136
+<   fraca(land_pts),                                                             &
+---
+>   fracaero(land_pts),                                                          &
+277a267
+> LOGICAL, INTENT(IN OUT) :: l_lice_surft(ntype)
+329c319
+<   lit_resp
+---
+>   lit_resp,                                                                    &
+330a321,322
+>   eps_real
+>     ! Small value to avoid fp issues
+335,336c327
+< #if !defined(UM_JULES)
+<   dcs_rothc(land_pts,dim_cslayer,5),                                           &
+---
+>   dcs_4pool(land_pts,dim_cslayer,4),                                           &
+338d328
+< #endif
+381d370
+< #if !defined(UM_JULES)
+386d374
+< #endif
+403a392,393
+> eps_real = EPSILON(1.0_real_jlslsm)
+> 
+442c432
+< IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+> IF ( soil_bgc_model == soil_model_4pool ) THEN
+460c450
+<      ( soil_bgc_model == soil_model_rothc ) ) THEN
+---
+>      ( soil_bgc_model == soil_model_4pool ) ) THEN
+497c487
+< END IF  !  TRIFFID step and RothC
+---
+> END IF  !  TRIFFID step and 4-pool soil C
+502c492
+< CALL tilepts(land_pts, frac, surft_pts, surft_index, l_lice_point)
+---
+> CALL tilepts(land_pts, frac, surft_pts, surft_index, l_lice_point, l_lice_surft)
+562c552
+<   IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+>   IF ( soil_bgc_model == soil_model_4pool ) THEN
+612c602
+<       frac_agric(l) = MIN(fraca(l),frac_vs(l) - (REAL(nnpft+1) * frac_min))
+---
+>       frac_agric(l) = MIN(fracaero(l),frac_vs(l) - (REAL(nnpft+1) * frac_min))
+642c632
+<   IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+>   IF ( soil_bgc_model == soil_model_4pool ) THEN
+654,661c644
+< 
+< #if !defined(UM_JULES)
+<         dcs_rothc(l,nn,1) = cs(l,nn,1)
+<         dcs_rothc(l,nn,2) = cs(l,nn,2)
+<         dcs_rothc(l,nn,3) = cs(l,nn,3)
+<         dcs_rothc(l,nn,4) = cs(l,nn,4)
+< #endif
+< 
+---
+>         dcs_4pool(l,nn,1:4) = cs(l,nn,1:4)
+668c651
+<   END IF  !  soil_model_rothc
+---
+>   END IF  !  soil_model_4pool
+780c763
+<   IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+>   IF ( soil_bgc_model == soil_model_4pool ) THEN
+791c774,775
+<   CALL tilepts(land_pts, frac, surft_pts, surft_index, l_lice_point)
+---
+>   CALL tilepts(land_pts, frac, surft_pts, surft_index, l_lice_point,           &
+>                l_lice_surft)
+798c782
+<     IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+>     IF ( soil_bgc_model == soil_model_4pool ) THEN
+829c813
+<     IF ( soil_bgc_model == soil_model_rothc ) THEN
+---
+>     IF ( soil_bgc_model == soil_model_4pool ) THEN
+834d817
+< #if !defined(UM_JULES)
+845c828
+<         CALL soilcarb_mix(land_pts, trif_pts, trif_index, dcs_rothc(:,:,1:4),  &
+---
+>         CALL soilcarb_mix(land_pts, trif_pts, trif_index, dcs_4pool,           &
+848d830
+< #endif
+873c855
+<     END IF  !  soil_model_rothc
+---
+>     END IF  !  soil_model_4pool
+878,879c860,862
+<         ratio          = frac_old(l,n) / frac(l,n)
+<         npp_ac(l,n)    = ratio * (npp_dr(l,n) - npp_dr_out(l,n) +              &
+---
+>         IF ((frac_old(l,n) > eps_real) .AND. (frac(l,n) > eps_real)) THEN
+>           ratio          = frac_old(l,n) / frac(l,n)
+>           npp_ac(l,n)    = ratio * (npp_dr(l,n) - npp_dr_out(l,n) +            &
+881c864
+<         resp_w_ac(l,n) = ratio * (resp_w_dr(l,n) - resp_w_dr_out(l,n))         &
+---
+>           resp_w_ac(l,n) = ratio * (resp_w_dr(l,n) - resp_w_dr_out(l,n))       &
+882a866,869
+>         ELSE
+>           npp_ac(l,n) = 0.0
+>           resp_w_ac(l,n) = 0.0
+>         END IF
+941c928
+<      ( soil_bgc_model == soil_model_rothc ) ) THEN
+---
+>      ( soil_bgc_model == soil_model_4pool ) ) THEN
+958c945
+< END IF  !  TRIFFID step and RothC
+---
+> END IF  !  TRIFFID step and 4-pool soil C
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_vegetation_veg-veg2a_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_vegetation_veg-veg2a_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

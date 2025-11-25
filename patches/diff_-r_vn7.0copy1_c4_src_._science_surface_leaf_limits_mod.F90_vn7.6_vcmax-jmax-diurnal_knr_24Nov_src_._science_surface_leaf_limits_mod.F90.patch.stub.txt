@@ -1,0 +1,51 @@
+Patch stub generated: 2025-11-25T12:09:12.282019 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/leaf_limits_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/leaf_limits_mod.F90
+
+SUMMARY:
+  - added lines (>): 11
+  - removed lines (<): 6
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/leaf_limits_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/leaf_limits_mod.F90
+44c44
+<     photo_collatz, photo_farquhar,photo_pmodel, stomata_jacobs,                &
+---
+>     photo_collatz, photo_farquhar, stomata_jacobs,                             &
+161c161
+< !$OMP PARALLEL DO                                                              &
+---
+> !$OMP PARALLEL DO IF(veg_pts > 1)                                              &
+176a177
+> 
+195a197
+> 
+277a280,284
+> !$OMP PARALLEL DO IF(open_pts > 1)                                             &
+> !$OMP SCHEDULE(STATIC)                                                         &
+> !$OMP DEFAULT(NONE)                                                            &
+> !$OMP PRIVATE(l,j)                                                             &
+> !$OMP SHARED(open_pts,veg_index,open_index,wcarb,vcmax,wlite,ci,ccp,km,je)
+283a291
+> !$OMP END PARALLEL DO
+285,286d292
+< CASE ( photo_pmodel )
+< ! Do nothing at this stage for the p-model
+290c296
+<       'pft_photo_model should be photo_collatz, photo_farquhar or photo_pmodel')
+---
+>                'pft_photo_model should be photo_collatz or photo_farquhar')
+293d298
+<
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_leaf_limits_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_leaf_limits_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

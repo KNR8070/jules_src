@@ -1,0 +1,85 @@
+Patch stub generated: 2025-11-25T12:09:12.297184 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/vegetation/irrigation_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/vegetation/irrigation_mod.F90
+
+SUMMARY:
+  - added lines (>): 21
+  - removed lines (<): 14
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/vegetation/irrigation_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/vegetation/irrigation_mod.F90
+216c216
+< ! irr_crop == 1 is not advisable for UM use. It requires detailed
+---
+> ! irr_crop == irr_crop_doell is not advisable for UM use. It requires detailed
+277c277,278
+< USE jules_irrig_mod, ONLY: irr_crop, irr_crop_doell, irr_crop_dvimax
+---
+> USE jules_irrig_mod, ONLY: irr_crop, irr_crop_all_year, irr_crop_doell,        &
+>                            irr_crop_dvimax
+390c391,392
+<   ! on in the UM. irr_crop=0 is the only available option for UM JULES.
+---
+>   ! on in the UM. irr_crop=irr_crop_all_year is the only available option for
+>   ! UM JULES.
+416c418
+<       CASE ( 0 )
+---
+>       CASE ( irr_crop_all_year )
+420c422
+<       CASE ( 1 )
+---
+>       CASE ( irr_crop_doell )
+424c426
+<           l_irrigate_now = .FALSE.
+---
+>           l_irrigate_now(l,m) = .FALSE.
+428c430
+<           l_irrigate_now = .TRUE.
+---
+>           l_irrigate_now(l,m) = .TRUE.
+436c438
+<           l_irrigate_now = .TRUE.
+---
+>           l_irrigate_now(l,m) = .TRUE.
+440c442
+<       CASE ( 2 )
+---
+>       CASE ( irr_crop_dvimax )
+544,545d545
+< USE conversions_mod, ONLY: secs_in_day=>isec_per_day
+< 
+548c548
+< USE jules_irrig_mod, ONLY: l_irrig_limit
+---
+> USE jules_irrig_mod, ONLY: l_irrig_limit, nstep_irrig
+551a552,553
+> USE timestep_mod, ONLY: timestep
+> 
+648a651,652
+>   timestep_irrig,                                                              &
+>     ! Irrigation timestep length (s).
+795a800,802
+> ! Calculate irrigation timestep length.
+> timestep_irrig = timestep * REAL(nstep_irrig)
+> 
+798c805
+<   ! Sum irrigation over soil tiles and irrigated layers.
+---
+>   ! Sum irrigation over soil tiles and irrigated layers, and convert to rate.
+800c807
+<                       / REAL(secs_in_day)
+---
+>                       / timestep_irrig
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_vegetation_irrigation_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_vegetation_irrigation_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

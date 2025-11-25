@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.269505 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/fcdch.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/fcdch.F90
+
+SUMMARY:
+  - added lines (>): 108
+  - removed lines (<): 130
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/fcdch.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/fcdch.F90
+44,45c44,49
+< USE atm_fields_bounds_mod, ONLY:tdims
+< USE theta_field_sizes, ONLY: t_i_length
+---
+> USE atm_fields_bounds_mod, ONLY: tdims
+> USE planet_constants_mod,  ONLY: g, cp, vkman
+> USE sf_flux_mod,           ONLY: sf_flux
+> USE sf_resist_mod,         ONLY: sf_resist
+> USE theta_field_sizes,     ONLY: t_i_length
+> USE water_constants_mod,   ONLY: lc
+47,52d50
+< USE water_constants_mod, ONLY: lc
+< USE sf_resist_mod, ONLY: sf_resist
+< USE sf_flux_mod, ONLY: sf_flux
+< USE qsat_mod, ONLY: qsat, qsat_mix
+< 
+< USE planet_constants_mod, ONLY: g, cp, vkman
+66a65
+> 
+291c290,293
+< ,fraca(points)                                                                 &
+---
+> ,fracaero_t(points)                                                            &
+>                      ! Total fraction of surface moisture flux with
+> !                          !     only aerodynamic resistance
+> ,fracaero_s(points)                                                            &
+293c295,296
+< !                          !     only aerodynamic resistance.
+---
+> !                          !     only aerodynamic resistance
+> !                          !     over the frozen part of the surface
+296c299
+< !                          !     resistance factor for fraction 1-FRACA.
+---
+> !                          !     resistance factor for fraction 1-fracaero_t.
+299c302
+< !                          !     FRACA+(1-FRACA)*RESFS.
+---
+> !                          !     fracaero_t+(1-fracaero_t)*resfs.
+341a345,347
+> INTEGER :: indexi(surft_pts), indexj(surft_pts)
+>               ! Arrays to store horizontal field indices i and j
+> 
+389a396,402
+> 
+> DO k = 1,surft_pts
+>   l = surft_index(k)
+>   indexj(k) = (pts_index(l) - 1) / t_i_length + 1
+>   indexi(k) = pts_index(l) - (indexj(k) - 1) * t_i_length
+> END DO
+> 
+399c412
+< !$OMP  beta_cnv_bl,db,vshr,recip_l_mo,zh,srf_ex_cnv_gust,g) IF(surft_pts>1)
+---
+> !$OMP  beta_cnv_bl,db,vshr,recip_l_mo,zh,srf_ex_cnv_gust,g,indexi,indexj) IF(surft_pts>1)
+403d415
+<     !CDIR NODEP
+406,408c418,419
+<       l = surft_index(k)
+<       j =(pts_index(l) - 1) / t_i_length + 1
+<       i = pts_index(l) - (j-1) * t_i_length
+---
+>       j = indexj(k)
+>       i = indexi(k)
+421d431
+<   !CDIR NODEP
+425,426c435,436
+<     j =(pts_index(l) - 1) / t_i_length + 1
+<     i = pts_index(l) - (j-1) * t_i_length
+---
+>     j = indexj(k)
+>     i = indexi(k)
+471d480
+<     !CDIR NODEP
+475c484
+< !$OMP  cdv,cdv_std,phi_m) IF(surft_pts>1)
+---
+> !$OMP  cdv,cdv_std,phi_m,indexi,indexj) IF(surft_pts>1)
+478,479c487,488
+<       j=(pts_index(l) - 1) / t_i_length + 1
+<       i = pts_index(l) - (j-1) * t_i_length
+---
+>       j = indexj(k)
+>       i = indexi(k)
+505d513
+<     !CDIR NODEP
+509c517
+< !$OMP  cdv,cdv_std,phi_m) IF(surft_pts>1)
+---
+> !$OMP  cdv,cdv_std,phi_m,indexi,indexj) IF(surft_pts>1)
+512,513c520,521
+<       j=(pts_index(l) - 1) / t_i_length + 1
+<       i = pts_index(l) - (j-1) * t_i_length
+---
+>       j = indexj(k)
+>       i = indexi(k)
+546c554
+< !$OMP PARALLEL DO IF(surft_pts > 1) DEFAULT(NONE) PRIVATE(i, j, k, l)          &
+---
+> !$OMP PARALLEL IF(surft_pts > 1) DEFAULT(NONE) PRIVATE(i, j, k, l)             &
+548,549c556,558
+< !$OMP        db_older, chv_dim, chv, vshr, rhostar, epdt, dq, timestep)        &
+< !$OMP SCHEDULE(STATIC)
+---
+> !$OMP        db_older, chv_dim, chv, vshr, rhostar, epdt, dq, timestep,        &
+> !$OMP        rhokh_can, cp, cdv, l_aggregate, can_model,indexi,indexj)
+> !$OMP DO SCHEDULE(STATIC)
+552,553c561,562
+<       j = (pts_index(l) - 1) / t_i_length + 1
+<       i = pts_index(l) - (j-1) * t_i_length
+---
+>       j = indexj(k)
+>       i = indexi(k)
+555c564
+<       ! Save initial values ready for iterations and calcualte the
+---
+>       ! Save initial values ready for iterations and calculate the
+562c571
+< !$OMP END PARALLEL DO
+---
+> !$OMP END DO NOWAIT
+565,567c574
+< !$OMP PARALLEL DO IF(surft_pts > 1) DEFAULT(NONE) PRIVATE(i, j, k, l)          &
+< !$OMP SHARED(surft_pts, surft_index, pts_index, t_i_length,                    &
+< !$OMP        rhokh_can, rhostar, cp, cdv) SCHEDULE(STATIC)
+---
+> !$OMP DO SCHEDULE(STATIC)
+570,571c577,578
+<         j = (pts_index(l) - 1) / t_i_length + 1
+<         i = pts_index(l) - (j-1) * t_i_length
+---
+>         j = indexj(k)
+>         i = indexi(k)
+576c583
+< !$OMP END PARALLEL DO
+---
+> !$OMP END DO
+577a585
+> !$OMP END PARALLEL
+583c591
+<      snowdep,snow,vshr,fraca,                                                  &
+---
+>      snowdep,snow,vshr,tstar,fracaero_t,fracaero_s,                            &
+598c606
+< !$OMP        rhokh, rhostar, chv) SCHEDULE(STATIC)
+---
+> !$OMP        rhokh, rhostar, chv, indexi, indexj) SCHEDULE(STATIC)
+601,602c609,610
+<         j = (pts_index(l) - 1) / t_i_length + 1
+<         i = pts_index(l) - (j-1) * t_i_length
+---
+>         j = indexj(k)
+>         i = indexi(k)
+609c617
+<       ! Calcualte new values for the sensible and latent heat fluxes
+---
+>       ! Calculate new values for the sensible and latent heat fluxes
+616c624
+<        radnet,resft,rhokh,l_soil_point,                                        &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_fcdch.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_fcdch.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

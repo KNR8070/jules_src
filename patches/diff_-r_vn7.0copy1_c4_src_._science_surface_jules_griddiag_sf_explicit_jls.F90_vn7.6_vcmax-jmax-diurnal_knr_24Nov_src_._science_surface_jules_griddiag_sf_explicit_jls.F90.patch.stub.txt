@@ -1,0 +1,59 @@
+Patch stub generated: 2025-11-25T12:09:12.272095 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/jules_griddiag_sf_explicit_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/jules_griddiag_sf_explicit_jls.F90
+
+SUMMARY:
+  - added lines (>): 14
+  - removed lines (<): 10
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/jules_griddiag_sf_explicit_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/jules_griddiag_sf_explicit_jls.F90
+63c63
+<  ssi_index, sice_index_ncat, sice_frac_ncat,                                   &
+---
+>  ssi_index, sice_index_ncat, sice_frac_ncat, sice_pts_ncat,                    &
+98d97
+< USE ancil_info, ONLY: sice_pts_ncat
+354c353,354
+<   sice_index_ncat(t_i_length * t_j_length,nice)
+---
+>   sice_index_ncat(t_i_length * t_j_length,nice),                               &
+>   sice_pts_ncat(nice)
+485c485
+< !$OMP PARALLEL DO SCHEDULE(STATIC) DEFAULT(NONE) PRIVATE(i,j,k,l, tmp1,tmp2)   &
+---
+> !$OMP PARALLEL DO IF(surft_pts(n) > 1) SCHEDULE(STATIC) DEFAULT(NONE)          &
+487c487,488
+< !$OMP tile_frac,rib_surft,fz0,z0m_surft,fz0h,z0h_surft)
+---
+> !$OMP        tile_frac,rib_surft,fz0,z0m_surft,fz0h,z0h_surft)                 &
+> !$OMP PRIVATE(i,j,k,l, tmp1,tmp2)
+631,632c632,635
+< !$OMP PARALLEL DO SCHEDULE(STATIC) PRIVATE(i,j,k,l) SHARED(n,surft_pts,        &
+< !$OMP surft_index,land_index,t_i_length,rhokh,flandg,tile_frac,rhokh_surft)
+---
+> !$OMP PARALLEL DO IF(surft_pts(n) > 1) SCHEDULE(STATIC)                        &
+> !$OMP SHARED(n,surft_pts,surft_index,land_index,t_i_length,rhokh,flandg,       &
+> !$OMP        tile_frac,rhokh_surft)                                            &
+> !$OMP PRIVATE(i,j,k,l)
+712,714c715,718
+< !$OMP PARALLEL DO SCHEDULE(STATIC) PRIVATE(i,j,k,l,ws10) SHARED(n,surft_pts,   &
+< !$OMP surft_index,land_index,t_i_length,cdr10m,vshr_land,unload_rate_u,        &
+< !$OMP unload_backgrnd_pft)
+---
+> !$OMP PARALLEL DO IF(surft_pts(n) > 1) SCHEDULE(STATIC)                        &
+> !$OMP SHARED(n,surft_pts,surft_index,land_index,t_i_length,cdr10m,vshr_land,   &
+> !$OMP        unload_rate_u,unload_backgrnd_pft)                                &
+> !$OMP PRIVATE(i,j,k,l,ws10)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_jules_griddiag_sf_explicit_jls.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_jules_griddiag_sf_explicit_jls.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

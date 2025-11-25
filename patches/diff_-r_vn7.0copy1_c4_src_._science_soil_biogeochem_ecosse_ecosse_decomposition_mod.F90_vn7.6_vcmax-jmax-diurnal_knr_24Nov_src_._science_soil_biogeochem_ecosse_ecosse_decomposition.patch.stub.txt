@@ -1,0 +1,82 @@
+Patch stub generated: 2025-11-25T12:09:12.266067 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil_biogeochem/ecosse/ecosse_decomposition_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil_biogeochem/ecosse/ecosse_decomposition_mod.F90
+
+SUMMARY:
+  - added lines (>): 18
+  - removed lines (<): 18
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil_biogeochem/ecosse/ecosse_decomposition_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil_biogeochem/ecosse/ecosse_decomposition_mod.F90
+58c58
+< !   in the RothC-based code with the same name but often differnt units.
+---
+> !   in the 4-pool soil C code with the same name but often different units.
+311c311
+< ! The following code is intentionally similar to that used with the RothC
+---
+> ! The following code is intentionally similar to that used with the 4-pool C
+506c506
+< ! These are converted into the units used by TRIFFID and RothC.
+---
+> ! These are converted into the units used by TRIFFID and 4-pool C model.
+536c536
+<   decomp_wrate_min_rothc
+---
+>   decomp_wrate_min_smith
+540c540
+<   temp_mod_q10, temp_mod_rothc, water_mod_jules, water_mod_rothc,              &
+---
+>   temp_mod_q10, temp_mod_smith, water_mod_clark, water_mod_smith,              &
+546,548c546,548
+<   rate_modifier_jules_temp, rate_modifier_jules_water,                         &
+<   rate_modifier_rothc_ph,   rate_modifier_rothc_temp,                          &
+<   rate_modifier_rothc_water
+---
+>   rate_modifier_q10_temp, rate_modifier_clark_water,                           &
+>   rate_modifier_smith_ph,   rate_modifier_smith_temp,                          &
+>   rate_modifier_smith_water
+638c638
+< CASE ( water_mod_rothc )
+---
+> CASE ( water_mod_smith )
+640,642c640,642
+<   CALL rate_modifier_rothc_water( land_pts, nlayer, vs_pts,                    &
+<                                   decomp_wrate_min_rothc,                      &
+<                                   decomp_wrate_min_rothc, vs_index,            &
+---
+>   CALL rate_modifier_smith_water( land_pts, nlayer, vs_pts,                    &
+>                                   decomp_wrate_min_smith,                      &
+>                                   decomp_wrate_min_smith, vs_index,            &
+646,647c646,647
+< CASE ( water_mod_jules )
+<   CALL rate_modifier_jules_water( land_pts, nlayer, vs_pts, vs_index,          &
+---
+> CASE ( water_mod_clark )
+>   CALL rate_modifier_clark_water( land_pts, nlayer, vs_pts, vs_index,          &
+657,658c657,658
+< CASE ( temp_mod_rothc )
+<   CALL rate_modifier_rothc_temp( land_pts, nlayer, vs_pts,                     &
+---
+> CASE ( temp_mod_smith )
+>   CALL rate_modifier_smith_temp( land_pts, nlayer, vs_pts,                     &
+662c662
+<   CALL rate_modifier_jules_temp( land_pts, nlayer, vs_pts,                     &
+---
+>   CALL rate_modifier_q10_temp( land_pts, nlayer, vs_pts,                       &
+670c670
+< CALL rate_modifier_rothc_ph( land_pts, nlayer, vs_pts,                         &
+---
+> CALL rate_modifier_smith_ph( land_pts, nlayer, vs_pts,                         &
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_biogeochem_ecosse_ecosse_decomposition_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_biogeochem_ecosse_ecosse_decomposition.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

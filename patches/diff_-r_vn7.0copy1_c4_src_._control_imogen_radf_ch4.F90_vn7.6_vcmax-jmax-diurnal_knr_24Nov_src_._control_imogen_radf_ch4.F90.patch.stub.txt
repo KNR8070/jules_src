@@ -1,0 +1,40 @@
+Patch stub generated: 2025-11-25T12:09:12.110086 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/imogen/radf_ch4.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/radf_ch4.F90
+
+SUMMARY:
+  - added lines (>): 6
+  - removed lines (<): 4
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/imogen/radf_ch4.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/radf_ch4.F90
+11c11
+< SUBROUTINE radf_ch4(q_ch4)
+---
+> SUBROUTINE radf_ch4(ch4_ppbv, q_ch4)
+15d14
+< USE imogen_progs, ONLY: ch4_ppbv
+34a34,36
+> REAL, INTENT(IN) ::                                                            &
+>   ch4_ppbv              ! CH4 concetration (ppbv)
+> 
+36c38
+<   q_ch4                 ! Forcing due to wetland/rice emissions.
+---
+>   q_ch4                 ! Forcing due to ch4 emissions (W/m2)
+41c43
+<                         ! years for which ch4 and N20 concentrations
+---
+>                         ! years for which ch4 and N2O concentrations
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_imogen_radf_ch4.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_imogen_radf_ch4.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

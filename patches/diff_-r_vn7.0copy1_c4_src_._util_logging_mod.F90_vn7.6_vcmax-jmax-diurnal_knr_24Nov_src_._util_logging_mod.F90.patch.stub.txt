@@ -1,0 +1,64 @@
+Patch stub generated: 2025-11-25T12:09:12.303460 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./util/logging_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./util/logging_mod.F90
+
+SUMMARY:
+  - added lines (>): 12
+  - removed lines (<): 12
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./util/logging_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./util/logging_mod.F90
+11c11
+< USE mpi, ONLY: mpi_comm_world
+---
+> USE jules_vars_mod, ONLY: mpi_local_comm
+100,102d99
+< ! Combine the name of the originating procedure with the message
+< full_message = TRIM(proc_name) // ': ' // message
+< 
+106c103
+<   full_message = "[INFO] " // full_message
+---
+>   full_message = "[INFO]"
+109c106
+<   full_message = "[DEBUG] " // full_message
+---
+>   full_message = "[DEBUG]"
+112c109
+<   full_message = "[WARNING] " // full_message
+---
+>   full_message = "[WARNING]"
+115c112
+<   full_message = "[ERROR] " // full_message
+---
+>   full_message = "[ERROR]"
+118c115
+<   full_message = "[FATAL ERROR] " // full_message
+---
+>   full_message = "[FATAL ERROR]"
+125a123,125
+> ! Combine the name of the originating procedure with the message
+> full_message = TRIM(full_message) // " " // TRIM(proc_name) // ': ' // message
+> 
+128,129c128,129
+<   CALL mpi_comm_size(mpi_comm_world, ntasks, ERROR)
+<   CALL mpi_comm_rank(mpi_comm_world, task_id, ERROR)
+---
+>   CALL mpi_comm_size(mpi_local_comm, ntasks, ERROR)
+>   CALL mpi_comm_rank(mpi_local_comm, task_id, ERROR)
+173c173
+<   CALL mpi_abort(mpi_comm_world, 1, ERROR)
+---
+>   CALL mpi_abort(mpi_local_comm, 1, ERROR)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._util_logging_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._util_logging_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

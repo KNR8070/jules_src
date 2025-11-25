@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.214246 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/dump/write_dump_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/dump/write_dump_mod.F90
+
+SUMMARY:
+  - added lines (>): 74
+  - removed lines (<): 273
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/dump/write_dump_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/dump/write_dump_mod.F90
+1c1
+< #if !defined(UM_JULES)
+---
+> #if !defined(RIVERS_ONLY)
+18c18
+<                             fluxes, lake_vars, rivers
+---
+>                             fluxes, lake_vars, rivers, water_resources
+22a23
+> USE imgn_vars_mod, ONLY: imgn_vars
+25c26,27
+<   global_land_pts, grid_area_ij, latitude, longitude
+---
+>   global_land_pts, grid_area_ij, latitude, longitude, l_coord_latlon,          &
+>   projection_x_coord, projection_y_coord
+28c30
+<   dim_cs1, dim_soil_n_pool, nsurft, nsoilt, dim_cslayer
+---
+>   dim_cs1, dim_soil_n_pool, nsurft, nsoilt, dim_cslayer, nmasst
+36,38d37
+< USE imogen_progs, ONLY:                                                        &
+<   co2_ppmv, co2_change_ppmv, dtemp_o, fa_ocean, ch4_ppbv
+< 
+60,62d58
+< USE jules_water_resources_mod, ONLY:                                           &
+<   conveyance_loss, irrig_eff, sfc_water_frac
+< 
+64,67d59
+< USE io_constants, ONLY:                                                        &
+<   max_file_name_len, max_dim_var, mode_write, max_sdf_name_len, format_ascii,  &
+<   format_ncdf
+< 
+74,79d65
+< USE dictionary_mod, ONLY:                                                      &
+<   dict, dict_create, dict_set, dict_get, dict_has_key, dict_free
+< 
+< USE string_utils_mod, ONLY:                                                    &
+<   to_string
+< 
+81,88c67
+<   file_handle, file_open, file_def_dim, file_def_var,                          &
+<   file_enddef, file_write_var, file_close
+< 
+< USE output_mod, ONLY:                                                          &
+<   output_dir, run_id
+< 
+< USE model_time_mod, ONLY:                                                      &
+<   current_time, is_spinup, spinup_cycle
+---
+>   file_handle, file_write_var, file_close
+90,92c69,70
+< USE get_dim_info_mod,  ONLY: get_dim_info
+< USE dump_mod,          ONLY: max_dim_dump, max_var_dump, dump_format
+< USE logging_mod,       ONLY: log_fatal, log_info
+---
+> USE dump_mod,                            ONLY: max_var_dump
+> USE logging_mod,                         ONLY: log_fatal, log_info
+93a72,74
+> USE create_dump_file_mod,                ONLY: create_dump_file
+> USE write_dump_var_rivers_mod,           ONLY: write_dump_var_rivers
+> USE add_dump_coords_for_rivers_mod,      ONLY: add_dump_coords_for_rivers
+111,116d91
+< ! Local parameters.
+< LOGICAL, PARAMETER :: l_reading_false = .FALSE.
+<   ! A value of .FALSE. that is passed to argument l_reading of subroutine
+<   ! get_dim_info to show that it is being called in connection with writing
+<   ! (not reading) a dump.
+< 
+118,122d92
+< CHARACTER(LEN=max_file_name_len) :: file_name
+<                                     ! The filename to use for the dump file
+< CHARACTER(LEN=max_file_name_len) :: dt_string
+<                                     ! The datetime string to use in the file
+<                                     ! name
+135,147d104
+< ! Variables used when defining dimensions
+< TYPE(dict) :: file_dim_ids  ! Dictionary of the dimensions that have been
+<                             ! defined
+<                             ! Maps dim_name => dim_id
+< 
+< INTEGER :: ndims  ! The number of levels dims for the current variable
+< CHARACTER(LEN=max_sdf_name_len) :: dim_names(max_dim_var)
+<                   ! The levels dimension names for the current variable
+< INTEGER :: dim_sizes(max_dim_var)
+<                   ! The sizes of the levels dims for the current variable
+< INTEGER :: dim_ids(max_dim_var)
+<                   ! The ids in file of the levels dims for the current
+<                   ! variable
+151c108
+< INTEGER :: i, j, m, n, s  ! Loop counters
+---
+> INTEGER :: i, m, n, s  ! Loop counters
+172a130
+> nvars = 0
+177,180c135,140
+< ! Add latitude and longitude to the list to help offline inspection of the
+< ! dump file, ie they are diagnostics, not prognostics or ancillaries.
+< ! Lat & lon will not be read in from the dump to prevent confusion with the
+< ! model grid namelists
+---
+> ! Add latitude and longitude, and possibly projection coordinates, to the list
+> ! to help offline inspection of the dump file, ie they are diagnostics, not
+> ! prognostics or ancillaries. Projection coordinates are only included if
+> ! they are not latitude and longitude - primarily to preserve existing results.
+> ! Lat & lon (and projection coords) will not be read in from the dump to
+> ! prevent confusion with the model grid namelists.
+186,188c146
+< 
+< ! Similarly, add latitude and longitude of river points, if needed.
+< IF ( l_rivers ) THEN
+---
+> IF ( .NOT. l_coord_latlon ) THEN
+190c148
+<   identifiers(nvars) = 'rivers_lat_rp'
+---
+>   identifiers(nvars) = 'projection_x_coord'
+192c150
+<   identifiers(nvars) = 'rivers_lon_rp'
+---
+>   identifiers(nvars) = 'projection_y_coord'
+195,286c153,156
+< !-----------------------------------------------------------------------------
+< ! In the master task only, we open a new file and define the required
+< ! dimensions and variables
+< !-----------------------------------------------------------------------------
+< IF ( is_master_task() ) THEN
+<   !---------------------------------------------------------------------------
+<   ! Generate the file name that we want to use and open the file
+<   !---------------------------------------------------------------------------
+<   ! File name starts with run id + indicator of a dump file
+<   file_name = TRIM(run_id) // ".dump."
+< 
+<   ! Include the current spinup cycle if there is one
+<   IF ( is_spinup )                                                             &
+<     file_name = TRIM(file_name) //                                             &
+<                 "spin" // TRIM(to_string(spinup_cycle)) // "."
+< 
+<   ! Then current date and time
+<   WRITE(dt_string, '(I4.4,I2.2,I2.2)') current_time%year,                      &
+<                                        current_time%month,                     &
+<                                        current_time%day
+<   dt_string = TRIM(dt_string) // "." // TRIM(to_string(current_time%TIME))
+<   file_name = TRIM(file_name) // TRIM(dt_string)
+< 
+<   ! Add the extension based on dump format
+<   SELECT CASE ( dump_format )
+<   CASE ( format_ascii )
+<     file_name = TRIM(file_name) // ".asc"
+< 
+<   CASE ( format_ncdf )
+<     file_name = TRIM(file_name) // ".nc"
+< 
+<   CASE DEFAULT
+<     CALL log_fatal("write_dump",                                               &
+<                    "Unrecognised file format - " // TRIM(dump_format))
+<   END SELECT
+< 
+<   ! Prepend the output directory
+<   file_name = TRIM(output_dir) // "/" // TRIM(file_name)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_dump_write_dump_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_dump_write_dump_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

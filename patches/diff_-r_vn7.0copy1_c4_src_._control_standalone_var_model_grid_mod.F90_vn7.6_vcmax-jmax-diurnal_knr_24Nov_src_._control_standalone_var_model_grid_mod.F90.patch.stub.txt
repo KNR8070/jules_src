@@ -1,0 +1,52 @@
+Patch stub generated: 2025-11-25T12:09:12.155990 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/standalone/var/model_grid_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/var/model_grid_mod.F90
+
+SUMMARY:
+  - added lines (>): 22
+  - removed lines (<): 4
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/standalone/var/model_grid_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/var/model_grid_mod.F90
+14a15,21
+> LOGICAL :: l_coord_latlon = .FALSE.
+>   ! Switch indicating the coordinate system for the full grid.
+>   ! TRUE: Coordinates are latitude and longitude
+>   ! FALSE: Other projection coordinates (not lat-lon).
+>   !   A rotated grid (which uses latitude and longitude relative to a rotated
+>   !   pole) should be indicated with l_coord_latlon=F.
+> 
+40a48,57
+> REAL, ALLOCATABLE :: projection_x_coord(:,:)
+>                                     ! Projection coordinate in the x
+>                                     ! direction for each model point.
+> REAL, ALLOCATABLE :: projection_y_coord(:,:)
+>                                     ! Projection coordinate in the y
+>                                     ! direction for each model point.
+> REAL, ALLOCATABLE :: projection_x_coord_land(:)
+>   ! Projection x coordindates values of land points for the current task.
+> REAL, ALLOCATABLE :: projection_y_coord_land(:)
+>   ! Projection y coordindates values of land points for the current task.
+42,45c59,63
+< REAL, ALLOCATABLE :: latitude_of_land_pts(:)
+<   ! The latitude of model land points for the current task
+< REAL, ALLOCATABLE :: longitude_of_land_pts(:)
+<   ! The longitude of model land points for the current task
+---
+>   ! Note: If the model grid is defined in terms of geographic coordinates
+>   !   (latitude and longitude; as indicated by l_coord_latlon=TRUE), the
+>   !   so-called projection coordinate variables above will in fact hold copies
+>   !   of the geographic coordinates. The distinction only becomes important in
+>   !   the case of l_coord_latlon=FALSE.
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_standalone_var_model_grid_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_standalone_var_model_grid_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

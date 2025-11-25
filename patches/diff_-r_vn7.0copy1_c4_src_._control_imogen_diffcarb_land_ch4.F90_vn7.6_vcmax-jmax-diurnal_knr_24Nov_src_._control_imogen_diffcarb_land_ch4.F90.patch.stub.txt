@@ -1,0 +1,39 @@
+Patch stub generated: 2025-11-25T12:09:12.101715 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/imogen/diffcarb_land_ch4.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/diffcarb_land_ch4.F90
+
+SUMMARY:
+  - added lines (>): 3
+  - removed lines (<): 8
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/imogen/diffcarb_land_ch4.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/diffcarb_land_ch4.F90
+5,7c5
+< SUBROUTINE diffcarb_land_ch4(land_pts, d_land_atmos_ch4, lat, dctot_ch4)
+< 
+< USE cellarea_calc_mod, ONLY: cellarea_calc
+---
+> SUBROUTINE diffcarb_land_ch4(land_pts, d_land_atmos_ch4, darea, dctot_ch4)
+36,37c34,35
+<   lat(land_pts),                                                               &
+<                    ! Latitute (degrees)
+---
+>   darea(land_pts),                                                             &
+>                    ! Gridbox area (m2)
+48,49d45
+<   darea(land_pts),                                                             &
+<                    ! Gridbox area (m2)
+61d56
+< CALL cellarea_calc(land_pts, lat, darea)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_imogen_diffcarb_land_ch4.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_imogen_diffcarb_land_ch4.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

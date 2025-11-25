@@ -1,0 +1,80 @@
+Patch stub generated: 2025-11-25T12:09:12.146128 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/standalone/check_unavailable_options_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/check_unavailable_options_mod.F90
+
+SUMMARY:
+  - added lines (>): 51
+  - removed lines (<): 1
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/standalone/check_unavailable_options_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/check_unavailable_options_mod.F90
+22a23
+> USE missing_data_mod, ONLY: imdi
+29c30,31
+< USE jules_rivers_mod,  ONLY: i_river_vn, l_inland, rivers_um_trip
+---
+> USE jules_rivers_mod,  ONLY: i_river_vn, l_inland, rivers_um_trip,             &
+>                              trip_globe_shape
+34a37,41
+> USE jules_deposition_mod, ONLY: l_ukca_dry_dep_so2wet, l_ukca_ddepo3_ocean,    &
+>                                 l_deposition_from_ukca
+> 
+> USE jules_water_tracers_mod, ONLY: l_wtrac_jls
+> 
+113a121,129
+> IF ( trip_globe_shape /= imdi ) THEN
+>   error_sum = error_sum + 1
+>   WRITE(jules_message,'(I0,A,L1)') error_sum,                                  &
+>      ": The shape of the TRIP globe can not be altered in standalone mode." // &
+>      " trip_globe_shape must not be input. trip_globe_shape = ",               &
+>      trip_globe_shape
+>   CALL jules_print(RoutineName, jules_message, level = PrNorm)
+> END IF
+> 
+137a154,187
+>   CALL jules_print(RoutineName, jules_message, level = PrNorm)
+> END IF
+> 
+> ! Deposition switches which are not available for use in JULES standalone
+> IF ( l_deposition_from_ukca ) THEN
+>   error_sum = error_sum + 1
+>   WRITE(jules_message,'(I0,A,L1)') error_sum,                                  &
+>      ": Deposition switch l_deposition_from_ukca_has to be false for " //      &
+>      "standalone, as the calling UKCA routines are not available. " //         &
+>      "l_deposition_from_ukca =", l_deposition_from_ukca
+>   CALL jules_print(RoutineName, jules_message, level = PrNorm)
+> END IF
+> 
+> IF ( l_ukca_ddepo3_ocean ) THEN
+>   error_sum = error_sum + 1
+>   WRITE(jules_message,'(I0,A,L1)') error_sum,                                  &
+>      ": Deposition switch l_ukca_ddepo3_ocean is not applicable to " //        &
+>      "standalone. l_ukca_ddepo3_ocean =", l_ukca_ddepo3_ocean
+>   CALL jules_print(RoutineName, jules_message, level = PrNorm)
+> END IF
+> 
+> IF ( l_ukca_dry_dep_so2wet ) THEN
+>   error_sum = error_sum + 1
+>   WRITE(jules_message,'(I0,A,L1)') error_sum,                                  &
+>      ": Deposition switch l_ukca_dry_dep_so2wet is not applicable to " //      &
+>      "standalone. l_ukca_dry_dep_so2wet =", l_ukca_dry_dep_so2wet
+>   CALL jules_print(RoutineName, jules_message, level = PrNorm)
+> END IF
+> 
+> IF ( l_wtrac_jls ) THEN
+>   error_sum = error_sum + 1
+>   WRITE(jules_message,'(I0,A,L1)') error_sum,                                  &
+>      ": Water tracers cannot be run in standalone mode. " //                   &
+>      "l_wtrac_jls =", l_wtrac_jls
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_standalone_check_unavailable_options_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_standalone_check_unavailable_options_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

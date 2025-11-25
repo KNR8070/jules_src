@@ -1,0 +1,133 @@
+Patch stub generated: 2025-11-25T12:09:12.261418 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil/frunoff_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/frunoff_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 64
+  - removed lines (<): 16
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil/frunoff_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/frunoff_jls_mod.F90
+21,23c21,25
+< SUBROUTINE frunoff ( npnts, surft_pts, curr_surft, timestep, surft_index,      &
+<                      area, can_cpy, can_wcnt, infil, r, frac,                  &
+<                      surf_roff, surf_roff_surft)
+---
+> SUBROUTINE frunoff ( npnts, surft_pts, curr_surft, nsurft, n_wtrac_jls,        &
+>                      timestep, surft_index,                                    &
+>                      area, can_cpy, can_wcnt, infil, r, r_wtrac, frac,         &
+>                      surf_roff, surf_roff_surft, surf_roff_wtrac,              &
+>                      surf_roff_surft_wtrac)
+30a33,34
+> USE jules_water_tracers_mod, ONLY: l_wtrac_jls
+> 
+43c47
+<   curr_surft
+---
+>   curr_surft,                                                                  &
+44a49,52
+>   nsurft,                                                                      &
+>     ! Number of surface tiles (used by water tracers)
+>   n_wtrac_jls
+>     ! Number of water tracers
+67a76,77
+>   r_wtrac(npnts,n_wtrac_jls),                                                  &
+>     ! Water tracer fall rate for all tiles (kg/m2/s).
+76,77c86,87
+<     ! Cummulative surface runoff (kg/m2/s).
+<   surf_roff_surft(npnts)
+---
+>     ! Cumulative surface runoff (kg/m2/s).
+>   surf_roff_surft(npnts),                                                      &
+79c89,94
+< 
+---
+>   surf_roff_wtrac(npnts,n_wtrac_jls),                                          &
+>     ! Cummulative water tracer surface runoff (kg/m2/s).
+>   surf_roff_surft_wtrac(npnts,nsurft,n_wtrac_jls)
+>     ! Water tracer surface runoff contributions for all tiles (kg/m2/s).
+>     ! (Note, unlike the water equivalent, this is the full field containing
+>     !  all tiles)
+84c99
+<   i, j
+---
+>   i, j, i_wt
+96c111
+<   runoff,                                                                      &
+---
+>   runoff(npnts),                                                               &
+97a113,114
+>   runoff_wtrac,                                                                &
+>     ! Local water tracer runoff.
+113c130
+< !$OMP PRIVATE(i, runoff, aexp, aexp1, aexp2, can_ratio, cm)                    &
+---
+> !$OMP PRIVATE(i, j, aexp, aexp1, aexp2, can_ratio, cm)                         &
+116c133
+< !$OMP        curr_surft, lake )                                                &
+---
+> !$OMP        curr_surft, lake, runoff )                                        &
+121c138
+<   runoff = 0.0
+---
+>   runoff(i) = 0.0
+135c152
+<       runoff    = r(i) * ( can_ratio * aexp1 + (1.0 - can_ratio) * aexp2 )
+---
+>       runoff(i) = r(i) * ( can_ratio * aexp1 + (1.0 - can_ratio) * aexp2 )
+147c164
+<       runoff = r(i) * aexp                    !     ... P252.14B
+---
+>       runoff(i) = r(i) * aexp                    !     ... P252.14B
+152c169
+<   surf_roff_surft(i) = surf_roff_surft(i) + runoff
+---
+>   surf_roff_surft(i) = surf_roff_surft(i) + runoff(i)
+155c172
+<     surf_roff(i)       = surf_roff(i)       + frac(i) * runoff
+---
+>     surf_roff(i)       = surf_roff(i)       + frac(i) * runoff(i)
+158a176,206
+> 
+> ! Water tracers
+> IF (l_wtrac_jls) THEN
+> !$OMP PARALLEL DEFAULT(NONE)                                                   &
+> !$OMP PRIVATE(i, j, i_wt, runoff_wtrac)                                        &
+> !$OMP SHARED(surft_pts, surft_index, r, r_wtrac, runoff, surf_roff_wtrac,      &
+> !$OMP        surf_roff_surft_wtrac, frac, l_flake_model, n_wtrac_jls,          &
+> !$OMP        curr_surft, lake)
+>   DO i_wt = 1, n_wtrac_jls
+> !$OMP DO SCHEDULE(STATIC)
+>     DO j = 1,surft_pts
+>       i = surft_index(j)
+>       runoff_wtrac = 0.0
+>       IF ( r(i) > EPSILON(r(i)) ) THEN
+>         runoff_wtrac = (r_wtrac(i,i_wt)/r(i)) * runoff(i)
+>       END IF
+> 
+>       surf_roff_surft_wtrac(i,curr_surft,i_wt) =                               &
+>                                surf_roff_surft_wtrac(i,curr_surft,i_wt) +      &
+>                                       runoff_wtrac
+> 
+>       IF ( .NOT. ((l_flake_model) .AND. (curr_surft == lake)) ) THEN
+>         surf_roff_wtrac(i,i_wt) = surf_roff_wtrac(i,i_wt) + frac(i) *          &
+>                                   runoff_wtrac
+>       END IF
+>     END DO
+> !$OMP END DO
+>   END DO
+> !$OMP END PARALLEL
+> 
+> END IF    ! l_wtrac_jls
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_frunoff_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_frunoff_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

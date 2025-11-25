@@ -1,0 +1,38 @@
+Patch stub generated: 2025-11-25T12:09:12.232406 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./params/standalone/um_types.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./params/standalone/um_types.F90
+
+SUMMARY:
+  - added lines (>): 5
+  - removed lines (<): 5
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./params/standalone/um_types.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./params/standalone/um_types.F90
+12,13c12,13
+< USE precision_mod, ONLY: REAL32, REAL64,                                       &
+<                           integer32 => INT32, integer64 => INT64
+---
+> USE precision_mod, ONLY: real_32, real_64,                                     &
+>                           integer_32 => int_32, integer_64 => int_64
+20,21c20,21
+< INTEGER, PARAMETER :: logical64 = integer64
+< INTEGER, PARAMETER :: logical32 = integer32
+---
+> INTEGER, PARAMETER :: logical_64 = integer_64
+> INTEGER, PARAMETER :: logical_32 = integer_32
+24c24
+< INTEGER, PARAMETER :: real_jlslsm = REAL32
+---
+> INTEGER, PARAMETER :: real_jlslsm = real_32
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._params_standalone_um_types.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._params_standalone_um_types.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,55 @@
+Patch stub generated: 2025-11-25T12:09:12.201729 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/um/init_acc.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/um/init_acc.F90
+
+SUMMARY:
+  - added lines (>): 18
+  - removed lines (<): 5
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/um/init_acc.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/um/init_acc.F90
+16c16
+<        resp_w_pft_acc,resp_s_acc1)
+---
+>        resp_w_pft_acc,resp_s_acc_4pool)
+20a21,25
+> USE jules_soil_biogeochem_mod, ONLY: l_layeredC
+> 
+> USE atm_fields_mod, ONLY:                                                      &
+>   resp_s_acclyr_p1, resp_s_acclyr_p2,                                          &
+>   resp_s_acclyr_p3, resp_s_acclyr_p4
+63c68
+< REAL(KIND=real_jlslsm), INTENT(IN OUT) :: resp_s_acc1(land_pts,1,4)
+---
+> REAL(KIND=real_jlslsm), INTENT(IN OUT) :: resp_s_acc_4pool(land_pts,4)
+88c93
+< DO n = 1,4
+---
+> DO n = 1,4  ! soil carbon pools
+90,91c95
+<     ! dim_cslayer is 1
+<     resp_s_acc1(l,1,n)           = 0.0
+---
+>     resp_s_acc_4pool(l,n) = 0.0
+93a98,106
+> 
+> IF (l_layeredc) THEN
+>   DO l=1,land_pts
+>     resp_s_acclyr_p1(l,:) = 0.0
+>     resp_s_acclyr_p2(l,:) = 0.0
+>     resp_s_acclyr_p3(l,:) = 0.0
+>     resp_s_acclyr_p4(l,:) = 0.0
+>   END DO
+> END IF
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_um_init_acc.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_um_init_acc.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

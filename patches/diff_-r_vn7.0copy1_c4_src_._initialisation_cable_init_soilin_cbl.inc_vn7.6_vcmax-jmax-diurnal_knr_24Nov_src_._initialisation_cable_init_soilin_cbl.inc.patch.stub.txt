@@ -1,0 +1,47 @@
+Patch stub generated: 2025-11-25T12:09:12.162253 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/cable/init_soilin_cbl.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/cable/init_soilin_cbl.inc
+
+SUMMARY:
+  - added lines (>): 12
+  - removed lines (<): 11
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/cable/init_soilin_cbl.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/cable/init_soilin_cbl.inc
+9a10,21
+> !-----------------------------------------------------------------------------
+> ! Description:
+> !   Initialises the non-vegetation parameters
+> !
+> ! Code Owner: Please refer to ModuleLeaders.txt
+> ! This file belongs in TECHNICAL
+> !
+> ! Code Description:
+> !   Language: Fortran 90.
+> !   This code is written to JULES coding standards v1.
+> !-----------------------------------------------------------------------------
+> 
+24,34d35
+< !-----------------------------------------------------------------------------
+< ! Description:
+< !   Initialises the non-vegetation parameters
+< !
+< ! Code Owner: Please refer to ModuleLeaders.txt
+< ! This file belongs in TECHNICAL
+< !
+< ! Code Description:
+< !   Language: Fortran 90.
+< !   This code is written to JULES coding standards v1.
+< !-----------------------------------------------------------------------------
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_cable_init_soilin_cbl.inc_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_cable_init_soilin_cbl.inc.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.280180 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/jules_ssi_sf_implicit.jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/jules_ssi_sf_implicit.jls.F90
+
+SUMMARY:
+  - added lines (>): 142
+  - removed lines (<): 15
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/jules_ssi_sf_implicit.jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/jules_ssi_sf_implicit.jls.F90
+32a33,34
+> ! IN values defining water tracer field dimensions :
+>  n_wtrac_jls,                                                                  &
+52c54
+<  ocn_cpl_point,                                                                &
+---
+>  ocn_cpl_point, sice_pts_ncat, sea_index, ssi_pts, sice_pts, sea_pts,          &
+54c56,62
+<  sw_sicat)
+---
+>  sw_sicat,                                                                     &
+>  ! water tracers (IN)
+>  fqw_sea_wtrac, fqw_sicat_wtrac,                                               &
+>  ! water tracers (IN OUT)
+>  fqw_1_wtrac, dfqw_wtrac,                                                      &
+>  ! water tracers (OUT)
+>  e_sea_wtrac, ei_sice_wtrac)
+84a93,95
+> USE jules_water_tracers_mod,  ONLY: l_wtrac_imp_jls, standard_ratio_wtrac
+> USE sf_ssi_imp_wtrac_mod,     ONLY: sf_ssi_imp_wtrac
+> 
+91,93d101
+< USE ancil_info,               ONLY:                                            &
+<   ssi_pts,sice_pts, sice_pts_ncat
+< 
+102a111
+>  ssi_pts, sice_pts, sea_pts,                                                   &
+107a117,120
+> INTEGER, INTENT(IN) ::                                                         &
+>  n_wtrac_jls
+>                              ! IN No. of water tracers in JULES
+> 
+267c280,282
+<   sice_index_ncat(t_i_length * t_j_length, nice)
+---
+>   sice_index_ncat(t_i_length * t_j_length, nice),                              &
+>   sice_pts_ncat(nice),                                                         &
+>   sea_index(t_i_length * t_j_length)
+282a298,333
+> ! Water tracers (IN)
+> REAL(KIND=real_jlslsm), INTENT(IN) :: fqw_sea_wtrac(                           &
+>                                                tdims%i_start:tdims%i_end,      &
+>                                                tdims%j_start:tdims%j_end,      &
+>                                                n_wtrac_jls)
+>                             ! Water tracer surface flux over open ocean
+>                             !  from explicit scheme (kg/m2/s)
+> REAL(KIND=real_jlslsm), INTENT(IN) :: fqw_sicat_wtrac(                         &
+>                                                tdims%i_start:tdims%i_end,      &
+>                                                tdims%j_start:tdims%j_end,      &
+>                                                nice_use, n_wtrac_jls)
+>                             ! Water tracer surface flux over sea ice
+>                             !  from explicit scheme per ice cat (kg/m2/s)
+> ! Water tracers (INOUT)
+> REAL(KIND=real_jlslsm), INTENT(IN OUT) :: fqw_1_wtrac(                         &
+>                                          tdims%i_start:tdims%i_end,            &
+>                                          tdims%j_start:tdims%j_end,n_wtrac_jls)
+>                             ! Water tracer surface moisture flux  (kg/m2/s)
+> REAL(KIND=real_jlslsm), INTENT(IN OUT) :: dfqw_wtrac(                          &
+>                                                    tdims%i_start:tdims%i_end,  &
+>                                                    tdims%j_start:tdims%j_end,  &
+>                                                    n_wtrac_jls)
+>                             ! Increment to water tracer surface moisture flux
+>                             !   (kg/m2/s)
+> 
+> ! Water tracers (OUT)
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: e_sea_wtrac(tdims%i_start:tdims%i_end,  &
+>                                          tdims%j_start:tdims%j_end,n_wtrac_jls)
+>                             ! Water tracer evaporation from sea times leads
+>                             !   fraction (kg/m2/s)
+> REAL(KIND=real_jlslsm), INTENT(OUT) :: ei_sice_wtrac(                          &
+>                                             tdims%i_start:tdims%i_end,         &
+>                                             tdims%j_start:tdims%j_end,         &
+>                                             nice_use,n_wtrac_jls)
+>                             ! Water tracer sublimation from sea ice per
+>                             !   ice category (kg/m2/s)
+305c356
+<                tdims%j_start:tdims%j_end)
+---
+>                tdims%j_start:tdims%j_end)                                      &
+308a360,365
+> ,snowinc_sice(tdims%i_start:tdims%i_end,                                       &
+>            tdims%j_start:tdims%j_end,1)
+>                              ! Snow increment on sea ice category.
+>                              ! Needed for consistency with the land surface
+>                              ! but not used directly, so only allocated
+>                              ! with a size of 1 in the third dimension
+314c371,374
+< ! dummy arrays required for sea and se-ice to create universal
+---
+> REAL(KIND=real_jlslsm), ALLOCATABLE :: sea_frac(:)
+>                              ! Leads fraction (used for water tracers)
+> 
+> ! dummy arrays required for sea and sea-ice to create universal
+331c391
+< ,n
+---
+> ,n                                                                             &
+333c393,394
+< 
+---
+> ,i_wt
+>             ! LOCAL Loop counter (water tracers)
+366d426
+< 
+481a542
+> !$OMP        snowinc_sice,                                                     &
+502a564,571
+> !$OMP DO SCHEDULE(STATIC)
+>   DO j = tdims%j_start,tdims%j_end
+>     DO i= tdims%i_start,tdims%i_end
+>       snowinc_sice(i,j,1)       = 0.0
+>     END DO
+>   END DO
+> !$OMP END DO NOWAIT
+> 
+591c660
+<         array_one,rhokh_sice(:,:,n),sice_frac_ncat(:,n),timestep,              &
+---
+>         array_one,array_one,rhokh_sice(:,:,n),sice_frac_ncat(:,n),timestep,    &
+596c665
+<         sice_melt(:,:,n)                                                       &
+---
+>         sice_melt(:,:,n),snowinc_sice(:,:,1)                                   &
+645c714
+<         array_one,rhokh_sice(:,:,1),sice_frac_ncat(:,n),timestep,              &
+---
+>         array_one,array_one,rhokh_sice(:,:,1),sice_frac_ncat(:,n),timestep,    &
+650c719
+<         sice_melt(:,:,n)                                                       &
+---
+>         sice_melt(:,:,n),snowinc_sice(:,:,1)                                   &
+677a747,787
+>   !--------------------------------------------------------------------------
+>   ! Update water tracers for implicit calculation
+>   !--------------------------------------------------------------------------
+> 
+>   IF (l_wtrac_imp_jls) THEN
+> 
+>     ALLOCATE(sea_frac(t_i_length * t_j_length))        ! Leads fraction
+> 
+>     DO i_wt = 1, n_wtrac_jls
+> 
+>       ! Set up leads fraction
+> !$OMP PARALLEL DO SCHEDULE(STATIC) DEFAULT(NONE) PRIVATE(l)                    &
+> !$OMP SHARED(sice_frac,sea_frac,t_i_length,t_j_length)
+>       DO l = 1, t_i_length * t_j_length
+>         sea_frac(l) = 1.0 - sice_frac(l)
+>       END DO
+> !$OMP END PARALLEL DO
+> 
+>       ! Ocean
+>       CALL sf_ssi_imp_wtrac(                                                   &
+>         ssi_pts, sea_pts, ssi_index, sea_index,                                &
+>         standard_ratio_wtrac(i_wt), sea_frac, fssi_ij,  e_sea,                 &
+>         fqw_sea_wtrac(:,:,i_wt), fqw_sea_wtrac(:,:,1),                         &
+>         fqw_1_wtrac(:,:,i_wt), dfqw_wtrac(:,:,i_wt),                           &
+>         e_sea_wtrac(:,:,i_wt))
+> 
+>       ! Sea ice
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_jules_ssi_sf_implicit.jls.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_jules_ssi_sf_implicit.jls.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

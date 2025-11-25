@@ -1,0 +1,35 @@
+Patch stub generated: 2025-11-25T12:09:12.260957 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil/elev_htc_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/elev_htc_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 4
+  - removed lines (<): 4
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil/elev_htc_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil/elev_htc_jls_mod.F90
+24c24
+<                       snow_soil_htf, tsurf_elev_surft )
+---
+>                       snow_soil_htf, tsurf_elev_surft, l_lice_surft )
+29,31d28
+< USE ancil_info, ONLY:                                                          &
+<   l_lice_surft
+< 
+34a32,33
+> USE jules_surface_types_mod, ONLY: ntype
+> 
+67a67
+> LOGICAL, INTENT(IN) :: l_lice_surft(ntype)
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_elev_htc_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_elev_htc_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

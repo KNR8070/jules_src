@@ -1,0 +1,79 @@
+Patch stub generated: 2025-11-25T12:09:12.294062 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/smc_ext_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/smc_ext_jls_mod.F90
+
+SUMMARY:
+  - added lines (>): 35
+  - removed lines (<): 9
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/smc_ext_jls_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/smc_ext_jls_mod.F90
+22c22
+< ,                   wt_ext,fsmc)
+---
+> ,                   wt_ext,fsmc,psi_root_zone_sox)
+34c34
+< USE jules_vegetation_mod, ONLY: fsmc_shape
+---
+> USE jules_vegetation_mod, ONLY: fsmc_shape,stomata_model,stomata_sox
+91c91
+<  wt_ext(npnts,nshyd)  ! Cummulative fraction of transpiration
+---
+>  wt_ext(npnts,nshyd)  ! Cumulative fraction of transpiration
+96,97c96,101
+<  fsmc(npnts)          ! Soil moisture availability
+< !                     !    factor.
+---
+>  fsmc(npnts)                                                                   &
+>                       ! Soil moisture availability
+> !                     ! factor.
+> ,psi_root_zone_sox(npnts)
+>                       ! (negative) Soil water potential in root zone (Pa)
+>                       ! To be passed up for use by SOX in sf_stom.
+149c153,154
+< !$OMP SHARED(nshyd,npnts,psi,v_layer,sthu,v_sat,wt_ext,psi_root_zone,fsmc,ones)
+---
+> !$OMP SHARED(nshyd,npnts,psi,v_layer,sthu,v_sat,wt_ext,psi_root_zone,fsmc,ones,&
+> !$OMP        psi_root_zone_sox)
+162a168
+>   psi_root_zone_sox(i) = 0.0
+195,197c201,223
+<   fsmc = fsmc_layer(npnts,surft_pts,surft_index,                               &
+<                     ft, v_root_zone, v_close_root_zone,                        &
+<                     v_open_root_zone, ones, psi_root_zone)
+---
+>   IF ( stomata_model == stomata_sox ) THEN
+> !$OMP PARALLEL DO                                                              &
+> !$OMP SCHEDULE(STATIC)                                                         &
+> !$OMP DEFAULT(NONE)                                                            &
+> !$OMP PRIVATE(j,i)                                                             &
+> !$OMP SHARED(surft_pts,surft_index,psi_root_zone_sox,v_root_zone,v_sat,sathh,  &
+> !$OMP        bexp)
+>     DO j = 1,surft_pts
+>       i = surft_index(j)
+>       ! If SOX is being used psi_root_zone is needed. fsmc_shape is not
+>       ! be used in sox - fsmc will be set to 1.0 always
+>       psi_root_zone_sox(i) = psi_from_sthu(v_root_zone(i) / v_sat(i,1),        &
+>                                        sathh(i,1), bexp(i,1), sthu_min)
+> 
+>     END DO
+> !$OMP END PARALLEL DO
+> 
+>     fsmc(:) = 1.0
+> 
+>   ELSE
+>     fsmc = fsmc_layer(npnts, surft_pts, surft_index, ft, v_root_zone,          &
+>                       v_close_root_zone, v_open_root_zone, ones, psi_root_zone)
+>   END IF !stomata_model
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_smc_ext_jls_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_smc_ext_jls_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

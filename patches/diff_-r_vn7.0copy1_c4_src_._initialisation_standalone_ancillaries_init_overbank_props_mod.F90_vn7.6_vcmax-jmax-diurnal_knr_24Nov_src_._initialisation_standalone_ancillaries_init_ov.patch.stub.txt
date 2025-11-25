@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.176748 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/ancillaries/init_overbank_props_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/ancillaries/init_overbank_props_mod.F90
+
+SUMMARY:
+  - added lines (>): 309
+  - removed lines (<): 163
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/ancillaries/init_overbank_props_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/ancillaries/init_overbank_props_mod.F90
+13a14,17
+> USE missing_data_mod, ONLY: rmdi
+> 
+> USE model_interface_mod, ONLY: identifier_len
+> 
+15a20,37
+> !------------------------------------------------------------------------------
+> ! Variables
+> !------------------------------------------------------------------------------
+> INTEGER, PARAMETER :: nvars_max = 2
+>                                ! The maximum possible number of inundation
+>                                ! variables.
+> 
+> INTEGER :: nvars_required      ! The number of inundation variables that are
+>                                ! required in this configuration
+> 
+> CHARACTER(LEN=identifier_len) :: required_vars(nvars_max)
+>                                ! The variable identifiers of the required
+>                                ! variables
+> 
+> PRIVATE  !  private scope by default
+> PUBLIC allocate_overbank_vars_rp, init_overbank_props,                         &
+>        nvars_max, nvars_required, required_vars
+> 
+17a40,41
+> !#############################################################################
+> 
+25,28d48
+< USE missing_data_mod, ONLY: rmdi
+< 
+< USE ancil_info, ONLY: land_pts
+< 
+33,36d52
+< USE model_interface_mod, ONLY: identifier_len
+< 
+< USE model_grid_mod, ONLY: global_land_pts
+< 
+38c54
+<   np_rivers, nx_rivers, ny_rivers, l_rivers
+---
+>   np_rivers, nx_rivers, ny_rivers
+41,44c57,59
+<   l_riv_overbank, l_riv_hypsometry,                                            &
+<   logn_mean, logn_stdev, logn_mean_rp, logn_stdev_rp,                          &
+<   frac_fplain_lp, frac_fplain_rp,                                              &
+<   qbf, dbf, wbf
+---
+>   overbank_hypsometric, overbank_model
+> 
+> USE parallel_mod, ONLY: is_master_task
+52c67
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+63c78
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+67,90d81
+< ! Work variables
+< 
+< INTEGER ::                                                                     &
+<   ERROR        = 0,                                                            &
+<                      ! Variable for trapping the error from each
+<                      ! individual call to allocate
+<   error_sum    = 0
+<                      ! Variable to track the sum of all errors
+<                      ! resulting from calls to allocate. Hence we
+<                      ! know that everything was successful if and
+<                      ! only if this is zero at the end
+< 
+< INTEGER, PARAMETER :: nvars_max = 2 ! The maximum possible number
+<                                               ! of inundation variables
+< 
+< INTEGER :: nvars_required      ! The number of inundation variables that are
+<                                ! required in this configuration
+< CHARACTER(LEN=identifier_len) :: required_vars(nvars_max)
+<                                ! The variable identifiers of the required
+<                                ! variables
+< CHARACTER(LEN=identifier_len) :: optional_vars(nvars_max)
+<                                ! The variable identifiers of any optional
+<                                ! variables
+< 
+136a128,129
+> INTEGER :: ERROR  !  Error value.
+> 
+139a133
+> !end of header
+142,143c136,141
+< ! If rivers or overbank inundation are not on, there is nothing to do
+< IF (l_rivers .AND. l_riv_overbank) THEN
+---
+> !------------------------------------------------------------------------------
+> ! All tasks need only be done on the master task, which is where the river
+> ! routing code will run.
+> !------------------------------------------------------------------------------
+> 
+> IF ( is_master_task() ) THEN
+145c143
+<   !---------------------------------------------------------------------------
+---
+>   !----------------------------------------------------------------------------
+147c145
+<   !---------------------------------------------------------------------------
+---
+>   !----------------------------------------------------------------------------
+154,271c152,240
+<   IF ( global_land_pts <= 1 ) THEN
+<     l_rivers = .FALSE.
+<     CALL log_warn(RoutineName,                                                 &
+<                   "River routing not appropriate for single point runs. " //   &
+<                   "Overbank inundation disabled.")
+< 
+<   ELSE
+< 
+<     !-------------------------------------------------------------------------
+<     ! Read overbank inundation namelist
+<     !--------------------------------------------------------------------------
+< 
+<     CALL log_info(RoutineName,"Reading JULES_OVERBANK_PROPS namelist...")
+< 
+<     READ(namelist_unit, NML = jules_overbank_props, IOSTAT = ERROR)
+<     IF ( ERROR /= 0 ) CALL log_fatal(RoutineName,                              &
+<                   "Error reading namelist JULES_OVERBANK_PROPS " //            &
+<                   "(IOSTAT=" // TRIM(to_string(ERROR)) // ")")
+< 
+<     !--------------------------------------------------------------------------
+<     ! Set up river overbank inundation properties
+<     !--------------------------------------------------------------------------
+< 
+<     IF ( l_riv_hypsometry ) THEN
+<       nvars_required = 2
+<       required_vars(1:nvars_required) = [ 'logn_mean ', 'logn_stdev' ]
+< 
+<       !------------------------------------------------------------------------
+<       ! Check that variables in the namelist have been provided and set up
+<       ! other variables.
+<       !------------------------------------------------------------------------
+<       CALL check_namelist_values( nvars, nvars_max, nvars_required,            &
+<                                   RoutineName, FILE, const_val,                &
+<                                   use_file, required_vars, tpl_name, var,      &
+<                                   nvars_const, nvars_file, l_have_template,    &
+<                                   use_var, file_name, var_name )
+< 
+<       !-----------------------------------------------------------------------
+<       ! Allocate inundation-specific arrays from ancillary information
+<       !-----------------------------------------------------------------------
+< 
+<       IF ( nx_rivers > 0 .AND. ny_rivers > 0) THEN
+< 
+<         ALLOCATE( logn_mean(nx_rivers, ny_rivers), STAT = ERROR )
+<         error_sum = ERROR
+<         ALLOCATE( logn_stdev(nx_rivers, ny_rivers), STAT = ERROR )
+<         error_sum = error_sum + ERROR
+<         IF ( error_sum == 0 ) THEN
+<           ! Initialise to impossible values.
+<           logn_mean(:,:)  = rmdi
+<           logn_stdev(:,:) = rmdi
+<         ELSE
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_ancillaries_init_overbank_props_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_ancillaries_init_ov.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

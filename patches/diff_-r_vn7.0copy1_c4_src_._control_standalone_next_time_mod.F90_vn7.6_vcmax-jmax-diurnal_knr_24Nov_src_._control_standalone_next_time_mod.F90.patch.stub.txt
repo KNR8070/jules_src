@@ -1,0 +1,113 @@
+Patch stub generated: 2025-11-25T12:09:12.149557 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/standalone/next_time_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/next_time_mod.F90
+
+SUMMARY:
+  - added lines (>): 31
+  - removed lines (<): 29
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Signature rename: unify timestep_len/timestep or provide wrapper.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/standalone/next_time_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/next_time_mod.F90
+27c27
+< USE spinup_mod, ONLY: spinup_check
+---
+> USE spinup_check_mod, ONLY: spinup_check
+32,33c32,34
+<                           timestep, start_of_year, current_time,end_of_year,   &
+<                           print_step, max_spinup_cycles
+---
+>                           timestep_number, start_of_year, current_time,        &
+>                           end_of_year, print_step, max_spinup_cycles,          &
+>                           oasis_time
+109c110
+<     !-----------------------------------------------------------------------------
+---
+>     !---------------------------------------------------------------------------
+111c112
+<     !-----------------------------------------------------------------------------
+---
+>     !---------------------------------------------------------------------------
+124c125
+<     !-----------------------------------------------------------------------------
+---
+>     !---------------------------------------------------------------------------
+127c128
+<     !-----------------------------------------------------------------------------
+---
+>     !---------------------------------------------------------------------------
+141,143c142,144
+<       ! We use end_of_run rather than a fatal error to abort the run as we want a
+<       ! final dump to be written, and output from the final spinup cycle to be written
+<       ! correctly
+---
+>       ! We use end_of_run rather than a fatal error to abort the run as we want
+>       ! a final dump to be written, and output from the final spinup cycle to
+>       ! be written correctly
+146c147,148
+<       ! If the flag is not set, we will continue with the main run with a warning
+---
+>       ! If the flag is not set, we will continue with the main run with a
+>       ! warning
+154c156
+<     !-----------------------------------------------------------------------------
+---
+>     !---------------------------------------------------------------------------
+156c158
+<     !-----------------------------------------------------------------------------
+---
+>     !---------------------------------------------------------------------------
+166,168c168,170
+<     ! A seek of the input files is not required for starting a new cycle of spinup
+<     ! since advance_all handles ramping between spinup_end and spinup_start
+<     ! smoothly
+---
+>     ! A seek of the input files is not required for starting a new cycle of
+>     ! spinup since advance_all handles ramping between spinup_end and
+>     ! spinup_start smoothly
+186c188
+< timestep = timestep + 1
+---
+> timestep_number = timestep_number + 1
+188a191,193
+> ! Update the time step in seconds: the first time step is 1, not 0
+> oasis_time = (timestep_number-1)*timestep_len
+> 
+218c223
+<   IF ( MOD(timestep, print_step) == 0 ) THEN
+---
+>   IF ( MOD(timestep_number, print_step) == 0 ) THEN
+220c225
+<                   "Timestep: " // TRIM(to_string(timestep)) // "; " //         &
+---
+>                   "Timestep: " // TRIM(to_string(timestep_number)) // "; " //  &
+244,253c249,255
+< ! Standalone Rivers: Ignore dumps for now
+< IF ( lsm_id /= rivers ) THEN
+<   IF ( current_time == spinup_start .OR. current_time == main_run_start .OR.   &
+<      ( dump_period_unit == dump_period_year .AND.                              &
+<      start_of_year .AND. MOD(current_time%year,dump_period) == 0 )  .OR.       &
+<      ( dump_period_unit == dump_period_time .AND.                              &
+<      MOD(current_time%TIME,dump_period) == 0 ) .OR.                            &
+<      end_of_run ) THEN
+<     CALL write_dump()
+<   END IF
+---
+> IF ( current_time == spinup_start .OR. current_time == main_run_start .OR.     &
+>    ( dump_period_unit == dump_period_year .AND.                                &
+>    start_of_year .AND. MOD(current_time%year,dump_period) == 0 )  .OR.         &
+>    ( dump_period_unit == dump_period_time .AND.                                &
+>    MOD(current_time%TIME,dump_period) == 0 ) .OR.                              &
+>    end_of_run ) THEN
+>   CALL write_dump()
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_standalone_next_time_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_standalone_next_time_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

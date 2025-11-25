@@ -1,0 +1,77 @@
+Patch stub generated: 2025-11-25T12:09:12.102393 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/imogen/diffcarb_land_co2.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/diffcarb_land_co2.F90
+
+SUMMARY:
+  - added lines (>): 13
+  - removed lines (<): 23
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/imogen/diffcarb_land_co2.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/imogen/diffcarb_land_co2.F90
+12c12
+< SUBROUTINE diffcarb_land_co2(land_pts, d_land_atmos_co2, lat, dctot_co2, conv)
+---
+> SUBROUTINE diffcarb_land_co2(land_pts, d_land_atmos_co2, darea, dctot_co2)
+14c14
+< USE cellarea_calc_mod, ONLY: cellarea_calc
+---
+> USE imogen_constants, ONLY: conv_gtc_to_ppm
+35c35
+<                ! IN Number of land points
+---
+>                ! Number of land points
+38,39d37
+<   lat(land_pts),                                                               &
+<                ! IN Latitute (degrees)
+41,46c39,42
+<                ! IN Change in total surface gridbox CO2
+<                !    content during a period "YEAR_CO2" (kg C/m2)
+<   conv
+<                ! IN Converts global emission of C (Gt/yr)
+<                !    into atmospheric CO2 (ppm/GtC)
+< 
+---
+>                ! Change in total surface gridbox co2 content
+>                ! between a calling period (here years) (kg C/m2)
+>   darea(land_pts)
+>                ! Gridbox area (m2)
+48c44
+< REAL, INTENT(IN OUT) ::                                                        &
+---
+> REAL, INTENT(OUT) ::                                                           &
+50,53c46,48
+<                ! OUT Change in atmospheric CO2 concentration
+<                !     as a result of land-atmosphere feedbacks
+<                !     between calls to SCENARIO (ppm/"YEAR_CO2")
+< 
+---
+>                ! Change in atmospheric CO2 concentration
+>                ! as a result of land-atmosphere feedbacks
+>                ! between calling periods (here years) (ppm/year)
+56c51
+<   land_gain,                                                                   &
+---
+>   land_gain
+58,59d52
+<   darea(land_pts)
+<                ! WORK Gridbox area (m2)
+67,69d59
+< 
+< CALL cellarea_calc(land_pts, lat, darea)
+< 
+74c64
+< d_land_atmos_co2 = -(land_gain / 1.0e12) * conv
+---
+> d_land_atmos_co2 = -(land_gain / 1.0e12) * conv_gtc_to_ppm
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_imogen_diffcarb_land_co2.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_imogen_diffcarb_land_co2.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

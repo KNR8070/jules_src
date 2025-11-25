@@ -1,0 +1,27 @@
+Patch stub generated: 2025-11-25T12:09:12.200585 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/params/init_params_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/params/init_params_mod.F90
+
+SUMMARY:
+  - added lines (>): 2
+  - removed lines (<): 1
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/params/init_params_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/params/init_params_mod.F90
+12a13,14
+> USE init_deposition_species_mod, ONLY: init_deposition_species
+> 
+31d32
+< #include "init_deposition_species.inc"
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_params_init_params_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_params_init_params_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

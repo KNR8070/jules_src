@@ -1,0 +1,72 @@
+Patch stub generated: 2025-11-25T12:09:12.094577 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/cable/shared/progs_cbl_vars_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/cable/shared/progs_cbl_vars_mod.F90
+
+SUMMARY:
+  - added lines (>): 41
+  - removed lines (<): 1
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/cable/shared/progs_cbl_vars_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/cable/shared/progs_cbl_vars_mod.F90
+0a1,10
+> !******************************COPYRIGHT********************************************
+> ! (c) CSIRO 2022.
+> ! All rights reserved.
+> !
+> ! This routine has been licensed to the other JULES partners for use and
+> ! distribution under the JULES collaboration agreement, subject to the terms and
+> ! conditions set out therein.
+> !
+> ! [Met Office Ref SC0237]
+> !******************************COPYRIGHT********************************************
+5d14
+< !
+7a17,31
+> ! This MODULE is USEd by:
+> !      cable_fields_mod.F90,
+> !      surf_couple_explicit_mod.F90,
+> !      surf_couple_implicit_mod.F90,
+> !      surf_couple_radiation_mod.F90,
+> !      control.F90,
+> !      init_cable_progs.F90,
+> !      init.F90
+> !
+> ! This MODULE contains 4 public Subroutines:
+> !      progs_cbl_vars_alloc,
+> !      progs_cbl_vars_dealloc,
+> !      progs_cbl_vars_assoc,
+> !      progs_cbl_vars_nullify
+> !
+9a34,37
+> !
+> ! Code Description:
+> !   Language: Fortran 90.
+> !   This code is written to JULES coding standards v1.
+60a89,91
+> ! Description:
+> !   Allocate the CABLE prognostic data variables in the derived type structure
+> 
+219a251,253
+> ! Description:
+> !   Deallocate the CABLE prognostic data variables in the derived type structure
+> 
+262a297,299
+> ! Description:
+> !   Associate the CABLE prognostic pointers in the derived type structure
+> 
+307a345,347
+> 
+> ! Description:
+> !   Nullify the CABLE prognostic pointers in the derived type structure
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_cable_shared_progs_cbl_vars_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_cable_shared_progs_cbl_vars_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

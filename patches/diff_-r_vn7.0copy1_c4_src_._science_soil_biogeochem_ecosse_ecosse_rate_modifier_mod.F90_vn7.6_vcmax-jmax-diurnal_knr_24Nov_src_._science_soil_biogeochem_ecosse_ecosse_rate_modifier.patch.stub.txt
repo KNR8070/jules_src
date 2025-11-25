@@ -1,0 +1,114 @@
+Patch stub generated: 2025-11-25T12:09:12.267156 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/soil_biogeochem/ecosse/ecosse_rate_modifier_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil_biogeochem/ecosse/ecosse_rate_modifier_mod.F90
+
+SUMMARY:
+  - added lines (>): 26
+  - removed lines (<): 26
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/soil_biogeochem/ecosse/ecosse_rate_modifier_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/soil_biogeochem/ecosse/ecosse_rate_modifier_mod.F90
+37,39c37,39
+< PUBLIC rate_modifier_jules_temp, rate_modifier_jules_water,                    &
+<        rate_modifier_rothc_ph,   rate_modifier_rothc_temp,                     &
+<        rate_modifier_rothc_water
+---
+> PUBLIC rate_modifier_q10_temp, rate_modifier_clark_water,                      &
+>        rate_modifier_smith_ph,   rate_modifier_smith_temp,                     &
+>        rate_modifier_smith_water
+46c46
+< SUBROUTINE rate_modifier_rothc_ph( land_pts, nlayer, vs_pts,                   &
+---
+> SUBROUTINE rate_modifier_smith_ph( land_pts, nlayer, vs_pts,                   &
+51c51
+< !   RothC formulation: Eqn.3 of Smith et al. (2010).
+---
+> !   4-pool soil C formulation: Eqn.3 of Smith et al. (2010).
+117c117
+< END SUBROUTINE rate_modifier_rothc_ph
+---
+> END SUBROUTINE rate_modifier_smith_ph
+121c121
+< SUBROUTINE rate_modifier_rothc_temp( land_pts, nlayer, vs_pts,                 &
+---
+> SUBROUTINE rate_modifier_smith_temp( land_pts, nlayer, vs_pts,                 &
+126,127c126,127
+< !   Subroutine to calculate the temperature rate modifying factor using the
+< !   RothC formulation: Eqn.4 of Smith et al. (2010).
+---
+> !   Subroutine to calculate the temperature rate modifying factor:
+> !   Eqn.4 of Smith et al. (2010).
+131c131
+<   decomp_temp_coeff_rothc
+---
+>   decomp_temp_coeff_smith
+179,181c179,181
+<       temp_rate(i,il) = decomp_temp_coeff_rothc(1) /                           &
+<                         ( 1.0 + EXP( decomp_temp_coeff_rothc(2) /              &
+<                           ( soilT_degC(i,il) + decomp_temp_coeff_rothc(3) )    &
+---
+>       temp_rate(i,il) = decomp_temp_coeff_smith(1) /                           &
+>                         ( 1.0 + EXP( decomp_temp_coeff_smith(2) /              &
+>                           ( soilT_degC(i,il) + decomp_temp_coeff_smith(3) )    &
+188c188
+< END SUBROUTINE rate_modifier_rothc_temp
+---
+> END SUBROUTINE rate_modifier_smith_temp
+193c193
+< SUBROUTINE rate_modifier_rothc_water( land_pts, nlayer, vs_pts,                &
+---
+> SUBROUTINE rate_modifier_smith_water( land_pts, nlayer, vs_pts,                &
+199,200c199,200
+< !   Subroutine to calculate the water rate modifying factor using the RothC
+< !   formulation: Eqn.1 of Smith et al. (2010).
+---
+> !   Subroutine to calculate the water rate modifying factor:
+> !   Eqn.1 of Smith et al. (2010).
+289c289
+< END SUBROUTINE rate_modifier_rothc_water
+---
+> END SUBROUTINE rate_modifier_smith_water
+294c294
+< SUBROUTINE rate_modifier_jules_temp( land_pts, nlayer, vs_pts, vs_index,       &
+---
+> SUBROUTINE rate_modifier_q10_temp( land_pts, nlayer, vs_pts, vs_index,         &
+347c347
+< END SUBROUTINE rate_modifier_jules_temp
+---
+> END SUBROUTINE rate_modifier_q10_temp
+352c352
+< SUBROUTINE rate_modifier_jules_water( land_pts,nlayer,vs_pts,vs_index,         &
+---
+> SUBROUTINE rate_modifier_clark_water( land_pts,nlayer,vs_pts,vs_index,         &
+363c363
+<   decomp_wrate_min_jules
+---
+>   decomp_wrate_min_clark
+423c423
+< one_minus_min = 1.0 - decomp_wrate_min_jules
+---
+> one_minus_min = 1.0 - decomp_wrate_min_clark
+444c444
+<       water_rate(i,il) = decomp_wrate_min_jules +  one_minus_min               &
+---
+>       water_rate(i,il) = decomp_wrate_min_clark +  one_minus_min               &
+455c455
+<       water_rate(i,il) = decomp_wrate_min_jules
+---
+>       water_rate(i,il) = decomp_wrate_min_clark
+461c461
+< END SUBROUTINE rate_modifier_jules_water
+---
+> END SUBROUTINE rate_modifier_clark_water
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_soil_biogeochem_ecosse_ecosse_rate_modifier_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_soil_biogeochem_ecosse_ecosse_rate_modifier.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

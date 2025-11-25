@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.226486 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/output/internal_open_output_file.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/output/internal_open_output_file.inc
+
+SUMMARY:
+  - added lines (>): 119
+  - removed lines (<): 76
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/output/internal_open_output_file.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/output/internal_open_output_file.inc
+14c14,15
+< USE mpi, ONLY: mpi_comm_world, mpi_info_null
+---
+> USE mpi, ONLY: mpi_info_null
+> USE jules_vars_mod, ONLY: mpi_local_comm
+26a28,29
+> USE model_grid_mod, ONLY: l_coord_latlon
+> 
+33c36
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+44c47
+< !-----------------------------------------------------------------------------
+---
+> !------------------------------------------------------------------------------
+80,83c83,90
+< TYPE(data_cube) :: lat_cube, lon_cube, land_frac_cube  ! Cubes for lat/lon data
+< REAL :: point_lat, point_lon  ! Real values for lat/lon of single point
+<                               ! for ASCII files
+< INTEGER :: lat_id, lon_id, land_frac_id  ! Id of lat/lon variable in file for NetCDF files
+---
+> TYPE(data_cube) :: lat_cube, lon_cube, land_frac_cube, xcoord_cube, ycoord_cube
+>   ! Cubes for coordinate and land fraction data.
+> 
+> REAL :: point_lat, point_lon, point_xcoord, point_ycoord
+>   ! Real values for coordinates of single point for ASCII files.
+> 
+> INTEGER :: lat_id, lon_id, land_frac_id, xcoord_id, ycoord_id
+>   ! IDs of coordinate and land_frac variables in file for NetCDF files
+100,106c107,115
+<                                     output_period, .FALSE.,                    &
+<     ! If is_time_template = T, file_name will be used as a time template
+<                                       is_time_template, file_name,             &
+<     ! If is_time_template = F, file_names and file_times will be used
+<     ! So we give a single file name starting at the start of the file (i.e. one
+<     ! file for all output)
+<                                       [ file_name ], [ file_start ])
+---
+>                             output_period, .FALSE.,                            &
+>                             ! If is_time_template = T, file_name will be used
+>                             ! as a time template
+>                             is_time_template, file_name,                       &
+>                             ! If is_time_template = F, file_names and
+>                             ! file_times will be used. We give a single file
+>                             ! name starting at the start of the file (i.e. one
+>                             ! file for all output)
+>                             [ file_name ], [ file_start ])
+110,118c119,130
+<                                   output_period, .FALSE.,                      &
+<   ! If is_time_template = T, file_name will be used as a time template
+<                                     is_time_template, file_name,               &
+<   ! If is_time_template = F, file_names and file_times will be used
+<   ! So we give a single file name starting at the start of the file (i.e. one
+<   ! file for all output)
+<                                     [ file_name ], [ file_start ],             &
+<   ! Pass MPI variables to file_ts_open so that parallel I/O will be used
+<                                     mpi_comm_world, mpi_info_null)
+---
+>                           output_period, .FALSE.,                              &
+>                           ! If is_time_template = T, file_name will be used
+>                           ! as a time template
+>                           is_time_template, file_name,                         &
+>                           ! If is_time_template = F, file_names and
+>                           ! file_times will be used. We give a single file
+>                           ! name starting at the start of the file (i.e. one
+>                           ! file for all output)
+>                           [ file_name ], [ file_start ],                       &
+>                           ! Pass MPI variables to file_ts_open so that
+>                           ! parallel I/O will be used.
+>                           mpi_local_comm, mpi_info_null)
+147,148c159,160
+< ! Get the latitude and longitude data cubes, choose the correct variable for
+< ! the required grid.
+---
+> ! Get coordinate data cubes, choosing the correct variable for the required
+> ! grid.
+158a171,175
+>   IF ( .NOT. l_coord_latlon ) THEN
+>     ! Get projection coordinate values.
+>     xcoord_cube = extract_var(get_var_id('rivers_x_coord_rp'))
+>     ycoord_cube = extract_var(get_var_id('rivers_y_coord_rp'))
+>   END IF
+162c179,186
+<   IF ( l_land_frac ) land_frac_cube = extract_var(get_var_id('land_fraction'))
+---
+>   IF ( l_land_frac ) THEN
+>     land_frac_cube = extract_var(get_var_id('land_fraction'))
+>   END IF
+>   IF ( .NOT. l_coord_latlon ) THEN
+>     ! Get projection coordinate values.
+>     xcoord_cube = extract_var(get_var_id('projection_x_coord'))
+>     ycoord_cube = extract_var(get_var_id('projection_y_coord'))
+>   END IF
+182a207,216
+>   ! Populate projection coordinates.
+>   IF ( .NOT. l_coord_latlon ) THEN
+>     CALL cube_get_data(xcoord_cube, point_xcoord)
+>     CALL cube_get_data(ycoord_cube, point_ycoord)
+>     CALL file_ts_def_attr(out_file, attr_global, 'projection_x_coord',         &
+>                           point_xcoord)
+>     CALL file_ts_def_attr(out_file, attr_global, 'projection_y_coord',         &
+>                           point_ycoord)
+>   END IF
+> 
+185,192c219,222
+<   CALL internal_define_var(                                                    &
+<     out_file, defined_dims, get_var_id('latitude'), 'latitude', .FALSE., lat_id&
+<   )
+< 
+<   CALL internal_define_var(                                                    &
+<     out_file, defined_dims, get_var_id('longitude'), 'longitude', .FALSE., lon_id &
+<   )
+< 
+---
+>   CALL internal_define_var( out_file, defined_dims, get_var_id('latitude'),    &
+>                             'latitude', .FALSE., lat_id )
+>   CALL internal_define_var( out_file, defined_dims, get_var_id('longitude'),   &
+>                             'longitude', .FALSE., lon_id )
+194,197c224,226
+<     CALL internal_define_var(                                                  &
+<        out_file, defined_dims, get_var_id('land_fraction'), 'land_fraction',   &
+<        .FALSE., land_frac_id                                                   &
+<        )
+---
+>     CALL internal_define_var( out_file, defined_dims,                          &
+>                               get_var_id('land_fraction'), 'land_fraction',    &
+>                              .FALSE., land_frac_id )
+200,201c229,240
+<   ! No default case, so that using a format other than those defined is a definite
+<   ! error
+---
+>   ! Populate projection coordinates.
+>   IF ( .NOT. l_coord_latlon ) THEN
+>     CALL internal_define_var( out_file, defined_dims,                          &
+>                               get_var_id('projection_x_coord'),                &
+>                              'projection_x_coord', .FALSE., xcoord_id )
+>     CALL internal_define_var( out_file, defined_dims,                          &
+>                               get_var_id('projection_y_coord'),                &
+>                              'projection_y_coord', .FALSE., ycoord_id )
+>   END IF
+> 
+>   ! No default case, so that using a format other than those defined is a
+>   ! definite error.
+216,217c255,256
+<   ! Add the CF convention "cell_methods" attribute to indicate whether the field
+<   ! type of output
+---
+>   ! Add the CF convention "cell_methods" attribute to indicate the field type
+>   ! of output.
+254c293
+< ! Fill the latitude and longitude if we need to
+---
+> ! Fill the coordinate variables if we need to
+262a302
+> 
+265c305
+<     ! the master task
+---
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_output_internal_open_output_file.inc_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_output_internal_open_output_file.inc.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

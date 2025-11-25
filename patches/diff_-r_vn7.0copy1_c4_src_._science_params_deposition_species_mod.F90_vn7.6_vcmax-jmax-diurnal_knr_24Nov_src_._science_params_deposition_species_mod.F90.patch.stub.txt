@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.236185 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/params/deposition_species_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/deposition_species_mod.F90
+
+SUMMARY:
+  - added lines (>): 189
+  - removed lines (<): 95
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Namelist/IO changes: reconcile derived types and broadcast logic.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/params/deposition_species_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/deposition_species_mod.F90
+1d0
+< #if !defined(UM_JULES)
+16a16,25
+> USE jules_deposition_mod,                                                      &
+>                     ONLY: dry_dep_model_jules, dry_dep_model_ukca,             &
+>                           dry_dep_model, dep_rnull
+> 
+> USE deposition_output_arrays_mod, ONLY: deposition_output_array_real
+> 
+> #if defined (UM_JULES)
+> USE UM_ParCore, ONLY: mype
+> #endif
+> 
+36,37c45,46
+<   ch4_mml, ch4_scaling, ch4dd_tundra, cuticle_o3, dd_ice_coeff,                &
+<   dep_species_name, diffusion_corr, diffusion_coeff,                           &
+---
+>   ch4_mml, ch4_scaling, ch4dd_tundra, ch4_up_flux, cuticle_o3, dd_ice_coeff,   &
+>   dep_species_name, diffusion_corr, diffusion_coeff, dep_species_rmm,          &
+50,56d58
+< REAL(KIND=real_jlslsm), PARAMETER ::                                           &
+<   ch4_mml = 1.008e5
+<     ! Factor to convert methane flux (ug m-2 h-1) to dry deposition velocity
+<     ! (m s-1). ch4_mml = 3600 * 0.016 * 1.0E9 * 1.75E-6, where
+<     ! 0.016 = molar mass of methane (kg), 1.0E9 converts ug -> kg, and
+<     ! 1.75E-6 = assumed CH4 volumetric mixing ratio
+< 
+75c77
+<   ch4_scaling
+---
+>   ch4_scaling,                                                                 &
+77a80,84
+>   ch4_mml
+>     ! Factor to convert methane flux (ug m-2 h-1) to dry deposition velocity
+>     ! (m s-1). ch4_mml = 3600 * 0.016 * 1.0E9 * 1.75E-6, where
+>     ! 0.016 = molar mass of methane (kg), 1.0E9 converts ug -> kg, and
+>     ! 1.75E-6 = assumed CH4 volumetric mixing ratio
+99a107,108
+>   ch4_up_flux(:),                                                              &
+>     ! CH4 uptake flux, in ug m-2 hr-1
+104,105c113,118
+<     ! Diffusion coefficient for each species (m2 s-1).
+<     ! A value < 0 is used to indicate that a species does not dry deposit -
+---
+>     ! Diffusion coefficient for each species (m2 s-1), where available.
+>     ! A value of -1.0 indicates the diffusion coefficient should be derived
+>     ! from that of water
+>   dep_species_rmm(:),                                                          &
+>     ! Relative molecular mass of each species (g mol-1).
+>     ! All secies should have a positive value -
+113,114c126,127
+<     ! Standard value of surface resistance for each surface type and tracer
+<     ! species (s m-1).
+---
+>     ! Standard value of surface resistance for each surface type and
+>     ! deposited chemical species (s m-1).
+127,132c140,142
+< SUBROUTINE deposition_species_alloc(ntype,ndry_dep_species,                    &
+<                               l_deposition, dry_dep_model)
+< 
+< !No USE statements other than Dr Hook
+< USE parkind1,    ONLY: jprb, jpim
+< USE yomhook,     ONLY: lhook, dr_hook
+---
+> !-----------------------------------------------------------------------------
+> SUBROUTINE deposition_species_alloc(ntype, ndry_dep_species, l_deposition)
+> !-----------------------------------------------------------------------------
+134c144,145
+< USE ereport_mod, ONLY: ereport
+---
+> USE parkind1,       ONLY: jprb, jpim
+> USE yomhook,        ONLY: lhook, dr_hook
+136,137c147
+< !Not ideal
+< USE jules_deposition_mod,     ONLY: dry_dep_ukca_jules
+---
+> USE ereport_mod,    ONLY: ereport
+142c152
+< INTEGER, INTENT(IN) :: ntype,ndry_dep_species
+---
+> INTEGER, INTENT(IN) :: ntype, ndry_dep_species
+146,152d155
+< INTEGER, INTENT(IN) :: dry_dep_model
+< 
+< !Local variables
+< INTEGER :: temp_size, temp_tiles, temp_layers
+< 
+< INTEGER :: errcode
+< 
+163,164d165
+< errcode = 101
+< 
+169a171,202
+>   ! Deposition parameters through namelists.
+>   ! NOTE: Only using dep_species_name for dry_dep_model = dry_dep_model_ukca
+>   ! as species-dependent deposition parameter values hard-wired into
+>   ! deposition routines: deposition_initialisation_ukca_aerod and
+>   ! deposition_initialisation_ukca_surfddr.
+> 
+>   ALLOCATE( dd_ice_coeff(ndry_dep_species, 3))
+>   ALLOCATE( diffusion_coeff(ndry_dep_species))
+>   ALLOCATE( dep_species_rmm(ndry_dep_species))
+>   ALLOCATE( diffusion_corr(ndry_dep_species))
+>   ALLOCATE( r_tundra(ndry_dep_species))
+>   ALLOCATE( rsurf_std(ntype, ndry_dep_species))
+> 
+>   ! Always allocate space for CH4 parameters, even if not used.
+>   ALLOCATE( ch4_up_flux(ntype))
+> 
+>   ! Always allocate space for H2 parameters, even if not used.
+>   ALLOCATE( h2dd_c(ntype))
+>   ALLOCATE( h2dd_m(ntype))
+>   ALLOCATE( h2dd_q(ntype))
+> 
+>   ch4_up_flux(:)        = 0.0
+>   dd_ice_coeff(:,:)     = 0.0
+>   dep_species_name(:)   = ''
+>   diffusion_coeff(:)    = 0.0
+>   dep_species_rmm(:)    = 0.0
+>   diffusion_corr(:)     = 0.0
+>   r_tundra(:)           = 0.0
+>   rsurf_std(:,:)        = 0.0
+>   h2dd_c(:)             = 0.0
+>   h2dd_m(:)             = 0.0
+>   h2dd_q(:)             = 0.0
+171,200d203
+<   ! Model-dependent variables.
+<   SELECT CASE ( dry_dep_model )
+<   CASE ( dry_dep_ukca_jules )
+<     ! Deposition parameters.
+<     ALLOCATE( dd_ice_coeff(ndry_dep_species,3))
+<     ALLOCATE( diffusion_coeff(ndry_dep_species))
+<     ALLOCATE( diffusion_corr(ndry_dep_species))
+<     ALLOCATE( r_tundra(ndry_dep_species))
+<     ALLOCATE( rsurf_std(ntype,ndry_dep_species))
+< 
+<     ! Always allocate space for H2 parameters, even if not used.
+<     ALLOCATE( h2dd_c(ntype))
+<     ALLOCATE( h2dd_m(ntype))
+<     ALLOCATE( h2dd_q(ntype))
+< 
+<     dd_ice_coeff(:,:)   = 0.0
+<     dep_species_name(:) = ""
+<     diffusion_coeff(:)  = 0.0
+<     diffusion_corr(:)   = 0.0
+<     r_tundra(:)         = 0.0
+<     rsurf_std(:,:)      = 0.0
+<     h2dd_c(:)           = 0.0
+<     h2dd_m(:)           = 0.0
+<     h2dd_q(:)           = 0.0
+< 
+<   CASE DEFAULT
+<     CALL ereport ("Invalid value for dry_dep_model. ", errcode,                &
+<                    "deposition_species_alloc.")
+< 
+<   END SELECT
+208,210c211
+< 
+< SUBROUTINE check_jules_deposition_species()
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_params_deposition_species_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_params_deposition_species_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

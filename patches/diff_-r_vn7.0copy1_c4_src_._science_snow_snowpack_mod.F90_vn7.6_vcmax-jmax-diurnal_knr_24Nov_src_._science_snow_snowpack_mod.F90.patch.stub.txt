@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.256684 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/snow/snowpack_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/snow/snowpack_mod.F90
+
+SUMMARY:
+  - added lines (>): 259
+  - removed lines (<): 23
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/snow/snowpack_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/snow/snowpack_mod.F90
+24,26c24,26
+< SUBROUTINE snowpack ( surft_n, land_pts, surft_pts, timestep, cansnowtile,     &
+<                       nsnow, surft_index, nsurft, csnow, ei_surft,             &
+<                       hcaps1_soilt, hcons, infiltration, ksnow,                &
+---
+> SUBROUTINE snowpack ( surft_n, land_pts, surft_pts, n_wtrac_jls, timestep,     &
+>                       cansnowtile, nsnow, surft_index, nsurft, csnow,          &
+>                       ei_surft, hcaps1_soilt, hcons, infiltration, ksnow,      &
+28,30c28,34
+<                       surf_htf_surft, tile_frac, smvcst1_soilt, ds,            &
+<                       melt_surft, sice, sliq, snomlt_sub_htf, snowdepth,       &
+<                       snowmass, tsnow, t_soil1_soilt, tsurf_elev_surft,        &
+---
+>                       surf_htf_surft, tile_frac, smvcst1_soilt,                &
+>                       ei_surft_wtrac, infiltration_wtrac, ds,                  &
+>                       melt_surft, snowinc_surft, sice, sliq, snomlt_sub_htf,   &
+>                       snowdepth, snowmass, tsnow,                              &
+>                       t_soil1_soilt, tsurf_elev_surft,                         &
+>                       melt_surft_wtrac, sice_wtrac, sliq_wtrac,                &
+>                       snowfall_wtrac, snowmass_wtrac,                          &
+32c36
+<                       sf_diag, non_lake_frac,                                  &
+---
+>                       sice0_wtrac, sf_diag, non_lake_frac,                     &
+34c38
+<                       l_lice_point,                                            &
+---
+>                       l_lice_point, l_lice_surft,                              &
+55,56d58
+< USE ancil_info, ONLY: l_lice_surft
+< 
+61c63
+< USE jules_surface_types_mod, ONLY: lake
+---
+> USE jules_surface_types_mod, ONLY: lake, ntype
+86a89,90
+> USE jules_water_tracers_mod, ONLY: l_wtrac_jls, wtrac_calc_ratio_fn_jules
+> 
+106c110,113
+<   surft_pts      ! Number of tile points.
+---
+>   surft_pts,                                                                   &
+>                  ! Number of tile points.
+>   n_wtrac_jls
+>                  ! Number of water tracers.
+127a135,136
+>   snowinc_surft(land_pts),                                                     &
+>     ! Total snow increment over the time step (kg m-2 TS-1)
+157c166
+<   lake_depth_gb(land_pts)
+---
+>   lake_depth_gb(land_pts),                                                     &
+158a168,172
+>   ei_surft_wtrac(land_pts,nsurft,n_wtrac_jls),                                 &
+>     ! Water tracer sublimation of snow for all tiles (kg/m2/s).
+>     ! (Note, unlike the water equivalent, this is the full field for all tiles.)
+>   infiltration_wtrac(land_pts,n_wtrac_jls)
+>     ! Water tracer content in rainfall infiltrating into snowpack (kg/m2).
+184c198
+<   tsurf_elev_surft(land_pts)
+---
+>   tsurf_elev_surft(land_pts),                                                  &
+185a200,210
+>   melt_surft_wtrac(land_pts,nsurft,n_wtrac_jls),                               &
+>     ! Water tracer surface snowmelt rate for all tiles (kg/m2/s).
+>     ! (Note, unlike the water equivalent, this is the full field for all tiles)
+>   sice_wtrac(land_pts,nsmax,n_wtrac_jls),                                      &
+>     ! Water tracer ice content of snow layers (kg/m2).
+>   sliq_wtrac(land_pts,nsmax,n_wtrac_jls),                                      &
+>     ! Water tracer liquid content of snow layers (kg/m2).
+>   snowfall_wtrac(land_pts,n_wtrac_jls),                                        &
+>     ! Water tracer content of frozen precip reaching the ground (kg/m2).
+>   snowmass_wtrac(land_pts,n_wtrac_jls)
+>     ! Water tracer content in snow mass on the ground (kg/m2).
+202c227
+<   rho_snow(land_pts,nsmax)
+---
+>   rho_snow(land_pts,nsmax),                                                    &
+203a229,231
+>   sice0_wtrac(land_pts,n_wtrac_jls)
+>     ! Water tracer ice content of fresh snow (kg/m2).
+>     ! Where nsnow=0, sice0 is the mass of the snowpack.
+206a235
+> LOGICAL, INTENT(IN) :: l_lice_surft(ntype)
+228c257
+<   n
+---
+>   n,                                                                           &
+229a259,260
+>   i_wt
+>     ! Water tracer index.
+258c289
+<   dzsoilw
+---
+>   dzsoilw,                                                                     &
+259a291,296
+>   ratio_snowmass,                                                              &
+>   ratio_sice,                                                                  &
+>   ratio_sliq,                                                                  &
+>     ! Water tracer to water ratios
+>   submelt_wtrac
+>     ! Amount of water tracer snow that is melted or liquid that is frozen
+275c312
+<   r(nsmax)
+---
+>   r(nsmax),                                                                    &
+276a314,319
+>   dsice_wtrac(n_wtrac_jls),                                                    &
+>     ! Melt of water tracer snow beneath canopy (kg/m2/s)
+>   can_melt_wtrac(n_wtrac_jls),                                                 &
+>     ! Melt of water tracer snow on the canopy (kg/m2/s).
+>   win_wtrac(n_wtrac_jls)
+>     ! Water tracer entering layer (kg/m2).
+294c337
+< !$OMP PRIVATE(i,k,n,asoil,can_melt,coldsnow,dsice,g_snow_surf,rho_temp,        &
+---
+> !$OMP PRIVATE(i,k,n,i_wt,asoil,can_melt,coldsnow,dsice,g_snow_surf,rho_temp,   &
+296c339,340
+< !$OMP         r, tile_frac_lake_adj)
+---
+> !$OMP         r, tile_frac_lake_adj,ratio_snowmass,ratio_sice,ratio_sliq,      &
+> !$OMP         submelt_wtrac,win_wtrac,dsice_wtrac,can_melt_wtrac)
+345a390,395
+>         IF (l_wtrac_jls) THEN
+>           ! Repeat for water tracers
+>           DO i_wt = 1, n_wtrac_jls
+>             snowfall_wtrac(i,i_wt) = 0.0
+>           END DO
+>         END IF
+351a402,408
+>     IF (l_wtrac_jls) THEN
+>       ! Repeat for water tracers
+>       DO i_wt = 1,n_wtrac_jls
+>         snowmass_wtrac(i,i_wt) = snowmass_wtrac(i,i_wt)+snowfall_wtrac(i,i_wt)
+>       END DO
+>     END IF
+> 
+356,357c413,424
+<       snowmass(i) = snowmass(i) -                                              &
+<                     ( ei_surft(i) + melt_surft(i) ) * timestep
+---
+>       snowmass(i) = snowmass(i) + snowinc_surft(i)
+> 
+>       IF (l_wtrac_jls) THEN
+>         ! Repeat for water tracers
+>         DO i_wt = 1,n_wtrac_jls
+>           snowmass_wtrac(i,i_wt) = snowmass_wtrac(i,i_wt) -                    &
+>                                   ( ei_surft_wtrac(i,surft_n,i_wt)             &
+>                                     + melt_surft_wtrac(i,surft_n,i_wt) )       &
+>                                   * timestep
+>         END DO
+>       END IF
+> 
+358a426
+> 
+427a496,511
+>         ! Update water tracers first, so ratio calculation can use snowmass
+>         ! before is it updated
+>         IF (l_wtrac_jls) THEN
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_snow_snowpack_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_snow_snowpack_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

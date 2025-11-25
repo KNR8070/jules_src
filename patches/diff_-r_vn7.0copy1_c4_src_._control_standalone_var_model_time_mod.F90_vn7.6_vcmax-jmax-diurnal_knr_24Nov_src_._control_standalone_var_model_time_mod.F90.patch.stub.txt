@@ -1,0 +1,32 @@
+Patch stub generated: 2025-11-25T12:09:12.156459 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/standalone/var/model_time_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/var/model_time_mod.F90
+
+SUMMARY:
+  - added lines (>): 6
+  - removed lines (<): 1
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/standalone/var/model_time_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/standalone/var/model_time_mod.F90
+30c30
+< INTEGER :: timestep            ! The current timestep number.
+---
+> INTEGER :: timestep_number     ! The current timestep number.
+32a33,37
+> INTEGER :: oasis_time          ! Time controlling oasis coupling:
+>                                !  the current timestep in seconds
+>                                ! This time is not applicable to JULES or
+>                                ! Rivers-only when not coupled to OASIS and
+>                                ! should therefore not be used elsewhere.
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_standalone_var_model_time_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_standalone_var_model_time_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

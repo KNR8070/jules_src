@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.225839 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./io/model_interface/variable_metadata.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/model_interface/variable_metadata.inc
+
+SUMMARY:
+  - added lines (>): 219
+  - removed lines (<): 346
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./io/model_interface/variable_metadata.inc vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./io/model_interface/variable_metadata.inc
+5819c5819
+< ! Variables available with any multi-pool soil C model (e.g. RothC, ECOSSE).
+---
+> ! Variables available with any multi-pool soil C model (e.g. 4-pool, ECOSSE).
+6829c6829
+< ! Metadata for c_emiss_out
+---
+> ! Metadata for c_emiss_data
+6833c6833
+<     'c_emiss_out',                                                             &
+---
+>     'c_emiss_data',                                                            &
+7042c7042
+< ! Metadata for tracer.
+---
+> ! Metadata for deposition_conc
+7046c7046
+<     'tracer_field',                                                            &
+---
+>     'deposition_conc',                                                         &
+7048c7048
+<     var_type_tracer,                                                           &
+---
+>     var_type_dep_species,                                                      &
+7050c7050
+<     "Surface chemical tracer concentrations as mass mixing ratios",            &
+---
+>     "Surface concentration of deposited species as mass mixing ratios",        &
+7988c7988
+< ! Metadata for t1p5m_ij_clim_imgn
+---
+> ! Metadata for tl1_ij_clim_imgn
+7992c7992
+<     't1p5m_ij_clim_imgn',                                                      &
+---
+>     'tl1_ij_clim_imgn',                                                        &
+8001c8001
+< ! Metadata for rh1p5m_ij_clim_imgn
+---
+> ! Metadata for ql1_ij_clim_imgn
+8005c8005
+<     'rh1p5m_ij_clim_imgn',                                                     &
+---
+>     'ql1_ij_clim_imgn',                                                        &
+8014c8014
+< ! Metadata for uwind_ij_clim_imgn
+---
+> ! Metadata for wind_ij_clim_imgn
+8018c8018
+<     'uwind_ij_clim_imgn',                                                      &
+---
+>     'wind_ij_clim_imgn',                                                       &
+8022,8035c8022
+<     "imogen uwind climatology",                                                &
+< ! Units
+<     "m/s"                                                                      &
+<   ) /
+< !-----------------------------------------------------------------------------
+< ! Metadata for vwind_ij_clim_imgn
+< !-----------------------------------------------------------------------------
+< DATA metadata(621) / var_metadata(                                             &
+< ! String identifier
+<     'vwind_ij_clim_imgn',                                                      &
+< ! Variable type
+<     var_type_imogen_drive,                                                     &
+< ! Long name
+<     "imogen vwind climatology",                                                &
+---
+>     "imogen wind climatology",                                                 &
+8042c8029
+< DATA metadata(622) / var_metadata(                                             &
+---
+> DATA metadata(621) / var_metadata(                                             &
+8055c8042
+< DATA metadata(623) / var_metadata(                                             &
+---
+> DATA metadata(622) / var_metadata(                                             &
+8066c8053
+< ! Metadata for diurnal_t1p5m_ij_clim_imgn
+---
+> ! Metadata for diurnal_tl1_ij_clim_imgn
+8068c8055
+< DATA metadata(624) / var_metadata(                                             &
+---
+> DATA metadata(623) / var_metadata(                                             &
+8070c8057
+<     'diurnal_t1p5m_ij_clim_imgn',                                              &
+---
+>     'diurnal_tl1_ij_clim_imgn',                                                &
+8081c8068
+< DATA metadata(625) / var_metadata(                                             &
+---
+> DATA metadata(624) / var_metadata(                                             &
+8094c8081
+< DATA metadata(626) / var_metadata(                                             &
+---
+> DATA metadata(625) / var_metadata(                                             &
+8105c8092
+< ! Metadata for t1p5m_ij_anom_imgn
+---
+> ! Metadata for tl1_ij_anom_imgn
+8107c8094
+< DATA metadata(627) / var_metadata(                                             &
+---
+> DATA metadata(626) / var_metadata(                                             &
+8109c8096
+<     't1p5m_ij_anom_imgn',                                                      &
+---
+>     'tl1_ij_anom_imgn',                                                        &
+8118c8105
+< ! Metadata for rh1p5m_ij_anom_imgn
+---
+> ! Metadata for ql1_ij_anom_imgn
+8120c8107
+< DATA metadata(628) / var_metadata(                                             &
+---
+> DATA metadata(627) / var_metadata(                                             &
+8122c8109
+<     'rh1p5m_ij_anom_imgn',                                                     &
+---
+>     'ql1_ij_anom_imgn',                                                        &
+8131,8144c8118
+< ! Metadata for uwind_ij_anom_imgn
+< !-----------------------------------------------------------------------------
+< DATA metadata(629) / var_metadata(                                             &
+< ! String identifier
+<     'uwind_ij_anom_imgn',                                                      &
+< ! Variable type
+<     var_type_imogen_drive,                                                     &
+< ! Long name
+<     "imogen uwind anomaly",                                                    &
+< ! Units
+<     "m/s"                                                                      &
+<   ) /
+< !-----------------------------------------------------------------------------
+< ! Metadata for vwind_ij_anom_imgn
+---
+> ! Metadata for wind_ij_anom_imgn
+8146c8120
+< DATA metadata(630) / var_metadata(                                             &
+---
+> DATA metadata(628) / var_metadata(                                             &
+8148c8122
+<     'vwind_ij_anom_imgn',                                                      &
+---
+>     'wind_ij_anom_imgn',                                                       &
+8152c8126
+<     "imogen vwind anomaly",                                                    &
+---
+>     "imogen wind anomaly",                                                     &
+8159c8133
+< DATA metadata(631) / var_metadata(                                             &
+---
+> DATA metadata(629) / var_metadata(                                             &
+8172c8146
+< DATA metadata(632) / var_metadata(                                             &
+---
+> DATA metadata(630) / var_metadata(                                             &
+8183c8157
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._io_model_interface_variable_metadata.inc_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._io_model_interface_variable_metadata.inc.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

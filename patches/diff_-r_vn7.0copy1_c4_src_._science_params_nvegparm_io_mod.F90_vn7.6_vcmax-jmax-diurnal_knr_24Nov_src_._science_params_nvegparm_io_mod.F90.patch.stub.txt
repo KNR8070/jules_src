@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.237755 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/params/nvegparm_io_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/nvegparm_io_mod.F90
+
+SUMMARY:
+  - added lines (>): 61
+  - removed lines (<): 58
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/params/nvegparm_io_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/params/nvegparm_io_mod.F90
+17,18c17
+< USE max_dimensions, ONLY:                                                      &
+<   nnvg_max
+---
+> USE max_dimensions, ONLY: nnvg_max
+30d28
+<   albsnf_nvgu_io(nnvg_max) = rmdi,                                             &
+32a31
+>   albsnf_nvgu_io(nnvg_max) = rmdi,                                             &
+33a33,34
+>   ch_nvg_io(nnvg_max) = rmdi,                                                  &
+>   emis_nvg_io(nnvg_max) = rmdi,                                                &
+36,37d36
+<   z0_nvg_io(nnvg_max) = rmdi,                                                  &
+<   ch_nvg_io(nnvg_max) = rmdi,                                                  &
+39,42c38,40
+<   emis_nvg_io(nnvg_max) = rmdi,                                                &
+<   z0hm_nvg_io(nnvg_max) = rmdi,                                                &
+<   z0hm_classic_nvg_io(nnvg_max) = rmdi
+< 
+---
+>   z0_nvg_io(nnvg_max) = rmdi,                                                  &
+>   z0hm_classic_nvg_io(nnvg_max) = rmdi,                                        &
+>   z0hm_nvg_io(nnvg_max) = rmdi
+48,53c46,50
+<                           albsnc_nvg_io,albsnf_nvgu_io,                        &
+<                           albsnf_nvg_io, albsnf_nvgl_io,                       &
+<                           catch_nvg_io,gs_nvg_io,infil_nvg_io,                 &
+<                           z0_nvg_io,ch_nvg_io,vf_nvg_io,                       &
+<                           emis_nvg_io,z0hm_nvg_io,                             &
+<                           z0hm_classic_nvg_io
+---
+>                           albsnc_nvg_io, albsnf_nvg_io,                        &
+>                           albsnf_nvgl_io, albsnf_nvgu_io,                      &
+>                           catch_nvg_io, ch_nvg_io, emis_nvg_io,                &
+>                           gs_nvg_io, infil_nvg_io, vf_nvg_io,                  &
+>                           z0_nvg_io, z0hm_nvg_io, z0hm_classic_nvg_io
+70a68,71
+> WRITE(lineBuffer,*)' albsnf_nvgl_io = ',albsnf_nvgl_io
+> CALL jules_print('nvegparm_io',lineBuffer)
+> WRITE(lineBuffer,*)' albsnf_nvgu_io = ',albsnf_nvgu_io
+> CALL jules_print('nvegparm_io',lineBuffer)
+73c74
+< WRITE(lineBuffer,*)' gs_nvg_io = ',gs_nvg_io
+---
+> WRITE(lineBuffer,*)' ch_nvg_io = ',ch_nvg_io
+75c76
+< WRITE(lineBuffer,*)' infil_nvg_io = ',infil_nvg_io
+---
+> WRITE(lineBuffer,*)' emis_nvg_io = ',emis_nvg_io
+77c78
+< WRITE(lineBuffer,*)' z0_nvg_io = ',z0_nvg_io
+---
+> WRITE(lineBuffer,*)' gs_nvg_io = ',gs_nvg_io
+79c80
+< WRITE(lineBuffer,*)' ch_nvg_io = ',ch_nvg_io
+---
+> WRITE(lineBuffer,*)' infil_nvg_io = ',infil_nvg_io
+83c84,86
+< WRITE(lineBuffer,*)' emis_nvg_io = ',emis_nvg_io
+---
+> WRITE(lineBuffer,*)' z0_nvg_io = ',z0_nvg_io
+> CALL jules_print('nvegparm_io',lineBuffer)
+> WRITE(lineBuffer,*)' z0hm_classic_nvg_io = ',z0hm_classic_nvg_io
+131d133
+<   REAL(KIND=real_jlslsm) :: albsnf_nvgu_io(nnvg_max)
+133a136
+>   REAL(KIND=real_jlslsm) :: albsnf_nvgu_io(nnvg_max)
+134a138,139
+>   REAL(KIND=real_jlslsm) :: ch_nvg_io(nnvg_max)
+>   REAL(KIND=real_jlslsm) :: emis_nvg_io(nnvg_max)
+137,138d141
+<   REAL(KIND=real_jlslsm) :: z0_nvg_io(nnvg_max)
+<   REAL(KIND=real_jlslsm) :: ch_nvg_io(nnvg_max)
+140,141c143
+<   REAL(KIND=real_jlslsm) :: emis_nvg_io(nnvg_max)
+<   REAL(KIND=real_jlslsm) :: z0hm_nvg_io(nnvg_max)
+---
+>   REAL(KIND=real_jlslsm) :: z0_nvg_io(nnvg_max)
+142a145
+>   REAL(KIND=real_jlslsm) :: z0hm_nvg_io(nnvg_max)
+159,170c162,172
+<   my_nml % albsnc_nvg_io   = albsnc_nvg_io
+<   my_nml % albsnf_nvgu_io  = albsnf_nvgu_io
+<   my_nml % albsnf_nvg_io   = albsnf_nvg_io
+<   my_nml % albsnf_nvgl_io  = albsnf_nvgl_io
+<   my_nml % catch_nvg_io    = catch_nvg_io
+<   my_nml % gs_nvg_io       = gs_nvg_io
+<   my_nml % infil_nvg_io    = infil_nvg_io
+<   my_nml % z0_nvg_io       = z0_nvg_io
+<   my_nml % ch_nvg_io       = ch_nvg_io
+<   my_nml % vf_nvg_io       = vf_nvg_io
+<   my_nml % emis_nvg_io     = emis_nvg_io
+<   my_nml % z0hm_nvg_io     = z0hm_nvg_io
+---
+>   my_nml % albsnc_nvg_io       = albsnc_nvg_io
+>   my_nml % albsnf_nvg_io       = albsnf_nvg_io
+>   my_nml % albsnf_nvgl_io      = albsnf_nvgl_io
+>   my_nml % albsnf_nvgu_io      = albsnf_nvgu_io
+>   my_nml % catch_nvg_io        = catch_nvg_io
+>   my_nml % ch_nvg_io           = ch_nvg_io
+>   my_nml % emis_nvg_io         = emis_nvg_io
+>   my_nml % gs_nvg_io           = gs_nvg_io
+>   my_nml % infil_nvg_io        = infil_nvg_io
+>   my_nml % vf_nvg_io           = vf_nvg_io
+>   my_nml % z0_nvg_io           = z0_nvg_io
+171a174
+>   my_nml % z0hm_nvg_io         = z0hm_nvg_io
+178,189c181,191
+<   albsnc_nvg_io   = my_nml % albsnc_nvg_io
+<   albsnf_nvgu_io  = my_nml % albsnf_nvgu_io
+<   albsnf_nvg_io   = my_nml % albsnf_nvg_io
+<   albsnf_nvgl_io  = my_nml % albsnf_nvgl_io
+<   catch_nvg_io    = my_nml % catch_nvg_io
+<   gs_nvg_io       = my_nml % gs_nvg_io
+<   infil_nvg_io    = my_nml % infil_nvg_io
+<   z0_nvg_io       = my_nml % z0_nvg_io
+<   ch_nvg_io       = my_nml % ch_nvg_io
+<   vf_nvg_io       = my_nml % vf_nvg_io
+<   emis_nvg_io     = my_nml % emis_nvg_io
+<   z0hm_nvg_io     = my_nml % z0hm_nvg_io
+---
+>   albsnc_nvg_io       = my_nml % albsnc_nvg_io
+>   albsnf_nvg_io       = my_nml % albsnf_nvg_io
+>   albsnf_nvgl_io      = my_nml % albsnf_nvgl_io
+>   albsnf_nvgu_io      = my_nml % albsnf_nvgu_io
+>   catch_nvg_io        = my_nml % catch_nvg_io
+>   ch_nvg_io           = my_nml % ch_nvg_io
+>   emis_nvg_io         = my_nml % emis_nvg_io
+>   gs_nvg_io           = my_nml % gs_nvg_io
+>   infil_nvg_io        = my_nml % infil_nvg_io
+>   vf_nvg_io           = my_nml % vf_nvg_io
+>   z0_nvg_io           = my_nml % z0_nvg_io
+190a193
+>   z0hm_nvg_io         = my_nml % z0hm_nvg_io
+208,211c211,214
+<   albsnc_nvg,   albsnf_nvgu,  albsnf_nvg,                                      &
+<   albsnf_nvgl,  catch_nvg,    gs_nvg,                                          &
+<   infil_nvg,    z0_nvg,       ch_nvg,                                          &
+<   vf_nvg,       emis_nvg,     l_z0_nvg
+---
+>   albsnc_nvg,   albsnf_nvg,   albsnf_nvgl,                                     &
+>   albsnf_nvgu,  catch_nvg,    ch_nvg,                                          &
+>   emis_nvg,     gs_nvg,       infil_nvg,                                       &
+>   vf_nvg,       z0_nvg,       l_z0_nvg
+232d234
+< albsnf_nvgu(:)                      = albsnf_nvgu_io(1:nnvg)
+234a237
+> albsnf_nvgu(:)                      = albsnf_nvgu_io(1:nnvg)
+235a239,240
+> ch_nvg(:)                           = ch_nvg_io(1:nnvg)
+> emis_nvg(:)                         = emis_nvg_io(1:nnvg)
+238,239d242
+< z0_nvg(:)                           = z0_nvg_io(1:nnvg)
+< ch_nvg(:)                           = ch_nvg_io(1:nnvg)
+241,242c244
+< emis_nvg(:)                         = emis_nvg_io(1:nnvg)
+< z0h_z0m(npft+1:npft + nnvg)         = z0hm_nvg_io(1:nnvg)
+---
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_params_nvegparm_io_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_params_nvegparm_io_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

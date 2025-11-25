@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.185719 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/grid/init_model_grid_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/grid/init_model_grid_mod.F90
+
+SUMMARY:
+  - added lines (>): 197
+  - removed lines (<): 77
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Namelist/IO changes: reconcile derived types and broadcast logic.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/standalone/grid/init_model_grid_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/standalone/grid/init_model_grid_mod.F90
+18c18
+< USE init_latlon_mod, ONLY: l_const_latlon
+---
+> USE init_latlon_mod, ONLY: l_const_coord
+43a44,45
+> USE jules_model_environment_mod, ONLY: lsm_id, rivers
+> 
+45c47,48
+<                           grid_area_ij, latitude, longitude
+---
+>                           grid_area_ij, latitude, longitude, l_coord_latlon,   &
+>                           projection_x_coord, projection_y_coord
+77a81,83
+> REAL :: x_coord(grid_in%nx,grid_in%ny)
+>   ! x co-ordinates of points on the input grid.
+> 
+82,84c88,91
+< REAL(KIND=real_jlslsm) :: point_lat, point_lon
+<                               ! Latitude and longitude of points read from
+<                               ! points file
+---
+> REAL(KIND=real_jlslsm) :: point_x, point_y
+>                               ! x and y coordinates of points read from
+>                               ! points file. If l_coord_latlon=T these are
+>                               ! longitude and latitude respectively.
+90,93c97,101
+< REAL(KIND=real_jlslsm)                                                         &
+<     , ALLOCATABLE :: global_area(:,:), global_lat(:,:), global_lon(:,:), global_land_frac(:,:)
+<                              ! Latitude, longitude and land fraction on
+<                              ! the full model grid
+---
+> REAL(KIND=real_jlslsm), ALLOCATABLE ::                                         &
+>   global_area(:,:), global_lat(:,:), global_lon(:,:), global_land_frac(:,:),   &
+>   global_xcoord(:,:), global_ycoord(:,:)
+>                              ! Latitude, longitude, land fraction and more on
+>                              ! the full model grid.
+95c103
+<                              ! routine
+---
+>                              ! routine.
+100a109,117
+> INTEGER :: np, np_previous      ! Counters of values set in mask.
+> 
+> LOGICAL :: l_bounds_180
+>   ! TRUE if bounds values are taken to be in [-180,180], otherwise FALSE.
+> LOGICAL :: l_lon_180
+>   ! TRUE if longitude values are taken to be in [-180,180], otherwise FALSE.
+> LOGICAL :: l_missing
+>   ! TRUE if a coordinate pair cannot be matched to a location in the input
+>   !   grid, when reading a list f coordinate pairs.
+115,120c132,136
+< LOGICAL :: latlon_region  ! T - subgrid is to be selected with latitude and
+<                           !     longitude bounds
+<                           ! F - subgrid is to be selected using a list
+<                           !     of latitudes and longitudes
+< REAL(KIND=real_jlslsm) :: lat_bounds(2)   ! USED IF latlon_region=T
+< REAL(KIND=real_jlslsm) :: lon_bounds(2)
+---
+> LOGICAL :: l_bounds       ! T - subgrid is to be selected with coordinate bounds
+>                           ! F - subgrid is to be selected using a list of
+>                           !     coordinates
+> REAL(KIND=real_jlslsm) :: y_bounds(2)   ! USED IF l_bounds=T
+> REAL(KIND=real_jlslsm) :: x_bounds(2)
+128,130c144,146
+< NAMELIST  / jules_model_grid/ land_only, use_subgrid, latlon_region,           &
+<                             lat_bounds, lon_bounds, npoints, points_file,      &
+<                             force_1d_grid
+---
+> NAMELIST  / jules_model_grid/ land_only, use_subgrid, l_bounds,                &
+>                               y_bounds, x_bounds, npoints, points_file,        &
+>                               force_1d_grid
+151c167
+< IF ( ERROR /= 0 )                                                              &
+---
+> IF ( ERROR /= 0 ) THEN
+155a172
+> END IF
+157,160c174,178
+< !-----------------------------------------------------------------------------
+< ! Read the jules_nlsizes namelist.
+< !-----------------------------------------------------------------------------
+< CALL log_info("init_model_grid", "Reading JULES_NLSIZES namelist...")
+---
+> IF ( lsm_id /= rivers ) THEN
+>   !-----------------------------------------------------------------------------
+>   ! Read the jules_nlsizes namelist.
+>   !-----------------------------------------------------------------------------
+>   CALL log_info("init_model_grid", "Reading JULES_NLSIZES namelist...")
+162,167c180,186
+< READ(namelist_unit, NML = jules_nlsizes, IOSTAT = ERROR, IOMSG = iomessage)
+< IF ( ERROR /= 0 ) THEN
+<   CALL log_fatal("init_model_grid",                                            &
+<                  "Error reading namelist JULES_NLSIZES " //                    &
+<                  "(IOSTAT=" // TRIM(to_string(ERROR)) // " IOMSG=" //          &
+<                  TRIM(iomessage) // ")")
+---
+>   READ(namelist_unit, NML = jules_nlsizes, IOSTAT = ERROR, IOMSG = iomessage)
+>   IF ( ERROR /= 0 ) THEN
+>     CALL log_fatal("init_model_grid",                                          &
+>                    "Error reading namelist JULES_NLSIZES " //                  &
+>                    "(IOSTAT=" // TRIM(to_string(ERROR)) // " IOMSG=" //        &
+>                    TRIM(iomessage) // ")")
+>   END IF
+187a207,209
+> ! Copy x coordinates of input grid.
+> x_coord(:,:) = projection_x_coord(:,:)
+> 
+189c211
+<   IF ( latlon_region ) THEN
+---
+>   IF ( l_bounds ) THEN
+191c213
+<     ! The subgrid will be selected using latitude and longitude bounds
+---
+>     ! The subgrid will be selected using coordinate bounds.
+194,195c216
+<                   "Subgrid will be selected using latitude and " //            &
+<                   "longitude bounds")
+---
+>                   "Subgrid will be selected using coordinate bounds")
+197,198c218,219
+<                   "Latitude range - " // TRIM(to_string(lat_bounds(1))) //     &
+<                   " to " // TRIM(to_string(lat_bounds(2))))
+---
+>                   "y range - " // TRIM(to_string(y_bounds(1))) //              &
+>                   " to " // TRIM(to_string(y_bounds(2))))
+200,201c221,227
+<                   "Longitude range - " // TRIM(to_string(lon_bounds(1))) //    &
+<                   " to " // TRIM(to_string(lon_bounds(2))))
+---
+>                   "x range - " // TRIM(to_string(x_bounds(1))) //              &
+>                   " to " // TRIM(to_string(x_bounds(2))))
+>     ! Check that the bounds are given in increasing order.
+>     IF ( x_bounds(2) < x_bounds(1) .OR. y_bounds(2) < y_bounds(1) ) THEN
+>       CALL log_fatal("init_model_grid",                                        &
+>                      "Bounds must be given in increasing order.")
+>     END IF
+203,206c229,272
+<     input_mask = ( lat_bounds(1) <= latitude ) .AND.                           &
+<                  ( latitude <= lat_bounds(2) ) .AND.                           &
+<                  ( lon_bounds(1) <= longitude ) .AND.                          &
+<                  ( longitude <= lon_bounds(2) )
+---
+>     !-------------------------------------------------------------------------
+>     ! Deal with the case when longitude bounds cross the edge of the input
+>     ! grid - e.g. longitude values are given in [0,360] but a regional subgrid
+>     ! for [-10,10] is required. In this case we adjust the longitude values to
+>     ! fall within [-180,180].
+>     !-------------------------------------------------------------------------
+>     IF ( l_coord_latlon ) THEN
+>       ! Establish the ranges used for longitude and bounds.
+>       ! A value <0 is taken to indicate that values are in [-180,180];
+>       ! otherwise [0,360] is assumed.
+>       l_lon_180    = MINVAL( x_coord) < 0.0
+>       l_bounds_180 = x_bounds(1) < 0.0
+>       ! If ranges are different, change longitude values.
+>       IF ( l_lon_180 .NEQV. l_bounds_180 ) THEN
+>         IF ( l_bounds_180 ) THEN
+>           ! Change longitude to [-180,180].
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_standalone_grid_init_model_grid_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_standalone_grid_init_model_grid_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

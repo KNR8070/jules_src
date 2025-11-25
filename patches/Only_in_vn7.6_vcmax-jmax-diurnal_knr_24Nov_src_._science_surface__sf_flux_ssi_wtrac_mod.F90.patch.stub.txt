@@ -1,0 +1,22 @@
+Patch stub generated: 2025-11-25T12:09:12.288019 UTC
+
+HEADER:
+Only in vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface: sf_flux_ssi_wtrac_mod.F90
+
+SUMMARY:
+  - added lines (>): 0
+  - removed lines (<): 0
+  - only in one tree: True
+
+RECOMMENDATIONS:
+- File exists only in one tree: decide whether to copy/integrate.
+
+DIFF PREVIEW:
+Only in vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface: sf_flux_ssi_wtrac_mod.F90
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/Only_in_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface__sf_flux_ssi_wtrac_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

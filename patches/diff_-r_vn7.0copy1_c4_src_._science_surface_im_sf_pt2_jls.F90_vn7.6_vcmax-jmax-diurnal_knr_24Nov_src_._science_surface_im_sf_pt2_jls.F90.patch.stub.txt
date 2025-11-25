@@ -1,0 +1,38 @@
+Patch stub generated: 2025-11-25T12:09:12.270968 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./science/surface/im_sf_pt2_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/im_sf_pt2_jls.F90
+
+SUMMARY:
+  - added lines (>): 4
+  - removed lines (<): 4
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./science/surface/im_sf_pt2_jls.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./science/surface/im_sf_pt2_jls.F90
+40c40
+< USE model_domain_mod, ONLY: model_type, mt_single_column
+---
+> USE model_domain_mod, ONLY: model_type, mt_single_column, mt_lfric
+300c300
+< IF (model_type /= mt_single_column) THEN
+---
+> IF ((model_type /= mt_single_column) .AND. (model_type /= mt_lfric)) THEN
+373c373
+<   IF (model_type /= mt_single_column) THEN
+---
+>   IF ((model_type /= mt_single_column) .AND. (model_type /= mt_lfric)) THEN
+874c874
+<   IF (model_type /= mt_single_column) THEN
+---
+>   IF ((model_type /= mt_single_column) .AND. (model_type /= mt_lfric)) THEN
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._science_surface_im_sf_pt2_jls.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._science_surface_im_sf_pt2_jls.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

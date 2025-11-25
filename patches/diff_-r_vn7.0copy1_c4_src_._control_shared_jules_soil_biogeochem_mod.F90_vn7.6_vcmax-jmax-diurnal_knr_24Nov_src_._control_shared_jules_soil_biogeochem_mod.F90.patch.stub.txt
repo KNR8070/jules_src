@@ -1,0 +1,181 @@
+Patch stub generated: 2025-11-25T12:09:12.126564 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_soil_biogeochem_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_soil_biogeochem_mod.F90
+
+SUMMARY:
+  - added lines (>): 63
+  - removed lines (<): 38
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Soil-layer/4-pool changes: verify indexing and dzsoil availability.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_soil_biogeochem_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_soil_biogeochem_mod.F90
+47,48c47,48
+<   soil_model_rothc = 2,                                                        &
+<     ! The RothC (4 pool) model of soil carbon. Historically this was
+---
+>   soil_model_4pool = 2,                                                        &
+>     ! The 4 pool model of soil carbon. Historically this was
+50c50
+<     ! effectively implying RothC was used.
+---
+>     ! effectively implying 4-pools were used.
+79c79
+< ! Namelist variables used by both 1pool and RothC models.
+---
+> ! Namelist variables used by both 1-pool and 4-pool models.
+94c94
+<     ! .FALSE. = use RothC formulation
+---
+>     ! .FALSE. = use 4-pool specific formulation
+138c138
+< ! Namelist variables used only by the RothC model.
+---
+> ! Namelist variables used only by the 4-pool soil C model.
+156,158c156,158
+<   kaps_roth(4) = rmdi
+<     ! Specific soil respiration rate for RothC (s-1).
+<     ! in check_jules_soil_biogeochemistry we comfirm that kaps_roth is
+---
+>   kaps_4pool(4) = rmdi
+>     ! Specific soil respiration rate for 4-pool soil C model (s-1).
+>     ! in check_jules_soil_biogeochemistry we comfirm that kaps_4pool is
+167a168,171
+> REAL(KIND=real_jlslsm) ::                                                      &
+>   z_burn_max = rmdi
+>     ! Parameter setting maximum depth of burn
+> 
+233c237
+<     soil_bgc_model, ch4_substrate, kaps, kaps_roth, q10_soil, sorp,            &
+---
+>     soil_bgc_model, ch4_substrate, kaps, kaps_4pool, q10_soil, sorp,           &
+239c243
+<     l_label_frac_cs
+---
+>     l_label_frac_cs, z_burn_max
+250a255,257
+> USE jules_soil_mod, ONLY: sm_levels, dzsoil
+> USE ancil_info, ONLY: dim_cslayer
+> 
+257c264
+<   l_triffid, l_trif_fire, l_nitrogen
+---
+>   l_triffid, l_trif_fire, l_nitrogen, l_inferno
+280c287
+< CASE ( soil_model_1pool, soil_model_rothc, soil_model_ecosse )
+---
+> CASE ( soil_model_1pool, soil_model_4pool, soil_model_ecosse )
+290c297
+<   CASE ( soil_model_ecosse, soil_model_rothc )
+---
+>   CASE ( soil_model_ecosse, soil_model_4pool )
+294c301
+<                  'TRIFFID needs a prognostic soil model - use RothC.')
+---
+>                  'TRIFFID needs a prognostic soil model - use 4-pool C model.')
+314c321
+< CASE ( soil_model_ecosse, soil_model_rothc )
+---
+> CASE ( soil_model_ecosse, soil_model_4pool )
+317c324
+<                   'RothC and ECOSSE soil models need a veg model ' //          &
+---
+>                   '4-pool and ECOSSE soil models need a veg model ' //         &
+325c332
+< CASE ( soil_model_ecosse, soil_model_rothc )
+---
+> CASE ( soil_model_ecosse, soil_model_4pool )
+328c335
+<                   'RothC and ECOSSE soil models cannot be used with ' //       &
+---
+>                   '4-pool and ECOSSE soil models cannot be used with ' //      &
+338c345,346
+< ! Check that l_layeredC=T is only used with 1-pool and RothC models.
+---
+> ! Check that l_layeredC=T is only used with 1-pool and 4-pool models.
+> ! In addition modify value of dim_cslayer
+342c350,351
+<   CASE ( soil_model_1pool, soil_model_rothc )
+---
+>   CASE ( soil_model_1pool, soil_model_4pool )
+>     dim_cslayer = sm_levels
+356c365
+< ! Can't trace soil carbon unless using roth C model
+---
+> ! Can't trace soil carbon unless using 4-pool C model
+359c368
+<   CASE ( soil_model_rothc )
+---
+>   CASE ( soil_model_4pool )
+363c372
+<                  'need Roth C to be true to trace a fraction of soil C')
+---
+>                  'need 4-pool C to be true to trace a fraction of soil C')
+392,396c401,405
+< ! check kaps_rothc, n_inorg_turnoverand bio_hum_cn are set for soil_model_rothc
+< IF ( soil_bgc_model == soil_model_rothc ) THEN
+<   IF ( ANY( ABS( kaps_roth(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+<     CALL ereport(RoutineName, errorstatus, "kaps_roth not found")
+<   ELSE IF ( ANY(kaps_roth(:) < 1.0e-12) .OR. ANY(kaps_roth(:) > 1.0e-4) ) THEN
+---
+> ! check kaps_4pool, n_inorg_turnover and bio_hum_cn are set for soil_model_4pool
+> IF ( soil_bgc_model == soil_model_4pool ) THEN
+>   IF ( ANY( ABS( kaps_4pool(:) - rmdi ) < EPSILON(1.0) ) ) THEN
+>     CALL ereport(RoutineName, errorstatus, "kaps_4pool not found")
+>   ELSE IF ( ANY(kaps_4pool(:) < 1.0e-12) .OR. ANY(kaps_4pool(:) > 1.0e-4) ) THEN
+398c407
+<                  "kaps_roth must lie in the range 1.0e-12 to 1.0e-4")
+---
+>                  "kaps_4pool must lie in the range 1.0e-12 to 1.0e-4")
+414c423
+< END IF  ! end if soil_model_rothc
+---
+> END IF  ! end if soil_model_4pool
+417,418c426,427
+< ! check sorp is set for l_nitrogen and soil_model_rothc
+< IF ( l_nitrogen .AND. soil_bgc_model == soil_model_rothc ) THEN  ! sorp
+---
+> ! check sorp is set for l_nitrogen and soil_model_4pool
+> IF ( l_nitrogen .AND. soil_bgc_model == soil_model_4pool ) THEN  ! sorp
+456a466,475
+> ! check value of z_burn_max with l_layeredc
+> IF ( l_layeredc ) THEN
+>   IF ( ABS( z_burn_max - rmdi ) > EPSILON(1.0) ) THEN
+>     IF ( z_burn_max <= 0.0 .OR. z_burn_max > SUM(dzsoil(:)) ) THEN
+>       CALL ereport(RoutineName, errorstatus,                                   &
+>                    "z_burn_max must be positive & less than total soil depth")
+>     END IF
+>   END IF
+> END IF
+> 
+649c668
+< WRITE(lineBuffer, *) ' kaps_roth = ', kaps_roth
+---
+> WRITE(lineBuffer, *) ' kaps_4pool = ', kaps_4pool
+666a686,688
+> WRITE(lineBuffer, *) ' z_burn_max = ', z_burn_max
+> CALL jules_print('jules_soil_biogeochem_mod', lineBuffer)
+> 
+783c805
+< INTEGER, PARAMETER :: n_real = 27 + 4
+---
+> INTEGER, PARAMETER :: n_real = 28 + 4
+792c814
+<   REAL(KIND=real_jlslsm) :: kaps_roth(4)
+---
+>   REAL(KIND=real_jlslsm) :: kaps_4pool(4)
+817a840
+>   REAL(KIND=real_jlslsm) :: z_burn_max
+848c871
+<   my_nml % kaps_roth         = kaps_roth
+---
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_jules_soil_biogeochem_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_jules_soil_biogeochem_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

@@ -1,0 +1,113 @@
+Patch stub generated: 2025-11-25T12:09:12.124424 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_science_fixes_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_science_fixes_mod.F90
+
+SUMMARY:
+  - added lines (>): 78
+  - removed lines (<): 2
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./control/shared/jules_science_fixes_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./control/shared/jules_science_fixes_mod.F90
+80a81,93
+> ! ticket # (Jules:#1396)
+> LOGICAL :: l_fix_neg_snow = .FALSE.       ! Review in April 2025
+> 
+> ! ticket #931 (um:#6885): Atmospheric deposition fixes used in UKCA
+> LOGICAL :: l_fix_drydep_so2_water = .FALSE. ,                                  &
+>              ! True to use correct surface resistance of water when calculating
+>              ! dry deposition of SO2
+>            l_fix_improve_drydep = .FALSE. ,                                    &
+>              ! True to fix dry deposition velocities
+>            l_fix_ukca_h2dd_x = .FALSE.
+>              ! True to fix H2 deposition to shrub/soil
+> 
+> 
+85c98,99
+<          l_fix_snow_frac
+---
+>          l_fix_snow_frac, l_fix_drydep_so2_water, l_fix_improve_drydep,        &
+>          l_fix_ukca_h2dd_x, l_fix_neg_snow
+119a134,142
+> CALL jules_print(ModuleName,lineBuffer)
+> WRITE(lineBuffer,'(A,L1)') ' l_fix_neg_snow = ',      l_fix_neg_snow
+> CALL jules_print(ModuleName,lineBuffer)
+> WRITE(lineBuffer,'(A,L1)') ' l_fix_improve_drydep = ', l_fix_improve_drydep
+> CALL jules_print(ModuleName,lineBuffer)
+> WRITE(lineBuffer,'(A,L1)') ' l_fix_ukca_h2dd_x = ',   l_fix_ukca_h2dd_x
+> CALL jules_print(ModuleName,lineBuffer)
+> WRITE(lineBuffer,'(A,L1)') ' l_fix_drydep_so2_water = ', l_fix_drydep_so2_water
+> CALL jules_print(ModuleName,lineBuffer)
+235c258
+< INTEGER, PARAMETER :: n_log = 10
+---
+> INTEGER, PARAMETER :: n_log = 14
+249a273,276
+>   LOGICAL :: l_fix_neg_snow
+>   LOGICAL :: l_fix_drydep_so2_water
+>   LOGICAL :: l_fix_improve_drydep
+>   LOGICAL :: l_fix_ukca_h2dd_x
+276a304,307
+>   my_nml % l_fix_neg_snow                  = l_fix_neg_snow
+>   my_nml % l_fix_drydep_so2_water          = l_fix_drydep_so2_water
+>   my_nml % l_fix_improve_drydep            = l_fix_improve_drydep
+>   my_nml % l_fix_ukca_h2dd_x               = l_fix_ukca_h2dd_x
+292a324,327
+>   l_fix_neg_snow                  = my_nml % l_fix_neg_snow
+>   l_fix_drydep_so2_water          = my_nml % l_fix_drydep_so2_water
+>   l_fix_improve_drydep            = my_nml % l_fix_improve_drydep
+>   l_fix_ukca_h2dd_x               = my_nml % l_fix_ukca_h2dd_x
+412a448,456
+> IF ( .NOT. l_fix_neg_snow ) THEN
+>   errorstatus = -100
+>   cmessage    =                                                     newline // &
+>   'jules:#1396 fix to remove correct the melting calculation'     //newline // &
+>   ' that can result in negative snow amounts is not enabled: '    //newline // &
+>   'l_fix_neg_snow = .FALSE.'
+>   CALL ereport(RoutineName, errorstatus, cmessage)
+> END IF
+> 
+423a468,499
+> ! JULES and atmospheric deposition
+> ! Copied from um/src/control/misc/science_fixes_mod.F90
+> IF (.NOT. l_fix_improve_drydep) THEN
+>   ErrorStatus = -100
+>   cmessage    =                                                       newline//&
+>   'Model run excludes a change from ticket um:#1250 as'//             newline//&
+>   ' l_fix_improve_drydep=.FALSE.'//                                   newline//&
+>   ' This will mean that dry deposition velocities are set to null'//  newline//&
+>   ' for HCl, HOCl, HBr, HOBr, H2SO4, MeOH and Sec_Org and that dry'// newline//&
+>   ' deposition velocities for 9 tiles are inconsistent with 13/17/27 tiles.'
+>   CALL ereport(RoutineName, ErrorStatus, Cmessage)
+> END IF
+> 
+> IF (.NOT. l_fix_drydep_so2_water) THEN
+>   ErrorStatus = -100
+>   cmessage    =                                                       newline//&
+>   ' Model run excludes a change from ticket um:#5651, '//             newline//&
+>   ' l_fix_drydep_so2_water=.FALSE.'//                                 newline//&
+>   ' This will mean that the surface resistance of water when '//      newline//&
+>   ' calculating the dry deposition of SO2 is too high for 13, 17 '//  newline//&
+>   ' and 27 tiles.'
+>   CALL ereport(RoutineName, ErrorStatus, Cmessage)
+> END IF
+> 
+> IF (.NOT.  l_fix_ukca_h2dd_x) THEN
+>   ErrorStatus = -100
+>   cmessage    =                                                       newline//&
+>   'Model run excludes a change from ticket um:#4157 as'//             newline//&
+>   ' l_fix_ukca_h2dd_x=.FALSE. .'//                                    newline//&
+>   ' This will mean that the wrong element is used for h2dd_c & h2dd_m.'
+>   CALL ereport(RoutineName, ErrorStatus, Cmessage)
+> END IF
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._control_shared_jules_science_fixes_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._control_shared_jules_science_fixes_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+

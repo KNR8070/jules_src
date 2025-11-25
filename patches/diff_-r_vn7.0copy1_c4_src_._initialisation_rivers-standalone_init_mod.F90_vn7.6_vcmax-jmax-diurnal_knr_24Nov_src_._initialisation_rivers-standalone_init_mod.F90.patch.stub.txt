@@ -1,0 +1,118 @@
+Patch stub generated: 2025-11-25T12:09:12.167820 UTC
+
+HEADER:
+diff -r vn7.0copy1_c4/src/./initialisation/rivers-standalone/init_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/rivers-standalone/init_mod.F90
+
+SUMMARY:
+  - added lines (>): 50
+  - removed lines (<): 24
+  - only in one tree: False
+
+RECOMMENDATIONS:
+- Manual review recommended; inspect the preview below.
+
+DIFF PREVIEW:
+diff -r vn7.0copy1_c4/src/./initialisation/rivers-standalone/init_mod.F90 vn7.6_vcmax-jmax-diurnal_knr_24Nov/src/./initialisation/rivers-standalone/init_mod.F90
+1d0
+< #if !defined(UM_JULES)
+16c15,16
+<                 rivers_data, rivers)
+---
+>                 rivers_data, rivers,                                           &
+>                 wtrac_jls_data, wtrac_jls)
+20d19
+< USE init_drive_mod,                 ONLY: init_drive
+21a21
+> USE init_ic_mod,                    ONLY: init_ic
+29a30,35
+> USE init_oasis_rivers_mod,          ONLY: init_oasis_rivers
+> USE oasis_rivers_control_mod,       ONLY: oasis_partition, oasis_grid,         &
+>                                           oasis_variables
+> USE jules_model_environment_mod,    ONLY: l_oasis_rivers
+> USE init_drive_mod,                 ONLY: init_drive
+> USE check_compatible_options_mod,   ONLY: check_compatible_options
+53a60,62
+> USE jules_wtrac_type_mod,         ONLY: jls_wtrac_data_type,                   &
+>                                         jls_wtrac_type,                        &
+>                                         wtrac_jls_assoc
+74,79c83,89
+< TYPE(psparms_data_type), INTENT(IN OUT) :: psparms_data
+< TYPE(ainfo_data_type),   INTENT(IN OUT) :: ainfo_data
+< TYPE(progs_data_type),   INTENT(IN OUT) :: progs_data
+< TYPE(coastal_data_type), INTENT(IN OUT) :: coastal_data
+< TYPE(fluxes_data_type),  INTENT(IN OUT) :: fluxes_data
+< TYPE(rivers_data_type),  INTENT(IN OUT) :: rivers_data
+---
+> TYPE(psparms_data_type),   INTENT(IN OUT) :: psparms_data
+> TYPE(ainfo_data_type),     INTENT(IN OUT) :: ainfo_data
+> TYPE(progs_data_type),     INTENT(IN OUT) :: progs_data
+> TYPE(coastal_data_type),   INTENT(IN OUT) :: coastal_data
+> TYPE(fluxes_data_type),    INTENT(IN OUT) :: fluxes_data
+> TYPE(rivers_data_type),    INTENT(IN OUT) :: rivers_data
+> TYPE(jls_wtrac_data_type), INTENT(IN OUT) :: wtrac_jls_data
+82,87c92,98
+< TYPE(psparms_type), INTENT(IN OUT) :: psparms
+< TYPE(ainfo_type),   INTENT(IN OUT) :: ainfo
+< TYPE(progs_type),   INTENT(IN OUT) :: progs
+< TYPE(coastal_type), INTENT(IN OUT) :: coast
+< TYPE(fluxes_type),  INTENT(IN OUT) :: fluxes
+< TYPE(rivers_type),  INTENT(IN OUT) :: rivers
+---
+> TYPE(psparms_type),   INTENT(IN OUT) :: psparms
+> TYPE(ainfo_type),     INTENT(IN OUT) :: ainfo
+> TYPE(progs_type),     INTENT(IN OUT) :: progs
+> TYPE(coastal_type),   INTENT(IN OUT) :: coast
+> TYPE(fluxes_type),    INTENT(IN OUT) :: fluxes
+> TYPE(rivers_type),    INTENT(IN OUT) :: rivers
+> TYPE(jls_wtrac_type), INTENT(IN OUT) :: wtrac_jls
+107a119,123
+> IF (l_oasis_rivers) THEN
+>   ! Initialize coupling parameters
+>   CALL init_oasis_rivers(nml_dir)
+> END IF
+> 
+115c131,132
+<                rivers_data)
+---
+>                rivers_data,                                                    &
+>                wtrac_jls_data)
+123a141
+> CALL wtrac_jls_assoc(wtrac_jls,wtrac_jls_data)
+128,129c146,159
+< ! Contains allocation of progs_data%seed_rain - hence passing in the data type
+< CALL init_drive(nml_dir,ainfo,progs_data)
+---
+> ! Driving data obtained via coupling or via ancillary files
+> IF (l_oasis_rivers) THEN
+>   ! Once the river grid is set, define the OASIS partition,  &
+>   ! write grid, and declare oasis coupled variables
+>   CALL oasis_partition()
+>   CALL oasis_grid()
+>   CALL oasis_variables()
+> ELSE
+>   ! Contains allocation of progs_data%seed_rain - hence passing in the data type
+>   CALL init_drive(nml_dir,ainfo,progs_data)
+> END IF
+> 
+> ! Initialise the model prognostics
+> CALL init_ic(nml_dir, rivers)
+139,141c169
+< ! Placemarker as a reminder if needed, but requires a suitable standalone
+< ! Rivers version.
+< ! CALL check_compatible_options()
+---
+> CALL check_compatible_options()
+147,148c175
+< ! Standalone Rivers: Ignore dumps for now
+< ! CALL write_dump()
+---
+> CALL write_dump()
+156d182
+< #endif
+
+INSTRUCTIONS:
+  1) Edit the corresponding .patch file: patches/diff_-r_vn7.0copy1_c4_src_._initialisation_rivers-standalone_init_mod.F90_vn7.6_vcmax-jmax-diurnal_knr_24Nov_src_._initialisation_rivers-standalone_init_mod.F90.patch
+     - Place a git-style unified diff (``--- a/..., +++ b/...``) there.
+  2) Create small focused patches (one logical change per file).
+  3) Run apply_patches.sh (after filling patches) from the repository root.
+
